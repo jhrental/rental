@@ -384,11 +384,19 @@ select{cursor:pointer}
       </div>
       <!-- 季選擇（季模式）-->
       <div id="ov-quarter-nav" style="display:none;display:none">
-        <select id="ov-quarter" onchange="renderOverview()" style="width:auto"></select>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button class="btn btn-sm" onclick="navQuarter(-1)" style="font-size:16px;padding:5px 12px">&#8249;</button>
+          <select id="ov-quarter" onchange="renderOverview()" style="width:auto"></select>
+          <button class="btn btn-sm" onclick="navQuarter(1)" style="font-size:16px;padding:5px 12px">&#8250;</button>
+        </div>
       </div>
       <!-- 年選擇（年模式）-->
       <div id="ov-year-nav" style="display:none">
-        <select id="ov-year" onchange="renderOverview()" style="width:auto"></select>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button class="btn btn-sm" onclick="navYear(-1)" style="font-size:16px;padding:5px 12px">&#8249;</button>
+          <select id="ov-year" onchange="renderOverview()" style="width:auto"></select>
+          <button class="btn btn-sm" onclick="navYear(1)" style="font-size:16px;padding:5px 12px">&#8250;</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1231,7 +1239,18 @@ function getViewRecs(){
   return {recs:[],label:'',period:''};
 }
 
-function navMonth(dir){
+function navQuarter(dir){
+  const sel=document.getElementById('ov-quarter');
+  const opts=Array.from(sel.options).map(o=>o.value);
+  const ni=opts.indexOf(sel.value)-dir;
+  if(ni>=0&&ni<opts.length){sel.value=opts[ni]; renderOverview();}
+}
+function navYear(dir){
+  const sel=document.getElementById('ov-year');
+  const opts=Array.from(sel.options).map(o=>o.value);
+  const ni=opts.indexOf(sel.value)-dir;
+  if(ni>=0&&ni<opts.length){sel.value=opts[ni]; renderOverview();}
+}
   const sel=document.getElementById('ov-month');
   const opts=Array.from(sel.options).map(o=>o.value);
   const ni=opts.indexOf(sel.value)-dir;
