@@ -2678,7 +2678,13 @@ function sendLoginAlert(username, type) {
   if (msg) fetch(GAS_URL + '?action=notify&key=' + GAS_KEY + '&msg=' + encodeURIComponent(msg)).catch(()=>{});
 }
 
+let dataLoaded = false;
+
 function doLogin() {
+  if (!dataLoaded) {
+    document.getElementById('login-error').textContent = '資料載入中，請稍候...';
+    return;
+  }
   const username = document.getElementById('login-username').value.trim();
   const password = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
@@ -3068,8 +3074,6 @@ function saveChangePassword() {
   closeModal('modal-change-pw');
   alert('密碼修改成功');
 }
-checkSession();
-
 /* ── Init ── */
 (async () => {
   await loadData();
@@ -3078,6 +3082,7 @@ checkSession();
     state.accounts = getDefaultAccounts().map(a => ({...a, password: hashPassword(a.password)}));
     saveData();
   }
+  dataLoaded = true;
   populateMonthSelects();
   populatePropSelects();
   populatePeriodSelects();
