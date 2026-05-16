@@ -201,75 +201,106 @@ select{cursor:pointer}
 @media(max-width:700px){
   /* Layout */
   .app-shell{flex-direction:column}
-  .sidebar{width:100%;height:auto;position:sticky;top:0;flex-direction:row;padding:0;border-right:none;border-bottom:0.5px solid var(--border);z-index:100;overflow-x:auto}
+  .sidebar{width:100%;height:auto;position:sticky;top:0;flex-direction:row;padding:0;border-right:none;border-bottom:0.5px solid var(--border);z-index:100;overflow-x:auto;background:var(--surface)}
   .sidebar-logo{display:none}
   .sidebar-footer{display:none}
-  .nav-item{flex-direction:column;gap:2px;padding:8px 12px;font-size:10px;border-right:none;border-bottom:2px solid transparent;white-space:nowrap;min-width:56px;align-items:center}
-  .nav-item.active{border-right:none;border-bottom-color:var(--blue-mid)}
-  .nav-item svg{width:20px;height:20px}
-  .nav-badge{position:absolute;top:4px;right:6px;font-size:9px;min-width:14px;height:14px}
-  .nav-item{position:relative}
-  .main{padding:0.75rem;max-width:100%}
+  .nav-item{flex-direction:column;gap:4px;padding:10px 8px 8px;border-right:none;border-bottom:3px solid transparent;white-space:nowrap;min-width:64px;align-items:center;font-size:12px;position:relative}
+  .nav-item span{font-size:12px;font-weight:500}
+  .nav-item.active{border-right:none;border-bottom-color:var(--blue-mid);color:var(--blue-mid)}
+  .nav-item svg{width:26px;height:26px}
+  .nav-badge{position:absolute;top:6px;right:8px;font-size:9px;min-width:16px;height:16px}
+  .main{padding:1rem;max-width:100%}
 
   /* Page title */
-  .page-title{font-size:16px;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+  .page-title{font-size:20px;font-weight:600;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px}
 
   /* Stats */
-  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .stat{padding:0.75rem}
-  .stat-val{font-size:18px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:1rem}
+  .stat-label{font-size:13px}
+  .stat-val{font-size:22px}
 
   /* Cards */
-  .card{padding:0.875rem}
+  .card{padding:1rem}
+  .card-title{font-size:16px}
 
   /* Tables - hide less important columns on mobile */
   #ov-prop-table th:nth-child(2),
-  #ov-prop-table td:nth-child(2){display:none} /* 租金 */
-
-  /* Records - simplify */
+  #ov-prop-table td:nth-child(2){display:none}
   #rec-table th:last-child,
-  #rec-table td:last-child{display:none} /* 備註 */
+  #rec-table td:last-child{display:none}
+  table{font-size:14px}
+  th{font-size:12px;padding:8px 10px}
+  td{padding:10px}
 
   /* Toolbar */
-  .toolbar{gap:6px}
-  .toolbar select{font-size:12px;padding:5px 6px}
+  .toolbar{gap:8px;flex-wrap:wrap}
+  .toolbar select{font-size:14px;padding:8px 10px}
   .toolbar-end{margin-left:auto}
 
-  /* Buttons */
-  .btn{padding:6px 10px;font-size:12px}
-  .btn-sm{padding:4px 8px;font-size:11px}
+  /* Buttons - large touch targets */
+  .btn{padding:10px 16px;font-size:15px;border-radius:10px}
+  .btn-primary{padding:12px 20px;font-size:15px}
+  .btn-sm{padding:8px 12px;font-size:13px}
+  .btn-icon{padding:10px;min-width:42px;min-height:42px;justify-content:center}
+  .btn-icon svg{width:20px;height:20px}
 
-  /* Modal */
-  .modal{width:95vw !important;padding:1.25rem;margin:0.5rem}
+  /* Modal - slide up from bottom */
   .modal-backdrop{align-items:flex-end;padding-bottom:0}
-  .modal{border-radius:var(--radius) var(--radius) 0 0;max-height:90vh}
-  .form-grid{grid-template-columns:1fr}
+  .modal{width:100% !important;padding:1.5rem;margin:0;border-radius:16px 16px 0 0;max-height:92vh}
+  .modal-title{font-size:18px;margin-bottom:1.25rem}
+  .form-grid{grid-template-columns:1fr;gap:12px}
   .form-grid .span2{grid-column:1}
+  .form-row label{font-size:15px;margin-bottom:6px}
+  input,select,textarea{font-size:16px;padding:10px 12px}
+  .modal-footer{padding-top:1rem;margin-top:1rem}
+  .modal-footer .btn{padding:12px 20px;font-size:15px;flex:1;justify-content:center}
 
-  /* Maint cards */
-  .maint-card{padding:0.875rem}
-  .maint-card-actions{flex-wrap:wrap;gap:4px}
-  .maint-card-head{flex-wrap:wrap}
+  /* Maint cards - larger and easier to read */
+  .maint-card{padding:1.1rem;margin-bottom:12px}
+  .maint-card-title{font-size:17px;margin-bottom:6px}
+  .maint-card-sub{font-size:14px;margin-top:4px;line-height:1.6}
+  .maint-card-actions{flex-wrap:wrap;gap:8px;margin-top:10px}
+  .maint-card-actions .btn{padding:10px 14px;font-size:14px;min-height:42px}
+  .maint-card-actions a{padding:10px 14px;font-size:14px;min-height:42px;display:inline-flex;align-items:center}
+  .badge{padding:5px 12px;font-size:13px}
 
   /* Prop rows */
-  .prop-row{flex-wrap:wrap;gap:8px}
-  .prop-thumb{width:36px;height:36px}
-  .prop-rent{font-size:13px}
+  .prop-row{flex-wrap:wrap;gap:10px;padding:14px 0}
+  .prop-thumb{width:42px;height:42px}
+  .prop-name{font-size:16px}
+  .prop-sub{font-size:13px}
+  .prop-rent{font-size:15px}
+  .prop-info .badge{font-size:12px;padding:4px 10px}
 
-  /* Overview month nav */
-  .month-nav select{font-size:12px}
-
-  /* View mode buttons */
-  #vmode-month,#vmode-quarter,#vmode-year{padding:5px 10px;font-size:12px}
+  /* Overview */
+  .month-nav select{font-size:14px;padding:7px 10px}
+  #vmode-month,#vmode-quarter,#vmode-year{padding:8px 14px;font-size:14px}
 
   /* Record group header */
-  .rec-group-header td div{flex-wrap:wrap;gap:4px}
+  .rec-group-header td div{flex-wrap:wrap;gap:6px;padding:10px 14px}
+  .rec-detail-row td{font-size:14px;padding:10px}
+
+  /* Maint tabs */
+  .maint-tab{padding:10px 16px;font-size:14px}
+
+  /* Form elements in modals */
+  .calc-row label{width:80px;font-size:13px}
+  .calc-box{padding:14px}
+  .calc-box-title{font-size:12px}
+
+  /* Type picker buttons */
+  #type-btn-in,#type-btn-out{padding:14px;font-size:16px}
+
+  /* Login screen */
+  #login-screen .modal,
+  #login-screen > div{width:90vw;padding:2rem 1.5rem}
 }
 
 @media(max-width:400px){
+  .nav-item{min-width:56px;padding:8px 4px 6px}
+  .nav-item span{font-size:11px}
   .stats-grid{grid-template-columns:1fr 1fr}
-  .nav-item span{font-size:9px}
-  .nav-item{padding:8px 8px;min-width:48px}
 }
 </style>
 </head>
@@ -854,6 +885,7 @@ let state = {
 };
 let currentPage = 'overview';
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrokzp_jRkuP79vLSVVPNm8vhNwDb74LxVy8UZyIQ9JNnSrdQM6cNYK-J6L5Q_nHLB/exec';
+const GAS_KEY = 'jhrental2605';
 let saveTimer = null;
 let isSyncing = false;
 
@@ -862,7 +894,7 @@ async function loadData() {
   setSaveIndicator('saving');
   document.getElementById('save-text').textContent = '載入中...';
   try {
-    const res = await fetch(GAS_URL + '?action=load');
+    const res = await fetch(GAS_URL + '?action=load&key=' + GAS_KEY);
     const json = await res.json();
     if (json.success && json.data && Object.keys(json.data).length > 0) {
       state = json.data;
@@ -895,7 +927,7 @@ function saveData() {
       const res = await fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'save', data: state }),
+        body: JSON.stringify({ action: 'save', data: state, key: GAS_KEY }),
       });
       const json = await res.json();
       if (json.success) {
