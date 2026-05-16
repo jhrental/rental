@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>租屋記帳系統</title>
+<style>
+.ico{display:inline-block;width:16px;height:16px;vertical-align:-3px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --text2: #6b6b66;
+  --text3: #9b9b94;
+  --green: #0f6e56; --green-bg: #e1f5ee; --green-mid: #1d9e75;
+  --red: #993c1d; --red-bg: #faece7; --red-mid: #d85a30;
+  --blue: #185fa5; --blue-bg: #e6f1fb; --blue-mid: #378add;
+  --amber: #854f0b; --amber-bg: #faeeda; --amber-mid: #ba7517;
+  --radius: 10px; --radius-sm: 7px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 0.5px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a18; --surface: #242422; --surface2: #2c2c2a;
+    --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
+    --text: #f0efe9; --text2: #a0a09a; --text3: #6b6b66;
+    --green: #5dcaa5; --green-bg: #04342c; --green-mid: #1d9e75;
+    --red: #f0997b; --red-bg: #4a1b0c; --red-mid: #d85a30;
+    --blue: #85b7eb; --blue-bg: #042c53; --blue-mid: #378add;
+    --amber: #ef9f27; --amber-bg: #412402; --amber-mid: #ef9f27;
+    --shadow: 0 1px 4px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.06);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+a{color:inherit}
+
+/* Layout */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:200px;flex-shrink:0;background:var(--surface);border-right:0.5px solid var(--border);padding:1.5rem 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;align-self:flex-start}
+.sidebar-logo{padding:0 1.25rem 1.5rem;font-size:16px;font-weight:600;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.sidebar-logo i{color:var(--blue-mid);font-size:20px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;cursor:pointer;color:var(--text2);font-size:14px;transition:all .15s;border-right:2px solid transparent;margin-bottom:2px}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{color:var(--blue-mid);background:var(--blue-bg);border-right-color:var(--blue-mid);font-weight:500}
+.nav-item i{font-size:18px;width:20px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:1rem 1.25rem;font-size:11px;color:var(--text3)}
+.save-indicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.save-indicator.saved{color:var(--green)}
+.save-indicator.saving{color:var(--amber)}
+
+.main{flex:1;padding:2rem;max-width:900px;min-width:0}
+.page-title{font-size:20px;font-weight:600;letter-spacing:-0.4px;margin-bottom:1.75rem;display:flex;align-items:center;justify-content:space-between}
+
+/* Cards */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:14px;font-weight:600;margin-bottom:1rem;color:var(--text)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem}
+.stat{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:1rem 1.1rem}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.stat-label i{font-size:14px}
+.stat-val{font-size:24px;font-weight:600;letter-spacing:-1px}
+.stat-val.green{color:var(--green-mid)}
+.stat-val.red{color:var(--red-mid)}
+.stat-val.blue{color:var(--blue-mid)}
+
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:500;border-bottom:0.5px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:0.5px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface2)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.badge-in{background:var(--green-bg);color:var(--green)}
+.badge-out{background:var(--red-bg);color:var(--red)}
+
+/* Amount colors */
+.amt-in{color:var(--green-mid);font-weight:600}
+.amt-out{color:var(--red-mid);font-weight:600}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+.btn-primary:hover{background:var(--blue);border-color:var(--blue)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-icon{padding:5px 8px}
+.btn-danger{color:var(--red-mid);border-color:var(--red-mid)}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-success{background:var(--green-mid);color:#fff;border-color:var(--green-mid)}
+.btn-success:hover{background:var(--green)}
+
+/* Filters */
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+.toolbar-end{margin-left:auto}
+
+/* Form elements */
+input,select,textarea{padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue-mid);box-shadow:0 0 0 3px rgba(55,138,221,.15)}
+select{cursor:pointer}
+.form-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.form-row label{font-size:12px;font-weight:500;color:var(--text2)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.form-grid .span2{grid-column:1/-1}
+
+/* Modal */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.2);padding:1.5rem;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem;letter-spacing:-0.3px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid var(--border)}
+
+/* Prop card */
+.prop-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:0.5px solid var(--border)}
+.prop-row:last-child{border-bottom:none}
+.prop-dot{width:36px;height:36px;border-radius:50%;background:var(--blue-bg);color:var(--blue-mid);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.prop-info{flex:1;min-width:0}
+.prop-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prop-sub{font-size:12px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prop-rent{font-size:14px;font-weight:700;color:var(--blue-mid);white-space:nowrap}
+.prop-rent span{font-size:11px;color:var(--text3);font-weight:400}
+
+/* Export preview */
+#export-preview pre{font-size:12px;font-family:'Menlo','Consolas',monospace;white-space:pre;overflow-x:auto;line-height:1.6;color:var(--text2);background:var(--surface2);padding:1rem;border-radius:var(--radius-sm)}
+
+/* Month nav */
+.month-nav{display:flex;align-items:center;gap:8px}
+.month-nav select{width:auto}
+
+/* Status */
+.status-ok{color:var(--green);font-size:12px;font-weight:600}
+.status-no{color:var(--red);font-size:12px;font-weight:600}
+
+.empty-row td{text-align:center;color:var(--text3);padding:2rem 0;font-size:13px}
+.maint-tab{padding:8px 16px;cursor:pointer;border-radius:var(--radius-sm) var(--radius-sm) 0 0;color:var(--text2);border:0.5px solid transparent;border-bottom:none;font-size:14px;background:transparent;margin-bottom:-0.5px}
+.maint-tab:hover{color:var(--text);background:var(--surface2)}
+.maint-tab.active{color:var(--text);background:var(--surface);border-color:var(--border);border-bottom:0.5px solid var(--surface);font-weight:500}
+.maint-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.1rem;margin-bottom:10px;box-shadow:var(--shadow)}
+.maint-card.overdue{border-left:3px solid var(--red-mid)}
+.maint-card.scheduled{border-left:3px solid var(--amber-mid)}
+.maint-card.done{border-left:3px solid var(--green-mid);opacity:0.65}
+.maint-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.maint-card-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.maint-card-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.maint-card-actions{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.photo-thumb{width:72px;height:54px;border-radius:var(--radius-sm);object-fit:cover;cursor:pointer;border:0.5px solid var(--border)}
+
+/* Lease alert */
+.alert-banner{background:var(--amber-bg);border:0.5px solid var(--amber-mid);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:12px}
+.alert-banner i{color:var(--amber-mid);font-size:20px;flex-shrink:0;margin-top:1px}
+.alert-banner-body{flex:1}
+.alert-banner-title{font-weight:600;font-size:14px;color:var(--amber);margin-bottom:6px}
+.alert-item{font-size:13px;color:var(--text2);padding:3px 0;display:flex;align-items:center;gap:8px}
+.alert-item .days-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;white-space:nowrap}
+.days-expired{background:var(--red-bg);color:var(--red)}
+.days-urgent{background:var(--red-bg);color:var(--red)}
+.days-warn{background:var(--amber-bg);color:var(--amber)}
+.badge-expired{background:var(--red-bg);color:var(--red)}
+.badge-warn{background:var(--amber-bg);color:var(--amber)}
+.badge-ok{background:var(--green-bg);color:var(--green)}
+.badge-vacant{background:var(--surface2);color:var(--text2);border:0.5px solid var(--border2)}
+.badge-repair{background:var(--amber-bg);color:var(--amber)}
+.nav-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:100px;background:var(--red-mid);color:#fff;font-size:10px;font-weight:700;padding:0 5px;margin-left:auto}
+.prop-row.is-vacant{opacity:0.7}
+.prop-row.is-vacant .prop-dot{background:var(--surface2);color:var(--text3)}
+.prop-thumb{width:44px;height:44px;border-radius:var(--radius-sm);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:0.5px solid var(--border)}
+.prop-thumb:hover{border-color:var(--blue-mid);box-shadow:0 0 0 2px var(--blue-bg)}
+.vacant-since{font-size:11px;color:var(--text3);margin-top:2px}
+.drag-handle{color:var(--text3);cursor:grab;padding:4px 6px;display:flex;align-items:center;flex-shrink:0;opacity:0.4;transition:opacity .15s}
+.drag-handle:hover{opacity:1;color:var(--blue-mid)}
+
+/* Utility calculator */
+.calc-box{background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;margin-top:8px;border:0.5px solid var(--border)}
+.calc-box-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:10px}
+.calc-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px}
+.calc-row label{color:var(--text2);width:90px;flex-shrink:0;font-size:12px}
+.calc-row input{flex:1}
+.calc-result{font-size:13px;color:var(--text2);margin-top:6px;padding-top:8px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.calc-result strong{font-size:16px;color:var(--blue-mid);font-weight:700}
+.calc-hint{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* Grouped records */
+.prop-group{margin-bottom:4px}
+.prop-group-header{background:var(--surface2);padding:7px 12px;font-size:12px;font-weight:600;color:var(--text2);border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px;border-radius:var(--radius-sm) var(--radius-sm) 0 0}
+.prop-group-header i{font-size:14px;color:var(--text3)}
+.prop-group table{border-radius:0 0 var(--radius-sm) var(--radius-sm);overflow:hidden}
+.prop-group tbody tr:last-child td{border-bottom:none}
+.prop-group-summary{font-size:11px;color:var(--text3);margin-left:auto;font-weight:400}
+
+@media(max-width:700px){
+  /* Layout */
+  .app-shell{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:sticky;top:0;flex-direction:row;padding:0;border-right:none;border-bottom:0.5px solid var(--border);z-index:100;overflow-x:auto}
+  .sidebar-logo{display:none}
+  .sidebar-footer{display:none}
+  .nav-item{flex-direction:column;gap:2px;padding:8px 12px;font-size:10px;border-right:none;border-bottom:2px solid transparent;white-space:nowrap;min-width:56px;align-items:center}
+  .nav-item.active{border-right:none;border-bottom-color:var(--blue-mid)}
+  .nav-item svg{width:20px;height:20px}
+  .nav-badge{position:absolute;top:4px;right:6px;font-size:9px;min-width:14px;height:14px}
+  .nav-item{position:relative}
+  .main{padding:0.75rem;max-width:100%}
+
+  /* Page title */
+  .page-title{font-size:16px;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+
+  /* Stats */
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat{padding:0.75rem}
+  .stat-val{font-size:18px}
+
+  /* Cards */
+  .card{padding:0.875rem}
+
+  /* Tables - hide less important columns on mobile */
+  #ov-prop-table th:nth-child(2),
+  #ov-prop-table td:nth-child(2){display:none} /* 租金 */
+
+  /* Records - simplify */
+  #rec-table th:last-child,
+  #rec-table td:last-child{display:none} /* 備註 */
+
+  /* Toolbar */
+  .toolbar{gap:6px}
+  .toolbar select{font-size:12px;padding:5px 6px}
+  .toolbar-end{margin-left:auto}
+
+  /* Buttons */
+  .btn{padding:6px 10px;font-size:12px}
+  .btn-sm{padding:4px 8px;font-size:11px}
+
+  /* Modal */
+  .modal{width:95vw !important;padding:1.25rem;margin:0.5rem}
+  .modal-backdrop{align-items:flex-end;padding-bottom:0}
+  .modal{border-radius:var(--radius) var(--radius) 0 0;max-height:90vh}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .span2{grid-column:1}
+
+  /* Maint cards */
+  .maint-card{padding:0.875rem}
+  .maint-card-actions{flex-wrap:wrap;gap:4px}
+  .maint-card-head{flex-wrap:wrap}
+
+  /* Prop rows */
+  .prop-row{flex-wrap:wrap;gap:8px}
+  .prop-thumb{width:36px;height:36px}
+  .prop-rent{font-size:13px}
+
+  /* Overview month nav */
+  .month-nav select{font-size:12px}
+
+  /* View mode buttons */
+  #vmode-month,#vmode-quarter,#vmode-year{padding:5px 10px;font-size:12px}
+
+  /* Record group header */
+  .rec-group-header td div{flex-wrap:wrap;gap:4px}
+}
+
+@media(max-width:400px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .nav-item span{font-size:9px}
+  .nav-item{padding:8px 8px;min-width:48px}
+}
+</style>
+</head>
+<body>
+
+<!-- 登入畫面 -->
+<div id="login-screen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:2.5rem 2rem;width:320px;text-align:center">
+    <div style="font-size:28px;margin-bottom:8px">🔒</div>
+    <div style="font-size:18px;font-weight:600;letter-spacing:-0.3px;margin-bottom:4px">租屋記帳系統</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:1.5rem">請輸入密碼</div>
+    <input type="password" id="login-input" placeholder="密碼"
+      style="width:100%;padding:10px 14px;font-size:16px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);text-align:center;letter-spacing:4px;margin-bottom:10px"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <div id="login-error" style="font-size:12px;color:var(--red-mid);margin-bottom:10px;min-height:16px"></div>
+    <button onclick="doLogin()" style="width:100%;padding:10px;background:var(--blue-mid);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">進入系統</button>
+  </div>
+</div>
+
+<div class="app-shell" id="app-shell" style="display:none">
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4l7 4v14M9 21v-4a2 2 0 0 1 4 0v4"/></svg><span>租屋記帳</span></div>
+  <div class="nav-item active" onclick="showPage('overview')"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>總覽</span></div>
+  <div class="nav-item" onclick="showPage('records')"><svg class="ico" viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2l-2 2l-2-2l-2 2l-2-2l-3 2M9 7h6M9 11h6M9 15h4"/></svg><span>帳目記錄</span></div>
+  <div class="nav-item" onclick="showPage('properties')"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21h18M9 21V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14M9 11h6M5 21V11l2-2M19 21V11l-2-2"/></svg><span>物件管理</span><span id="nav-lease-badge" style="display:none" class="nav-badge"></span></div>
+  <div class="nav-item" onclick="showPage('maintenance')"><svg class="ico" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>維修管理</span><span id="nav-maint-badge" style="display:none" class="nav-badge" style="background:var(--amber-mid)"></span></div>
+  <div class="nav-item" onclick="showPage('export')"><svg class="ico" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM12 11v6M9 15l3 3l3-3"/></svg><span>匯出報表</span></div>
+  <div class="sidebar-footer">
+    <div class="save-indicator" id="save-indicator"><svg class="ico" viewBox="0 0 24 24"><path d="M7 18a4.6 4.4 0 0 1 0-9 5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7H7"/><path d="M9 15l2 2l4-4"/></svg><span id="save-text">✓ 已儲存</span></div>
+    <div style="margin-top:6px;color:var(--text3)">資料儲存於本機</div>
+    <button onclick="lockApp()" style="margin-top:10px;width:100%;padding:6px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit">🔒 鎖定</button>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main" id="main-content">
+
+<!-- 總覽 -->
+<div class="page" id="page-overview">
+  <div class="page-title">
+    <span id="ov-title">每月總覽</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <!-- 檢視模式 -->
+      <div style="display:flex;border:0.5px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden">
+        <button id="vmode-month" onclick="setViewMode('month')" style="padding:6px 12px;font-size:13px;border:none;cursor:pointer;background:var(--blue-mid);color:#fff;font-family:inherit">月</button>
+        <button id="vmode-quarter" onclick="setViewMode('quarter')" style="padding:6px 12px;font-size:13px;border:none;border-left:0.5px solid var(--border2);cursor:pointer;background:transparent;color:var(--text2);font-family:inherit">季</button>
+        <button id="vmode-year" onclick="setViewMode('year')" style="padding:6px 12px;font-size:13px;border:none;border-left:0.5px solid var(--border2);cursor:pointer;background:transparent;color:var(--text2);font-family:inherit">年</button>
+      </div>
+      <!-- 月份導覽（月模式才顯示）-->
+      <div class="month-nav" id="ov-month-nav">
+        <button class="btn btn-sm" onclick="navMonth(-1)" style="font-size:16px;padding:5px 12px">&#8249;</button>
+        <select id="ov-month" onchange="renderOverview()" style="width:auto"></select>
+        <button class="btn btn-sm" onclick="navMonth(1)" style="font-size:16px;padding:5px 12px">&#8250;</button>
+      </div>
+      <!-- 季選擇（季模式）-->
+      <div id="ov-quarter-nav" style="display:none;display:none">
+        <select id="ov-quarter" onchange="renderOverview()" style="width:auto"></select>
+      </div>
+      <!-- 年選擇（年模式）-->
+      <div id="ov-year-nav" style="display:none">
+        <select id="ov-year" onchange="renderOverview()" style="width:auto"></select>
+      </div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-label"><svg class="ico" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span id="ov-income-label">收入</span></div><div class="stat-val green" id="ov-income">$0</div><div id="ov-income-pct" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div>
+    <div class="stat"><div class="stat-label"><svg class="ico" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg><span id="ov-expense-label">支出</span></div><div class="stat-val red" id="ov-expense">$0</div><div id="ov-expense-pct" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div>
+    <div class="stat"><div class="stat-label"><svg class="ico" viewBox="0 0 24 24"><path d="M17 8V5a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h14a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V6"/><circle cx="18" cy="14" r="1"/></svg>淨額</div><div class="stat-val blue" id="ov-net">$0</div><div id="ov-net-rate" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div>
+    <div class="stat"><div class="stat-label"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21h18M9 21V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14M9 11h6M5 21V11l2-2M19 21V11l-2-2"/></svg>物件數</div>
+      <div class="stat-val" id="ov-propcount">0</div>
+      <div id="ov-prop-breakdown" style="font-size:11px;color:var(--text3);margin-top:6px;display:flex;flex-direction:column;gap:2px"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-title">支出項目分布</div>
+    <div id="ov-expense-bars"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">各物件收支概況</div>
+    <div class="table-wrap"><table id="ov-prop-table"><thead><tr><th>物件</th><th>租金</th><th>收入</th><th>支出</th><th>合計</th><th>租金狀態</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<!-- 帳目 -->
+<div class="page" id="page-records" style="display:none">
+  <div class="page-title">帳目記錄</div>
+  <div class="toolbar">
+    <select id="rec-month" onchange="renderRecords()" style="width:auto"></select>
+    <select id="rec-prop" onchange="renderRecords()" style="width:auto"><option value="">全部物件</option></select>
+    <select id="rec-type" onchange="renderRecords()" style="width:auto">
+      <option value="">全部類型</option>
+      <option value="in">收入</option>
+      <option value="out">支出</option>
+    </select>
+    <div class="toolbar-end">
+      <button class="btn btn-primary" onclick="openRecordModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="table-wrap"><table id="rec-table"><thead><tr><th>日期</th><th>類型</th><th>項目</th><th>金額</th><th>備註</th><th></th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<!-- 物件 -->
+<div class="page" id="page-properties" style="display:none">
+  <div class="page-title">
+    <span>物件管理 <span id="prop-count" style="font-size:13px;font-weight:400;color:var(--text3)"></span></span>
+    <button class="btn btn-primary" onclick="openPropModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
+  </div>
+  <div id="lease-alert-banner" style="display:none" class="alert-banner">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3V11a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
+    <div class="alert-banner-body">
+      <div class="alert-banner-title">租約到期提醒</div>
+      <div id="lease-alert-list"></div>
+    </div>
+  </div>
+  <div id="vacant-alert-banner" style="display:none" class="alert-banner" style="border-color:var(--border2);background:var(--surface2)">
+    <svg class="ico" viewBox="0 0 24 24" style="color:var(--text2)"><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/><path d="M3 21h18M3 3l18 18M9.5 4.5L12 3l9 8h-2"/><path d="M5 12.5V21"/></svg></i>
+    <div class="alert-banner-body">
+      <div class="alert-banner-title" style="color:var(--text2)">閒置 / 整修中物件</div>
+      <div id="vacant-alert-list"></div>
+    </div>
+  </div>
+  <div class="card" id="prop-list"></div>
+</div>
+
+<!-- 匯出 -->
+<div class="page" id="page-export" style="display:none">
+  <div class="page-title">匯出報表</div>
+  <div class="card">
+    <div class="card-title">匯出設定</div>
+    <div class="form-grid">
+      <div class="form-row"><label>起始月份</label><select id="exp-from"></select></div>
+      <div class="form-row"><label>結束月份</label><select id="exp-to"></select></div>
+      <div class="form-row"><label>物件篩選</label><select id="exp-prop"><option value="">全部物件</option></select></div>
+      <div class="form-row"><label>匯出格式</label>
+        <select id="exp-fmt">
+          <option value="csv">CSV（Excel 可直接開啟）</option>
+          <option value="text">純文字報表</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-success" onclick="doExport()"><svg class="ico" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/></svg> 下載匯出</button>
+      <button class="btn" onclick="previewExport()"><svg class="ico" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 預覽</button>
+    </div>
+  </div>
+  <div class="card" id="export-preview" style="display:none">
+    <div class="card-title">預覽內容</div>
+    <div id="export-preview-content"></div>
+  </div>
+</div>
+
+<!-- 維修管理 -->
+<div class="page" id="page-maintenance" style="display:none">
+  <div class="page-title">維修管理</div>
+
+  <!-- 三個子頁籤 -->
+  <div style="display:flex;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem">
+    <div class="maint-tab active" id="mtab-pending" onclick="showMaintTab('pending')">維修</div>
+    <div class="maint-tab" id="mtab-history" onclick="showMaintTab('history')">紀錄</div>
+    <div class="maint-tab" id="mtab-routine" onclick="showMaintTab('routine')">保養</div>
+  </div>
+
+  <!-- 維修安排 -->
+  <div id="mpanel-pending">
+    <div class="section-head" style="margin-bottom:1rem">
+      <div id="maint-overdue-banner" style="display:none" class="alert-banner">
+        <span style="font-size:18px">⚠️</span>
+        <div class="alert-banner-body">
+          <div class="alert-banner-title">未跟進提醒</div>
+          <div id="maint-overdue-list"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+      <select id="maint-filter-prop" onchange="renderMaintPending()" style="width:auto">
+        <option value="">全部物件</option>
+      </select>
+      <select id="maint-filter-status" onchange="renderMaintPending()" style="width:auto">
+        <option value="">全部狀態</option>
+        <option value="pending">待處理</option>
+        <option value="scheduled">已安排</option>
+      </select>
+      <div style="margin-left:auto">
+        <button class="btn btn-primary" onclick="openMaintModal()">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
+        </button>
+      </div>
+    </div>
+    <div id="maint-pending-list"></div>
+  </div>
+
+  <!-- 維修紀錄 -->
+  <div id="mpanel-history" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+      <select id="hist-filter-prop" onchange="renderMaintHistory()" style="width:auto">
+        <option value="">全部物件</option>
+      </select>
+      <select id="hist-filter-kind" onchange="renderMaintHistory()" style="width:auto">
+        <option value="">全部類型</option>
+        <option value="repair">維修</option>
+        <option value="routine">保養</option>
+      </select>
+      <div style="margin-left:auto">
+        <button class="btn btn-primary" onclick="openHistModal()">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
+        </button>
+      </div>
+    </div>
+    <div id="maint-history-list"></div>
+  </div>
+
+  <!-- 定期保養 -->
+  <div id="mpanel-routine" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center">
+      <div style="margin-left:auto">
+        <button class="btn btn-primary" onclick="openRoutineModal()">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
+        </button>
+      </div>
+    </div>
+    <div id="routine-list"></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- Modal：帳目 -->
+<div class="modal-backdrop" id="modal-record">
+  <div class="modal" style="width:500px">
+    <div class="modal-title" id="modal-rec-title">新增帳目</div>
+
+    <!-- Step 1: 收入 or 支出 -->
+    <div style="display:flex;gap:8px;margin-bottom:16px" id="type-picker">
+      <button id="type-btn-in" class="btn" style="flex:1;padding:10px;font-size:14px;justify-content:center" onclick="pickType('in')">
+        <span style="font-size:18px">↓</span> 收入
+      </button>
+      <button id="type-btn-out" class="btn" style="flex:1;padding:10px;font-size:14px;justify-content:center" onclick="pickType('out')">
+        <span style="font-size:18px">↑</span> 支出
+      </button>
+    </div>
+
+    <div id="record-form-body" style="display:none">
+      <div class="form-grid">
+        <div class="form-row"><label>日期</label><input type="date" id="r-date"></div>
+        <div class="form-row"><label>物件</label><select id="r-prop" onchange="onPropChange()"></select></div>
+        <div class="form-row span2"><label>項目</label>
+          <select id="r-cat" onchange="onCatChange()"></select>
+        </div>
+        <div class="form-row span2" id="custom-cat-row" style="display:none"><label>自訂項目名稱</label><input type="text" id="r-custom-cat" placeholder="輸入項目"></div>
+
+        <!-- 水費提示 -->
+        <div class="form-row span2" id="water-hint-row" style="display:none">
+          <div class="calc-box">
+            <div class="calc-box-title"><svg class="ico" viewBox="0 0 24 24"><path d="M12 2C6 10 6 14 12 22c6-8 6-12 0-20z"/></svg> 水費自動帶入</div>
+            <div class="calc-result" style="border-top:none;margin-top:0;padding-top:0">
+              <span style="color:var(--text2);font-size:13px">本物件固定水費</span>
+              <strong id="water-hint-amount">$0</strong>
+            </div>
+            <div class="calc-hint">金額已自動填入，可手動修改</div>
+          </div>
+        </div>
+
+        <!-- 電費計算機 -->
+        <div class="form-row span2" id="elec-calc-row" style="display:none">
+          <div class="calc-box">
+            <div class="calc-box-title"><svg class="ico" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> 電費計算機</div>
+            <div class="calc-row"><label>上月度數</label><input type="number" id="elec-prev" placeholder="0" min="0" oninput="calcElec()"></div>
+            <div class="calc-row"><label>本月度數</label><input type="number" id="elec-curr" placeholder="0" min="0" oninput="calcElec()"></div>
+            <div class="calc-row"><label>本月平均電價</label><input type="number" id="elec-rate" placeholder="例：4.5" step="0.01" min="0" oninput="calcElec()"><span style="color:var(--text3);font-size:12px;white-space:nowrap">元/度</span></div>
+            <div class="calc-result">
+              <span style="color:var(--text2);font-size:13px" id="elec-formula">使用 — 度 × — 元</span>
+              <strong id="elec-result">$0</strong>
+            </div>
+            <div class="calc-hint">金額自動填入下方，可手動修改</div>
+          </div>
+        </div>
+
+        <div class="form-row"><label>金額（元）</label><input type="number" id="r-amount" placeholder="0" min="0"></div>
+        <div class="form-row span2"><label>備註</label><input type="text" id="r-note" placeholder="選填"></div>
+
+        <!-- 情境引導：分攤到多個物件（支出時才出現） -->
+        <div class="form-row span2" id="split-suggest-row" style="display:none">
+          <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;border:0.5px solid var(--border)">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:400">
+              <input type="checkbox" id="r-split-toggle" onchange="toggleSplitMode()" style="width:16px;height:16px;flex-shrink:0">
+              <div>
+                <div style="font-size:13px;font-weight:500">這筆支出要分攤到多個物件？</div>
+                <div style="font-size:12px;color:var(--text3);margin-top:2px">例如：同一個師傅修繕多間、共用的管理費</div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分攤展開區 -->
+      <div id="split-expand" style="display:none;margin-top:4px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">選擇分攤物件</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <select id="sp-mode" onchange="calcSplit()" style="flex:1">
+            <option value="equal">平均分攤</option>
+            <option value="manual">手動輸入各物件金額</option>
+          </select>
+        </div>
+        <div id="sp-prop-list" style="max-height:220px;overflow-y:auto;border:0.5px solid var(--border);border-radius:var(--radius-sm)"></div>
+        <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:12px;color:var(--text3)" id="sp-summary"></div>
+          <div style="font-size:13px;font-weight:600" id="sp-remainder"></div>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="r-edit-id">
+    <input type="hidden" id="r-type" value="in">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-record')">取消</button>
+      <button class="btn btn-primary" id="r-save-btn" style="display:none" onclick="saveRecordOrSplit()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：物件 -->
+<div class="modal-backdrop" id="modal-prop">
+  <div class="modal">
+    <div class="modal-title" id="modal-prop-title">新增物件</div>
+    <div class="form-grid">
+      <div class="form-row span2"><label>物件名稱</label><input type="text" id="p-name" placeholder="例：大安A棟101"></div>
+      <div class="form-row span2"><label>地址</label><input type="text" id="p-addr" placeholder="完整地址"></div>
+      <div class="form-row"><label>狀態</label>
+        <select id="p-status" onchange="toggleVacantFields()">
+          <option value="rented">出租中</option>
+          <option value="vacant">閒置中</option>
+          <option value="repair">整修中</option>
+        </select>
+      </div>
+      <div class="form-row"><label>月租金（元）</label><input type="number" id="p-rent" placeholder="0" min="0"></div>
+      <div class="form-row" id="p-tenant-row"><label>租客姓名</label><input type="text" id="p-tenant" placeholder="選填"></div>
+      <div class="form-row" id="p-vacant-since-row" style="display:none"><label>閒置起始日</label><input type="date" id="p-vacant-since"></div>
+      <div class="form-row" id="p-start-row"><label>租約起始</label><input type="date" id="p-start"></div>
+      <div class="form-row" id="p-end-row"><label>租約到期</label><input type="date" id="p-end"></div>
+      <div class="form-row span2" id="p-notary-row">
+        <label style="margin-bottom:6px">合約公證</label>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;width:auto">
+            <input type="checkbox" id="p-notarized" onchange="toggleNotaryDate()" style="width:16px;height:16px"> 已公證
+          </label>
+          <div id="p-notary-date-row" style="display:none;flex:1;display:none">
+            <input type="date" id="p-notary-date" placeholder="公證日期">
+          </div>
+        </div>
+      </div>
+      <div class="form-row span2"><label>物件照片</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div id="p-photo-preview" style="width:64px;height:64px;border-radius:var(--radius-sm);background:var(--surface2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+            <span style="font-size:11px;color:var(--text3)">無照片</span>
+          </div>
+          <div>
+            <input type="file" id="p-photo-input" accept="image/*" onchange="previewPhoto()" style="display:none">
+            <button type="button" class="btn btn-sm" onclick="document.getElementById('p-photo-input').click()">選擇照片</button>
+            <button type="button" class="btn btn-sm btn-danger" id="p-photo-clear" style="display:none;margin-top:4px" onclick="clearPhoto()">移除照片</button>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">建議尺寸：正方形，JPG 或 PNG</div>
+          </div>
+        </div>
+        <input type="hidden" id="p-photo">
+      </div>
+      <div class="form-row span2"><label>備註</label><input type="text" id="p-note" placeholder="選填"></div>
+      <div class="form-row span2" id="p-line-row">
+        <label>LINE 聯絡連結</label>
+        <input type="text" id="p-line" placeholder="貼上 LINE 群組或個人連結" style="font-size:12px">
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">群組邀請連結 或 個人：https://line.me/ti/p/~LINE_ID</div>
+      </div>
+      <div class="form-row span2" style="border-top:0.5px solid var(--border);padding-top:12px;margin-top:4px">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:2px">水電費設定（收租用）</label>
+      </div>
+      <div class="form-row">
+        <label>固定水費（元/月）</label>
+        <input type="number" id="p-water-fee" placeholder="0，留空表示不收" min="0">
+      </div>
+      <div class="form-row">
+        <label>電費收取方式</label>
+        <select id="p-elec-enabled">
+          <option value="0">租客自行繳納，不經手</option>
+          <option value="1">向租客收取，按度數計算</option>
+        </select>
+      </div>
+    </div>
+    <input type="hidden" id="p-edit-id">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-prop')">取消</button>
+      <button class="btn btn-primary" onclick="saveProp()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：分攤支出 -->
+<div class="modal-backdrop" id="modal-split">
+  <div class="modal" style="width:520px">
+    <div class="modal-title">分攤支出到多個物件</div>
+    <div class="form-grid">
+      <div class="form-row"><label>日期</label><input type="date" id="sp-date"></div>
+      <div class="form-row"><label>項目</label>
+        <select id="sp-cat">
+          <option value="修繕費">修繕費</option>
+          <option value="水費">水費</option>
+          <option value="電費">電費</option>
+          <option value="天然氣">天然氣</option>
+          <option value="洗樓梯">洗樓梯</option>
+          <option value="自訂...">自訂...</option>
+        </select>
+      </div>
+      <div class="form-row span2" id="sp-custom-cat-row" style="display:none"><label>自訂項目名稱</label><input type="text" id="sp-custom-cat" placeholder="輸入項目"></div>
+      <div class="form-row"><label>總金額（元）</label><input type="number" id="sp-total" placeholder="0" min="0" oninput="calcSplit()"></div>
+      <div class="form-row"><label>分攤方式</label>
+        <select id="sp-mode" onchange="calcSplit()">
+          <option value="equal">平均分攤</option>
+          <option value="manual">手動輸入各物件</option>
+        </select>
+      </div>
+      <div class="form-row span2"><label>備註</label><input type="text" id="sp-note" placeholder="選填"></div>
+    </div>
+    <div style="margin:4px 0 12px;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">選擇分攤物件</div>
+    <div id="sp-prop-list" style="max-height:280px;overflow-y:auto;border:0.5px solid var(--border);border-radius:var(--radius-sm)"></div>
+    <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;color:var(--text3)" id="sp-summary"></div>
+      <div style="font-size:13px;font-weight:600" id="sp-remainder"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-split')">取消</button>
+      <button class="btn btn-primary" onclick="saveSplit()">儲存並拆成多筆</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：維修安排 -->
+<div class="modal-backdrop" id="modal-maint">
+  <div class="modal" style="width:480px">
+    <div class="modal-title" id="modal-maint-title">新增維修安排</div>
+    <div class="form-grid">
+      <div class="form-row"><label>回報日期</label><input type="date" id="m-date"></div>
+      <div class="form-row"><label>物件</label><select id="m-prop"></select></div>
+      <div class="form-row span2"><label>問題描述</label><input type="text" id="m-desc" placeholder="例：浴室漏水、冷氣不冷"></div>
+      <div class="form-row"><label>是否已安排</label>
+        <select id="m-status" onchange="toggleMaintSchedule()">
+          <option value="pending">尚未安排</option>
+          <option value="scheduled">已安排</option>
+        </select>
+      </div>
+      <div class="form-row" id="m-schedule-row" style="display:none"><label>預計維修時間</label><input type="datetime-local" id="m-schedule-date"></div>
+      <div class="form-row span2"><label>備註</label><input type="text" id="m-note" placeholder="選填"></div>
+    </div>
+    <input type="hidden" id="m-edit-id">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-maint')">取消</button>
+      <button class="btn btn-primary" onclick="saveMaint()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：維修紀錄 -->
+<div class="modal-backdrop" id="modal-hist">
+  <div class="modal" style="width:500px">
+    <div class="modal-title" id="modal-hist-title">新增維修紀錄</div>
+    <div class="form-grid">
+      <div class="form-row"><label>維修日期</label><input type="date" id="h-date"></div>
+      <div class="form-row"><label>物件</label><select id="h-prop"></select></div>
+      <div class="form-row span2"><label>維修項目</label><input type="text" id="h-desc" placeholder="例：更換馬桶、修冷氣"></div>
+      <div class="form-row span2"><label>廠商 / 師傅</label><input type="text" id="h-vendor" placeholder="選填"></div>
+      <div class="form-row"><label>費用（元）</label><input type="number" id="h-cost" placeholder="0" min="0"></div>
+      <div class="form-row span2"><label>備註</label><input type="text" id="h-note" placeholder="選填"></div>
+      <div class="form-row span2">
+        <label>施工前照片</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div id="h-before-preview" style="width:80px;height:60px;border-radius:var(--radius-sm);background:var(--surface2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:11px;color:var(--text3)">無照片</div>
+          <div><input type="file" id="h-before-input" accept="image/*" onchange="previewHistPhoto('before')" style="display:none">
+          <button type="button" class="btn btn-sm" onclick="document.getElementById('h-before-input').click()">選擇</button>
+          <button type="button" class="btn btn-sm btn-danger" id="h-before-clear" style="display:none;margin-left:4px" onclick="clearHistPhoto('before')">移除</button></div>
+        </div>
+        <input type="hidden" id="h-before-photo">
+      </div>
+      <div class="form-row span2">
+        <label>施工後照片</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div id="h-after-preview" style="width:80px;height:60px;border-radius:var(--radius-sm);background:var(--surface2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:11px;color:var(--text3)">無照片</div>
+          <div><input type="file" id="h-after-input" accept="image/*" onchange="previewHistPhoto('after')" style="display:none">
+          <button type="button" class="btn btn-sm" onclick="document.getElementById('h-after-input').click()">選擇</button>
+          <button type="button" class="btn btn-sm btn-danger" id="h-after-clear" style="display:none;margin-left:4px" onclick="clearHistPhoto('after')">移除</button></div>
+        </div>
+        <input type="hidden" id="h-after-photo">
+      </div>
+    </div>
+    <input type="hidden" id="h-edit-id">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-hist')">取消</button>
+      <button class="btn btn-primary" onclick="saveHist()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：定期保養 -->
+<div class="modal-backdrop" id="modal-routine">
+  <div class="modal" style="width:440px">
+    <div class="modal-title" id="modal-routine-title">新增保養項目</div>
+    <div class="form-grid">
+      <div class="form-row"><label>物件</label><select id="rt-prop"></select></div>
+      <div class="form-row"><label>保養項目</label><input type="text" id="rt-item" placeholder="例：洗冷氣、洗洗衣機"></div>
+      <div class="form-row"><label>保養週期</label>
+        <select id="rt-cycle">
+          <option value="6">每 6 個月</option>
+          <option value="12">每 1 年</option>
+          <option value="24" selected>每 2 年</option>
+          <option value="36">每 3 年</option>
+        </select>
+      </div>
+      <div class="form-row"><label>上次保養日</label><input type="date" id="rt-last"></div>
+      <div class="form-row span2"><label>備註</label><input type="text" id="rt-note" placeholder="選填"></div>
+    </div>
+    <input type="hidden" id="rt-edit-id">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-routine')">取消</button>
+      <button class="btn btn-primary" onclick="saveRoutine()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：完成維修 → 帶入紀錄？ -->
+<div class="modal-backdrop" id="modal-complete">
+  <div class="modal" style="width:400px">
+    <div class="modal-title">完成維修</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">這筆維修要建立維修紀錄嗎？</p>
+    <div id="complete-maint-info" style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
+    <input type="hidden" id="complete-maint-id">
+    <div class="modal-footer">
+      <button class="btn" onclick="completeMaint(false)">不建立，直接完成</button>
+      <button class="btn btn-primary" onclick="completeMaint(true)">建立維修紀錄</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：維修費用建立帳目確認 -->
+<div class="modal-backdrop" id="modal-expense-confirm">
+  <div class="modal" style="width:380px">
+    <div class="modal-title">建立支出帳目？</div>
+    <div id="expense-confirm-info" style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">要同時在帳目記錄建立一筆支出嗎？</p>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-expense-confirm')">不用，跳過</button>
+      <button class="btn btn-primary" onclick="confirmCreateExpense()">建立支出帳目</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：完成保養 -->
+<div class="modal-backdrop" id="modal-done-routine">
+  <div class="modal" style="width:380px">
+    <div class="modal-title">完成保養</div>
+    <div id="done-routine-info" style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
+    <div class="form-grid">
+      <div class="form-row span2"><label>費用（元）</label><input type="number" id="rt-done-cost" placeholder="0，若無費用留空" min="0"></div>
+      <div class="form-row span2"><label>廠商 / 師傅</label><input type="text" id="rt-done-vendor" placeholder="選填"></div>
+      <div class="form-row span2"><label>備註</label><input type="text" id="rt-done-note" placeholder="選填"></div>
+    </div>
+    <input type="hidden" id="rt-done-id">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-done-routine')">取消</button>
+      <button class="btn btn-primary" onclick="saveDoneRoutine()">完成保養</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'rental_accounting_v1';
+const SHARED_PROP_ID = '__shared__';
+const CAT_IN = ['租金','水費','電費','押金','其他收入','自訂...'];
+const CAT_OUT = ['修繕費','水費','電費','天然氣','洗樓梯','自訂...'];
+
+let state = {
+  properties: [],
+  records: [],
+};
+let currentPage = 'overview';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrokzp_jRkuP79vLSVVPNm8vhNwDb74LxVy8UZyIQ9JNnSrdQM6cNYK-J6L5Q_nHLB/exec';
+let saveTimer = null;
+let isSyncing = false;
+
+/* ── Storage ── */
+async function loadData() {
+  setSaveIndicator('saving');
+  document.getElementById('save-text').textContent = '載入中...';
+  try {
+    const res = await fetch(GAS_URL + '?action=load');
+    const json = await res.json();
+    if (json.success && json.data && Object.keys(json.data).length > 0) {
+      state = json.data;
+    }
+  } catch(e) {
+    // fallback to localStorage if offline
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) state = JSON.parse(raw);
+    } catch(e2) {}
+    setSaveIndicator('error');
+    document.getElementById('save-text').textContent = '⚠ 離線模式';
+    return;
+  }
+  if (!state.properties) state.properties = [];
+  if (!state.records) state.records = [];
+  if (!state.maints) state.maints = [];
+  if (!state.maintHistory) state.maintHistory = [];
+  if (!state.routines) state.routines = [];
+  if (state.properties.length === 0) seedDemo();
+  setSaveIndicator('saved');
+}
+
+function saveData() {
+  setSaveIndicator('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'save', data: state }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSaveIndicator('saved');
+      } else {
+        setSaveIndicator('error');
+      }
+    } catch(e) {
+      setSaveIndicator('error');
+      document.getElementById('save-text').textContent = '⚠ 僅本機';
+    }
+  }, 600);
+}
+function setSaveIndicator(status) {
+  const el = document.getElementById('save-indicator');
+  const txt = document.getElementById('save-text');
+  if (!el||!txt) return;
+  el.className = 'save-indicator ' + status;
+  if (status === 'saved') { txt.textContent = '✓ 已儲存'; }
+  else if (status === 'saving') { txt.textContent = '↑ 儲存中...'; }
+  else { txt.textContent = '✕ 儲存失敗'; }
+}
+function seedDemo() {
+  state.properties = [
+    {id:'p1',name:'大安A棟101',addr:'台北市大安區復興南路一段123號1F',rent:18000,tenant:'王小明',start:'2024-02-01',end:'2025-01-31',note:''},
+    {id:'p2',name:'信義B棟202',addr:'台北市信義區信義路五段456號2F',rent:22000,tenant:'李美麗',start:'2024-05-01',end:'2025-04-30',note:''},
+    {id:'p3',name:'中山C棟303',addr:'台北市中山區中山北路二段789號3F',rent:15000,tenant:'陳大海',start:'2023-11-01',end:'2024-10-31',note:''},
+    {id:'p4',name:'松山D棟404',addr:'台北市松山區南京東路三段101號4F',rent:20000,tenant:'林小花',start:'2024-01-01',end:'2024-12-31',note:''},
+    {id:'p5',name:'文山E棟505',addr:'台北市文山區木柵路一段202號5F',rent:12000,tenant:'張三',start:'2024-03-01',end:'2025-02-28',note:''},
+    {id:'p6',name:'北投F棟606',addr:'台北市北投區中央南路二段303號6F',rent:16000,tenant:'劉家豪',start:'2024-06-01',end:'2025-05-31',note:''},
+    {id:'p7',name:'士林G棟707',addr:'台北市士林區中正路404號7F',rent:19000,tenant:'吳雅惠',start:'2024-04-01',end:'2025-03-31',note:''},
+    {id:'p8',name:'新店H棟808',addr:'新北市新店區中正路505號8F',rent:14000,tenant:'鄭文欽',start:'2024-07-01',end:'2025-06-30',note:''},
+    {id:'p9',name:'板橋I棟909',addr:'新北市板橋區文化路二段606號9F',rent:17000,tenant:'周芷若',start:'2024-08-01',end:'2025-07-31',note:''},
+  ];
+  const now = new Date();
+  const ym = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  const prev = now.getMonth()===0
+    ? (now.getFullYear()-1)+'-12'
+    : now.getFullYear()+'-'+String(now.getMonth()).padStart(2,'0');
+  state.records = [
+    {id:'r1',date:prev+'-05',propId:'p1',type:'in',cat:'租金',amount:18000,note:''},
+    {id:'r2',date:prev+'-05',propId:'p2',type:'in',cat:'租金',amount:22000,note:''},
+    {id:'r3',date:prev+'-06',propId:'p3',type:'in',cat:'租金',amount:15000,note:''},
+    {id:'r4',date:prev+'-08',propId:'p4',type:'in',cat:'租金',amount:20000,note:''},
+    {id:'r5',date:prev+'-10',propId:'p1',type:'out',cat:'修繕費',amount:3500,note:'浴室漏水'},
+    {id:'r6',date:prev+'-12',propId:'p5',type:'in',cat:'租金',amount:12000,note:''},
+    {id:'r7',date:prev+'-15',propId:'p6',type:'in',cat:'租金',amount:16000,note:''},
+    {id:'r8',date:prev+'-15',propId:'p7',type:'in',cat:'租金',amount:19000,note:''},
+    {id:'r9',date:prev+'-18',propId:'p3',type:'out',cat:'水費',amount:800,note:''},
+    {id:'r10',date:prev+'-20',propId:'p8',type:'in',cat:'租金',amount:14000,note:''},
+    {id:'r11',date:prev+'-22',propId:'p9',type:'in',cat:'租金',amount:17000,note:''},
+    {id:'r12',date:prev+'-25',propId:'p2',type:'out',cat:'管理費',amount:2000,note:''},
+    {id:'r13',date:ym+'-05',propId:'p1',type:'in',cat:'租金',amount:18000,note:''},
+    {id:'r14',date:ym+'-06',propId:'p2',type:'in',cat:'租金',amount:22000,note:''},
+    {id:'r15',date:ym+'-06',propId:'p3',type:'in',cat:'租金',amount:15000,note:''},
+    {id:'r16',date:ym+'-08',propId:'p4',type:'in',cat:'租金',amount:20000,note:''},
+    {id:'r17',date:ym+'-10',propId:'p5',type:'in',cat:'租金',amount:12000,note:''},
+  ];
+  saveData();
+}
+
+/* ── Helpers ── */
+function uid(){ return 'id'+ Date.now() + Math.random().toString(36).slice(2,6) }
+function fmtMoney(n){ return '$' + parseInt(n||0).toLocaleString('zh-TW') }
+function toYM(date){ return date.slice(0,7) }
+function allMonths(){
+  const ms = new Set();
+  state.records.forEach(r => ms.add(toYM(r.date)));
+  const now = new Date();
+  for(let i=0;i<3;i++){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    ms.add(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
+  }
+  return Array.from(ms).sort().reverse();
+}
+function getProp(id){
+  if(id===SHARED_PROP_ID) return {id:SHARED_PROP_ID,name:'整體支出',addr:'',tenant:'',rent:0,status:'shared'};
+  return state.properties.find(p=>p.id===id);
+}
+function initials(name){ return name ? name.slice(0,1) : '?' }
+
+/* ── Nav ── */
+function showPage(name) {
+  currentPage = name;
+  document.querySelectorAll('.page').forEach(el => el.style.display='none');
+  document.getElementById('page-'+name).style.display='block';
+  document.querySelectorAll('.nav-item').forEach((el,i) => {
+    el.classList.toggle('active', ['overview','records','properties','maintenance','export'][i]===name);
+  });
+  if(name==='overview') renderOverview();
+  if(name==='records') renderRecords();
+  if(name==='properties') renderProperties();
+  if(name==='maintenance'){ populateMaintPropSelects(); showMaintTab('pending'); }
+  if(name==='export') renderExportPage();
+}
+let viewMode = 'month'; // 'month' | 'quarter' | 'year'
+
+function setViewMode(mode){
+  viewMode = mode;
+  // update button styles
+  ['month','quarter','year'].forEach(m=>{
+    const btn=document.getElementById('vmode-'+m);
+    if(btn){
+      btn.style.background = m===mode ? 'var(--blue-mid)' : 'transparent';
+      btn.style.color = m===mode ? '#fff' : 'var(--text2)';
+    }
+  });
+  document.getElementById('ov-month-nav').style.display = mode==='month'?'flex':'none';
+  document.getElementById('ov-quarter-nav').style.display = mode==='quarter'?'block':'none';
+  document.getElementById('ov-year-nav').style.display = mode==='year'?'block':'none';
+  populatePeriodSelects();
+  renderOverview();
+}
+
+function populatePeriodSelects(){
+  // Quarter select
+  const qSel=document.getElementById('ov-quarter');
+  if(qSel){
+    const quarters=[];
+    const allYears=[...new Set(state.records.map(r=>r.date.slice(0,4)))].sort().reverse();
+    if(!allYears.length) allYears.push(new Date().getFullYear().toString());
+    allYears.forEach(y=>{
+      [1,2,3,4].forEach(q=> quarters.push(`${y}-Q${q}`));
+    });
+    quarters.sort().reverse();
+    const now=new Date();
+    const curQ=`${now.getFullYear()}-Q${Math.ceil((now.getMonth()+1)/3)}`;
+    const cur=qSel.value;
+    qSel.innerHTML=quarters.map(q=>`<option value="${q}">${q}</option>`).join('');
+    qSel.value=quarters.includes(cur)?cur:(quarters.includes(curQ)?curQ:quarters[0]);
+  }
+  // Year select
+  const ySel=document.getElementById('ov-year');
+  if(ySel){
+    const years=[...new Set(state.records.map(r=>r.date.slice(0,4)))].sort().reverse();
+    if(!years.length) years.push(new Date().getFullYear().toString());
+    const cur=ySel.value;
+    ySel.innerHTML=years.map(y=>`<option value="${y}">${y} 年</option>`).join('');
+    if(cur&&years.includes(cur)) ySel.value=cur;
+  }
+}
+
+function getViewRecs(){
+  if(viewMode==='month'){
+    const ym=document.getElementById('ov-month').value||allMonths()[0];
+    return { recs:state.records.filter(r=>r.date.slice(0,7)===ym), label:'月', period:ym };
+  }
+  if(viewMode==='quarter'){
+    const qv=document.getElementById('ov-quarter')?.value||'';
+    if(!qv) return {recs:[],label:'季',period:''};
+    const [y,qpart]=qv.split('-Q');
+    const q=parseInt(qpart);
+    const months=[(q-1)*3+1,(q-1)*3+2,(q-1)*3+3].map(m=>y+'-'+String(m).padStart(2,'0'));
+    return { recs:state.records.filter(r=>months.includes(r.date.slice(0,7))), label:'季', period:qv };
+  }
+  if(viewMode==='year'){
+    const y=document.getElementById('ov-year')?.value||new Date().getFullYear().toString();
+    return { recs:state.records.filter(r=>r.date.slice(0,4)===y), label:'年', period:y+'年' };
+  }
+  return {recs:[],label:'',period:''};
+}
+
+function navMonth(dir){
+  const sel=document.getElementById('ov-month');
+  const opts=Array.from(sel.options).map(o=>o.value);
+  const ni=opts.indexOf(sel.value)-dir;
+  if(ni>=0&&ni<opts.length){sel.value=opts[ni]; renderOverview();}
+}
+
+/* ── Populate selects ── */
+function populateMonthSelects(){
+  const ms = allMonths();
+  ['ov-month','rec-month'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const cur=el.value;
+    el.innerHTML=ms.map(m=>`<option value="${m}">${m}</option>`).join('');
+    if(cur && ms.includes(cur)) el.value=cur;
+  });
+}
+function populatePropSelects(){
+  const allOpt = '<option value="">全部物件</option>'
+    + `<option value="${SHARED_PROP_ID}">── 整體支出</option>`
+    + state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const onlyProp = state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  // income: only real properties
+  const incomePropOpt = onlyProp;
+  // expense: shared + split + properties
+  const expensePropOpt = `<option value="${SHARED_PROP_ID}">整體支出（不分物件）</option>`
+    + '<option disabled>──────────────</option>'
+    + onlyProp;
+  ['rec-prop','exp-prop'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=allOpt; });
+  // r-prop will be set dynamically by pickType
+  const rp=document.getElementById('r-prop'); if(rp) rp.innerHTML=onlyProp;
+}
+
+/* ── Overview ── */
+function renderOverview(){
+  populateMonthSelects();
+  populatePeriodSelects();
+  const {recs, label, period} = getViewRecs();
+
+  // Update title and labels
+  const titles={'month':'每月總覽','quarter':'季度總覽','year':'年度總覽'};
+  document.getElementById('ov-title').textContent=titles[viewMode]||'總覽';
+  document.getElementById('ov-income-label').textContent=label+'收入';
+  document.getElementById('ov-expense-label').textContent=label+'支出';
+
+  const inc=recs.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
+  const exp=recs.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
+  document.getElementById('ov-income').textContent=fmtMoney(inc);
+  document.getElementById('ov-expense').textContent=fmtMoney(exp);
+  const net=inc-exp;
+  const nel=document.getElementById('ov-net');
+  nel.textContent=fmtMoney(net);
+  nel.className='stat-val '+(net>=0?'green':'red');
+  document.getElementById('ov-propcount').textContent=state.properties.length;
+  const rented=state.properties.filter(p=>(p.status||'rented')==='rented').length;
+  const vacant=state.properties.filter(p=>p.status==='vacant').length;
+  const repair=state.properties.filter(p=>p.status==='repair').length;
+  const breakdown=document.getElementById('ov-prop-breakdown');
+  if(breakdown){
+    breakdown.innerHTML=[
+      rented?`<span style="color:var(--green-mid)">● 出租中 ${rented}</span>`:'',
+      vacant?`<span style="color:var(--text3)">● 閒置中 ${vacant}</span>`:'',
+      repair?`<span style="color:var(--amber-mid)">● 整修中 ${repair}</span>`:'',
+    ].filter(Boolean).join('');
+  }
+
+  const ptbody = document.querySelector('#ov-prop-table tbody');
+  // include shared prop if has records
+  const sharedRecs = recs.filter(r=>r.propId===SHARED_PROP_ID);
+  const isMonthMode = viewMode==='month';
+  // Update table header
+  const pthead = document.querySelector('#ov-prop-table thead tr');
+  if(pthead) pthead.innerHTML = `<th>物件</th><th>租金</th><th>收入</th><th>支出</th><th>合計</th>${isMonthMode?'<th>租金狀態</th>':''}`;
+  const propRows = state.properties.map(p=>{
+    const pr = recs.filter(r=>r.propId===p.id);
+    const pi = pr.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
+    const pe = pr.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
+    const hasRent = pr.some(r=>r.cat==='租金'&&r.type==='in');
+    const status = p.status||'rented';
+    let statusCell;
+    if(status==='vacant') statusCell = '<span class="badge badge-vacant"> 閒置中</span>';
+    else if(status==='repair') statusCell = '<span class="badge badge-repair">🔧 整修中</span>';
+    else statusCell = `<span class="badge ${hasRent?'badge-in':'badge-out'}">${hasRent?'✓ 已收租':'✕ 未收租'}</span>`;
+    return `<tr${status!=='rented'?' style="opacity:0.65"':''}>
+      <td><strong>${p.name}</strong></td>
+      <td style="color:var(--text2)">${status==='rented'?fmtMoney(p.rent):'—'}</td>
+      <td class="amt-in">${pi?fmtMoney(pi):'—'}</td>
+      <td class="amt-out">${pe?fmtMoney(pe):'—'}</td>
+      <td class="${(pi-pe)>=0?'amt-in':'amt-out'}">${fmtMoney(pi-pe)}</td>
+      ${isMonthMode?`<td>${statusCell}</td>`:''}
+    </tr>`;
+  });
+  if(sharedRecs.length){
+    const se=sharedRecs.reduce((a,r)=>a+r.amount,0);
+    propRows.push(`<tr style="opacity:0.8">
+      <td><strong style="color:var(--text2)">整體支出</strong></td>
+      <td>—</td><td>—</td>
+      <td class="amt-out">${fmtMoney(se)}</td>
+      <td class="amt-out">${fmtMoney(-se)}</td>
+      ${isMonthMode?'<td><span class="badge" style="background:var(--surface2);color:var(--text2)">整體</span></td>':''}
+    </tr>`);
+  }
+  ptbody.innerHTML = propRows.join('') || `<tr class="empty-row"><td colspan="${isMonthMode?6:5}">尚無物件</td></tr>`;
+
+  renderCharts(inc, exp, recs);
+}
+
+function renderCharts(inc, exp, recs){
+  const total = inc + exp;
+  const incPct = total ? Math.round(inc/total*100) : 0;
+  const expPct = total ? 100-incPct : 0;
+  const netRate = inc>0 ? Math.round((inc-exp)/inc*100) : null;
+
+  // Update stat card sub-labels
+  const incPctEl = document.getElementById('ov-income-pct');
+  const expPctEl = document.getElementById('ov-expense-pct');
+  const netRateEl = document.getElementById('ov-net-rate');
+  if(incPctEl) incPctEl.textContent = total ? `佔總額 ${incPct}%` : '';
+  if(expPctEl) expPctEl.textContent = total ? `佔總額 ${expPct}%` : '';
+  if(netRateEl) netRateEl.textContent = netRate!==null ? `淨利率 ${netRate}%` : '';
+
+  // ── Expense breakdown bars ──
+  const barsEl = document.getElementById('ov-expense-bars');
+  const expRecs = recs.filter(r=>r.type==='out');
+  const catMap = {};
+  expRecs.forEach(r=>{ catMap[r.cat]=(catMap[r.cat]||0)+r.amount; });
+  const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  if(!cats.length){
+    barsEl.innerHTML='<span style="color:var(--text3);font-size:13px">本月無支出記錄</span>';
+    return;
+  }
+  const maxAmt = cats[0][1];
+  const barColors = ['#185fa5','#1d9e75','#d85a30','#ba7517','#533ab7','#993556','#3b6d11','#0f6e56'];
+  barsEl.innerHTML = cats.map(([cat,amt],i)=>{
+    const pct = Math.round(amt/exp*100);
+    const barW = Math.round(amt/maxAmt*100);
+    const color = barColors[i%barColors.length];
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span style="color:var(--text2);font-weight:500">${cat}</span>
+        <span style="color:var(--text3)">${fmtMoney(amt)} · ${pct}%</span>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:100px;overflow:hidden">
+        <div style="height:100%;width:${barW}%;background:${color};border-radius:100px;transition:width .4s"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Records ── */
+function renderRecords(){
+  populateMonthSelects();
+  populatePropSelects();
+  const ym=document.getElementById('rec-month').value||allMonths()[0];
+  const pid=document.getElementById('rec-prop').value;
+  const typ=document.getElementById('rec-type').value;
+  let recs=state.records.filter(r=>toYM(r.date)===ym);
+  if(pid) recs=recs.filter(r=>r.propId===pid);
+  if(typ) recs=recs.filter(r=>r.type===typ);
+  recs.sort((a,b)=>a.date.localeCompare(b.date)||a.propId.localeCompare(b.propId));
+
+  const tbody=document.querySelector('#rec-table tbody');
+
+  if(!recs.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="6">本月暫無帳目</td></tr>'; return; }
+
+  // Group by property, shared prop last
+  const groups=[];
+  const groupMap={};
+  const propOrder=[...state.properties.map(p=>p.id), SHARED_PROP_ID];
+  recs.forEach(r=>{
+    const key=r.propId||SHARED_PROP_ID;
+    if(!groupMap[key]){ groupMap[key]=[]; groups.push(key); }
+    groupMap[key].push(r);
+  });
+  groups.sort((a,b)=>propOrder.indexOf(a)-propOrder.indexOf(b));
+
+  tbody.innerHTML=groups.map((propId,gi)=>{
+    const p=getProp(propId);
+    const gr=groupMap[propId];
+    const gInc=gr.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
+    const gExp=gr.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
+    const isShared=propId===SHARED_PROP_ID;
+    // rotating accent colors for group headers
+    const accentColors=['#185fa5','#1d9e75','#ba7517','#533ab7','#993556','#3b6d11','#d85a30','#0f6e56','#854f0b'];
+    const accent = isShared ? '#888' : accentColors[gi % accentColors.length];
+
+    const rows=gr.map(r=>`<tr class="rec-detail-row">
+      <td style="padding-left:20px;color:var(--text2);font-size:13px;border-left:3px solid ${accent}20">${r.date}</td>
+      <td><span class="badge ${r.type==='in'?'badge-in':'badge-out'}" style="font-size:11px">${r.type==='in'?'收入':'支出'}</span></td>
+      <td style="font-size:13px">${r.cat}</td>
+      <td style="font-size:13px" class="${r.type==='in'?'amt-in':'amt-out'};font-weight:600">${r.type==='in'?'+':'-'}${fmtMoney(r.amount)}</td>
+      <td style="color:var(--text3);font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.note||''}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-icon btn-sm" onclick="openRecordModal('${r.id}')" title="編輯"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
+        <button class="btn btn-icon btn-sm btn-danger" onclick="deleteRecord('${r.id}')" title="刪除"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      </td>
+    </tr>`).join('');
+
+    return `<tr class="rec-group-header">
+      <td colspan="6" style="padding:0;border-bottom:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 16px;background:var(--surface2);border-left:4px solid ${accent};border-bottom:0.5px solid ${accent}30">
+          <div style="font-weight:600;font-size:14px;color:var(--text)">
+            ${p?p.name:'未知物件'}${!isShared&&p&&p.tenant?` <span style="font-weight:400;color:var(--text3);font-size:13px">(${p.tenant})</span>`:''}
+            ${isShared?` <span style="font-weight:400;color:var(--text3);font-size:13px">整體支出</span>`:''}
+            ${!isShared&&p&&p.lineGroup?`<a href="${p.lineGroup}" target="_blank" style="display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:100px;background:#06c755;color:#fff;font-size:11px;font-weight:600;text-decoration:none;vertical-align:middle">LINE</a>`:''}
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px">
+            ${gInc?`<span style="color:#1d9e75;font-weight:600">+${fmtMoney(gInc)}</span>`:''}
+            ${gExp?`<span style="color:#d85a30;font-weight:600">-${fmtMoney(gExp)}</span>`:''}
+            ${gInc&&gExp?`<span style="color:var(--text3);font-size:11px">淨 <span style="font-weight:600;color:${(gInc-gExp)>=0?'#1d9e75':'#d85a30'}">${(gInc-gExp)>=0?'+':''}${fmtMoney(gInc-gExp)}</span></span>`:''}
+          </div>
+        </div>
+      </td>
+    </tr>${rows}<tr><td colspan="6" style="padding:0;height:8px;background:transparent;border:none"></td></tr>`
+  }).join('');
+}
+
+/* ── Properties ── */
+function daysUntilExpiry(endDate){
+  if(!endDate) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const end = new Date(endDate); end.setHours(0,0,0,0);
+  return Math.round((end - today) / 86400000);
+}
+function daysSince(dateStr){
+  if(!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((today - d) / 86400000);
+}
+function leaseStatusBadge(p){
+  const status = p.status||'rented';
+  if(status==='vacant'){
+    const days = daysSince(p.vacantSince);
+    const label = days!==null&&days>0 ? `閒置 ${days} 天` : '閒置中';
+    return `<span class="badge badge-vacant"><i class="ti ti-home-off"></i> ${label}</span>`;
+  }
+  if(status==='repair'){
+    const days = daysSince(p.vacantSince);
+    const label = days!==null&&days>0 ? `整修 ${days} 天` : '整修中';
+    return `<span class="badge badge-repair">🔧 ${label}</span>`;
+  }
+  const d = daysUntilExpiry(p.end);
+  if(d===null) return '<span class="badge" style="background:var(--surface2);color:var(--text3)">租約未設定</span>';
+  if(d < 0) return `<span class="badge badge-expired"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><point x1="12" y1="16" x2="12.01" y2="16"/></svg> 已到期 ${Math.abs(d)} 天</span>`;
+  if(d <= 14) return `<span class="badge badge-expired">⚠ 剩 ${d} 天</span>`;
+  if(d <= 45) return `<span class="badge badge-warn">⏱ 剩 ${d} 天</span>`;
+  return `<span class="badge badge-ok">✓ 剩 ${d} 天</span>`;
+}
+function renderProperties(){
+  const total = state.properties.length;
+  const vacantCount = state.properties.filter(p=>(p.status||'rented')!=='rented').length;
+  document.getElementById('prop-count').textContent = `共 ${total} 處${vacantCount?`，${vacantCount} 處非出租中`:''}`;
+
+  // Lease alert banner (only for rented props expiring)
+  const expiring = state.properties.filter(p=>{
+    if((p.status||'rented')!=='rented') return false;
+    const d=daysUntilExpiry(p.end);
+    return d!==null && d<=45;
+  }).sort((a,b)=>daysUntilExpiry(a.end)-daysUntilExpiry(b.end));
+
+  const banner = document.getElementById('lease-alert-banner');
+  const alertList = document.getElementById('lease-alert-list');
+  const navBadge = document.getElementById('nav-lease-badge');
+
+  if(expiring.length){
+    banner.style.display='flex';
+    navBadge.style.display='inline-flex';
+    navBadge.textContent = expiring.length;
+    alertList.innerHTML = expiring.map(p=>{
+      const d=daysUntilExpiry(p.end);
+      const cls = d<0?'days-expired': d<=14?'days-urgent':'days-warn';
+      const label = d<0?`已過期 ${Math.abs(d)} 天`:`還有 ${d} 天到期`;
+      return `<div class="alert-item">
+        <span class="days-badge ${cls}">${label}</span>
+        <strong>${p.name}</strong>
+        ${p.tenant?`・${p.tenant}`:''}
+        ・到期日 ${p.end}
+        <button class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="openPropModal('${p.id}')">編輯更新</button>
+      </div>`;
+    }).join('');
+  } else {
+    banner.style.display='none';
+    navBadge.style.display='none';
+  }
+
+  // Vacant banner
+  const vacant = state.properties.filter(p=>(p.status||'rented')!=='rented');
+  const vacantBanner = document.getElementById('vacant-alert-banner');
+  const vacantList = document.getElementById('vacant-alert-list');
+  if(vacant.length){
+    vacantBanner.style.display='flex';
+    vacantList.innerHTML = vacant.map(p=>{
+      const days = daysSince(p.vacantSince);
+      const statusLabel = (p.status==='repair')?'整修中':'閒置中';
+      const daysLabel = days!==null&&days>0?`已 ${days} 天`:'';
+      return `<div class="alert-item">
+        <span class="days-badge ${p.status==='repair'?'days-warn':'days-expired'}">${statusLabel}${daysLabel?' · '+daysLabel:''}</span>
+        <strong>${p.name}</strong>
+        ${p.vacantSince?`・起始 ${p.vacantSince}`:''}
+        ${p.note?`・${p.note}`:''}
+        <button class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="openPropModal('${p.id}')">更新狀態</button>
+      </div>`;
+    }).join('');
+  } else {
+    vacantBanner.style.display='none';
+  }
+
+  const list = document.getElementById('prop-list');
+  list.innerHTML = state.properties.length ? state.properties.map((p,idx)=>{
+    const status = p.status||'rented';
+    const isVacant = status!=='rented';
+    const notaryBadge = p.notarized
+      ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--blue-bg);color:var(--blue-mid);font-weight:500">✓ 已公證${p.notaryDate?' '+p.notaryDate:''}</span>`
+      : '';
+    return `<div class="prop-row${isVacant?' is-vacant':''}" draggable="true" data-id="${p.id}">
+      <div class="drag-handle" title="拖曳可調整順序">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+      </div>
+      <div class="prop-thumb" onclick="openPropModal('${p.id}')" title="點擊更換照片" style="cursor:pointer">
+        ${p.photo
+          ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">`
+          : `<span style="font-size:15px;font-weight:700;color:var(--blue-mid)">${p.name.slice(0,1)}</span>`}
+      </div>
+      <div class="prop-info">
+        <div class="prop-name">${p.name}</div>
+        <div class="prop-sub">${p.addr}${!isVacant&&p.tenant?' ∙ 租客：'+p.tenant:''}</div>
+        <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${leaseStatusBadge(p)}
+          ${!isVacant&&p.end?`<span style="font-size:11px;color:var(--text3)">租約 ${p.start||'?'} ～ ${p.end}</span>`:''}
+          ${notaryBadge}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="prop-rent">${isVacant?'<span style="color:var(--text3);font-size:12px;font-weight:400">無收入</span>':fmtMoney(p.rent)+'<span>/月</span>'}</div>
+        ${p.lineGroup?`<a href="${p.lineGroup}" target="_blank" class="btn btn-icon btn-sm" title="開啟 LINE 群組" style="background:#06c755;border-color:#06c755;color:#fff;text-decoration:none"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.07 1.6 5.8 4.1 7.55V21l2.45-1.35C9.6 19.87 10.78 20 12 20c5.52 0 10-4.02 10-9S17.52 2 12 2zm1 13H8v-1.5h5V15zm3-3H8v-1.5h8V12zm0-3H8V7.5h8V9z"/></svg></a>`:''}
+        <button class="btn btn-icon btn-sm" onclick="openPropModal('${p.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
+        <button class="btn btn-icon btn-sm btn-danger" onclick="deleteProp('${p.id}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      </div>
+    </div>`;
+  }).join('')
+    : '<div style="padding:2rem;text-align:center;color:var(--text3)">尚無物件，請新增</div>';
+  initDragDrop();
+}
+
+/* ── Prop ordering ── */
+let dragSrcId = null;
+let dragTargetId = null;
+let dragInsertBefore = true;
+let dragDropInited = false;
+
+function initDragDrop(){
+  if(dragDropInited) return;
+  dragDropInited = true;
+  const list = document.getElementById('prop-list');
+
+  list.addEventListener('dragstart', e=>{
+    const row = e.target.closest('[data-id]');
+    if(!row) return;
+    dragSrcId = row.dataset.id;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragSrcId);
+    row.style.opacity = '0.35';
+    row.style.outline = '2px dashed var(--blue-mid)';
+  }, false);
+
+  list.addEventListener('dragover', e=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const row = e.target.closest('[data-id]');
+    if(!row || row.dataset.id === dragSrcId) return;
+    const rect = row.getBoundingClientRect();
+    const isTop = e.clientY < rect.top + rect.height / 2;
+    if(dragTargetId !== row.dataset.id || dragInsertBefore !== isTop){
+      dragTargetId = row.dataset.id;
+      dragInsertBefore = isTop;
+      // clear all indicators
+      list.querySelectorAll('[data-id]').forEach(r=>{
+        r.style.borderTop = '';
+        r.style.borderBottom = '';
+      });
+      if(isTop) row.style.borderTop = '3px solid var(--blue-mid)';
+      else row.style.borderBottom = '3px solid var(--blue-mid)';
+    }
+  }, false);
+
+  list.addEventListener('dragleave', e=>{
+    if(!list.contains(e.relatedTarget)){
+      list.querySelectorAll('[data-id]').forEach(r=>{
+        r.style.borderTop = '';
+        r.style.borderBottom = '';
+      });
+      dragTargetId = null;
+    }
+  }, false);
+
+  list.addEventListener('drop', e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    // clear all styles immediately
+    list.querySelectorAll('[data-id]').forEach(r=>{
+      r.style.borderTop = '';
+      r.style.borderBottom = '';
+      r.style.opacity = '';
+      r.style.outline = '';
+    });
+    const src = dragSrcId, tgt = dragTargetId, before = dragInsertBefore;
+    dragSrcId = null; dragTargetId = null;
+    if(!src || !tgt || src === tgt) return;
+    const arr = [...state.properties];
+    const from = arr.findIndex(p=>p.id === src);
+    if(from < 0) return;
+    const [moved] = arr.splice(from, 1);
+    let to = arr.findIndex(p=>p.id === tgt);
+    if(to < 0) return;
+    if(!before) to++;
+    arr.splice(to, 0, moved);
+    state.properties = arr;
+    saveData();
+    renderProperties();
+  }, false);
+
+  list.addEventListener('dragend', e=>{
+    // clear all styles — safe because we query live DOM
+    list.querySelectorAll('[data-id]').forEach(r=>{
+      r.style.borderTop = '';
+      r.style.borderBottom = '';
+      r.style.opacity = '';
+      r.style.outline = '';
+    });
+    dragSrcId = null; dragTargetId = null;
+  }, false);
+}
+
+function dragStart(e){}
+function dragOver(e){ e.preventDefault(); }
+function dropProp(e){ e.preventDefault(); }
+function dragEnd(e){}
+
+let pendingExpense = null;
+function confirmCreateExpense(){
+  if(!pendingExpense) return;
+  state.records.push({
+    id:uid(),
+    date:pendingExpense.date,
+    propId:pendingExpense.propId,
+    type:'out',
+    cat:pendingExpense.cat||'修繕費',
+    amount:pendingExpense.amount,
+    note:pendingExpense.desc+(pendingExpense.vendor?' ('+pendingExpense.vendor+')':'')+(pendingExpense.note?' · '+pendingExpense.note:''),
+  });
+  saveData();
+  populateMonthSelects();
+  pendingExpense=null;
+  closeModal('modal-expense-confirm');
+}
+
+/* ── 瀏覽器通知 ── */
+function requestNotifyPermission(){
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+const notifyTimers={};
+function scheduleNotifications(){
+  // clear existing timers
+  Object.values(notifyTimers).forEach(t=>clearTimeout(t));
+  const now=Date.now();
+  (state.maints||[]).forEach(m=>{
+    if(m.status==='done'||!m.scheduleDate) return;
+    const target=new Date(m.scheduleDate).getTime();
+    const diff=target-now;
+    if(diff>0 && diff<7*24*60*60*1000){ // within 7 days
+      notifyTimers[m.id]=setTimeout(()=>{
+        if(Notification.permission==='granted'){
+          const p=getProp(m.propId);
+          new Notification('🔧 維修提醒',{
+            body:`${p?p.name:'?'} — ${m.desc}`,
+            icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔧</text></svg>'
+          });
+        }
+      }, diff);
+    }
+  });
+}
+
+/* ── Maintenance ── */
+function showMaintTab(tab){
+  ['pending','history','routine'].forEach(t=>{
+    document.getElementById('mtab-'+t).className='maint-tab'+(t===tab?' active':'');
+    document.getElementById('mpanel-'+t).style.display=t===tab?'block':'none';
+  });
+  if(tab==='pending') renderMaintPending();
+  if(tab==='history') renderMaintHistory();
+  if(tab==='routine') renderRoutine();
+}
+
+function renderMaintPending(){
+  const filterProp=document.getElementById('maint-filter-prop')?.value||'';
+  const filterStatus=document.getElementById('maint-filter-status')?.value||'';
+  let items=(state.maints||[]).filter(m=>m.status!=='done'||(filterStatus==='done'));
+  if(filterStatus) items=items.filter(m=>m.status===filterStatus);
+  else items=(state.maints||[]).filter(m=>m.status!=='done');
+  if(filterProp) items=items.filter(m=>m.propId===filterProp);
+  items.sort((a,b)=>a.date.localeCompare(b.date));
+
+  // overdue check (>2 days since report with no schedule)
+  const now=new Date(); now.setHours(0,0,0,0);
+  const overdue=(state.maints||[]).filter(m=>{
+    if(m.status==='done') return false;
+    const d=new Date(m.date); d.setHours(0,0,0,0);
+    const days=Math.round((now-d)/86400000);
+    return days>2 && m.status==='pending';
+  });
+  const banner=document.getElementById('maint-overdue-banner');
+  const overdueList=document.getElementById('maint-overdue-list');
+  const navBadge=document.getElementById('nav-maint-badge');
+  if(overdue.length){
+    banner.style.display='flex';
+    navBadge.style.display='inline-flex';
+    navBadge.textContent=overdue.length;
+    overdueList.innerHTML=overdue.map(m=>{
+      const p=getProp(m.propId);
+      const d=new Date(m.date); d.setHours(0,0,0,0);
+      const days=Math.round((now-d)/86400000);
+      return `<div class="alert-item"><span class="days-badge days-urgent">超過 ${days} 天</span><strong>${p?p.name:'?'}</strong> · ${m.desc}</div>`;
+    }).join('');
+  } else {
+    banner.style.display='none';
+    navBadge.style.display='none';
+  }
+
+  const list=document.getElementById('maint-pending-list');
+  if(!items.length){ list.innerHTML='<div style="text-align:center;color:var(--text3);padding:2rem;font-size:13px">目前沒有待處理的維修</div>'; return; }
+  list.innerHTML=items.map(m=>{
+    const p=getProp(m.propId);
+    const d=new Date(m.date); d.setHours(0,0,0,0);
+    const daysSince=Math.round((now-d)/86400000);
+    const isOverdue=daysSince>2&&m.status==='pending';
+    const statusBadge=m.status==='pending'
+      ?`<span class="badge badge-out">待處理</span>`
+      :`<span class="badge badge-warn" style="background:var(--amber-bg);color:var(--amber)">已安排</span>`;
+    return `<div class="maint-card ${isOverdue?'overdue':m.status}">
+      <div class="maint-card-head">
+        <div style="flex:1">
+          <div class="maint-card-title">${m.desc}</div>
+          <div class="maint-card-sub">${p?p.name:'?'} · 回報 ${m.date}${m.scheduleDate?` · 預計 ${new Date(m.scheduleDate).toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})}`:''}</div>
+          <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            ${statusBadge}
+            ${isOverdue?`<span class="badge badge-out">⚠ 超過 ${daysSince} 天未跟進</span>`:''}
+          </div>
+          ${m.note?`<div style="font-size:12px;color:var(--text3);margin-top:6px">${m.note}</div>`:''}
+        </div>
+        <div class="maint-card-actions">
+          ${p&&p.lineGroup?`<a href="${p.lineGroup}" target="_blank" style="display:inline-flex;align-items:center;padding:5px 10px;border-radius:var(--radius-sm);background:#06c755;color:#fff;font-size:12px;font-weight:600;text-decoration:none">LINE</a>`:''}
+          <button class="btn btn-sm" onclick="openCompleteModal('${m.id}')">✓ 完成</button>
+          <button class="btn btn-icon btn-sm" onclick="openMaintModal('${m.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
+          <button class="btn btn-icon btn-sm btn-danger" onclick="deleteMaint('${m.id}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMaintHistory(){
+  const filterProp=document.getElementById('hist-filter-prop')?.value||'';
+  const filterKind=document.getElementById('hist-filter-kind')?.value||'';
+  let items=(state.maintHistory||[]);
+  if(filterProp) items=items.filter(h=>h.propId===filterProp);
+  if(filterKind==='repair') items=items.filter(h=>h.kind!=='routine');
+  if(filterKind==='routine') items=items.filter(h=>h.kind==='routine');
+  items=[...items].sort((a,b)=>b.date.localeCompare(a.date));
+  const list=document.getElementById('maint-history-list');
+  if(!items.length){ list.innerHTML='<div style="text-align:center;color:var(--text3);padding:2rem;font-size:13px">尚無紀錄</div>'; return; }
+  list.innerHTML=items.map(h=>{
+    const p=getProp(h.propId);
+    const typeBadge=h.kind==='routine'
+      ?`<span class="badge" style="background:var(--blue-bg);color:var(--blue-mid);font-size:11px">保養</span>`
+      :`<span class="badge" style="background:var(--amber-bg);color:var(--amber);font-size:11px">維修</span>`;
+    return `<div class="maint-card">
+      <div class="maint-card-head">
+        <div style="flex:1">
+          <div class="maint-card-title" style="display:flex;align-items:center;gap:8px">${h.desc} ${typeBadge}</div>
+          <div class="maint-card-sub">${p?p.name:'?'} · ${h.date}${h.vendor?' · '+h.vendor:''}${h.cost?` · <span style="color:var(--red-mid);font-weight:600">${fmtMoney(h.cost)}</span>`:''}</div>
+          ${h.note?`<div style="font-size:12px;color:var(--text3);margin-top:4px">${h.note}</div>`:''}
+          ${(h.beforePhoto||h.afterPhoto)?`<div style="display:flex;gap:8px;margin-top:8px">
+            ${h.beforePhoto?`<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px">施工前</div><img src="${h.beforePhoto}" class="photo-thumb" onclick="viewPhoto('${h.id}','before')"></div>`:''}
+            ${h.afterPhoto?`<div><div style="font-size:10px;color:var(--text3);margin-bottom:2px">施工後</div><img src="${h.afterPhoto}" class="photo-thumb" onclick="viewPhoto('${h.id}','after')"></div>`:''}
+          </div>`:''}
+        </div>
+        <div class="maint-card-actions">
+          ${h.kind!=='routine'?`<button class="btn btn-icon btn-sm" onclick="openHistModal('${h.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>`:''}
+          <button class="btn btn-icon btn-sm btn-danger" onclick="deleteHist('${h.id}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRoutine(){
+  const now=new Date(); now.setHours(0,0,0,0);
+  const items=[...(state.routines||[])].sort((a,b)=>{
+    const da=nextRoutineDate(a); const db=nextRoutineDate(b);
+    return da.localeCompare(db);
+  });
+  const list=document.getElementById('routine-list');
+  if(!items.length){ list.innerHTML='<div style="text-align:center;color:var(--text3);padding:2rem;font-size:13px">尚無保養項目</div>'; return; }
+
+  // check for alerts
+  const alerts=items.filter(r=>{
+    const next=new Date(nextRoutineDate(r)); next.setHours(0,0,0,0);
+    const days=Math.round((next-now)/86400000);
+    return days<=3;
+  });
+  const navBadge=document.getElementById('nav-maint-badge');
+  if(alerts.length){ navBadge.style.display='inline-flex'; navBadge.textContent=(state.maints||[]).filter(m=>m.status!=='done'&&daysSinceDate(m.date)>2).length+alerts.length||alerts.length; }
+
+  list.innerHTML=items.map(r=>{
+    const p=getProp(r.propId);
+    const next=nextRoutineDate(r);
+    const nextD=new Date(next); nextD.setHours(0,0,0,0);
+    const daysLeft=Math.round((nextD-now)/86400000);
+    let statusBadge;
+    if(daysLeft<0) statusBadge=`<span class="badge badge-out">已過期 ${Math.abs(daysLeft)} 天</span>`;
+    else if(daysLeft<=3) statusBadge=`<span class="badge badge-warn" style="background:var(--amber-bg);color:var(--amber)">⚠ 還有 ${daysLeft} 天</span>`;
+    else statusBadge=`<span class="badge badge-ok">下次 ${next}</span>`;
+    return `<div class="maint-card ${daysLeft<0?'overdue':daysLeft<=3?'scheduled':''}">
+      <div class="maint-card-head">
+        <div style="flex:1">
+          <div class="maint-card-title">${r.item}</div>
+          <div class="maint-card-sub">${p?p.name:'?'} · 每 ${r.cycle} 個月 · 上次 ${r.lastDate||'未記錄'}</div>
+          <div style="margin-top:6px">${statusBadge}</div>
+          ${r.note?`<div style="font-size:12px;color:var(--text3);margin-top:4px">${r.note}</div>`:''}
+        </div>
+        <div class="maint-card-actions">
+          <button class="btn btn-sm" onclick="doneRoutine('${r.id}')">✓ 完成保養</button>
+          <button class="btn btn-icon btn-sm" onclick="openRoutineModal('${r.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
+          <button class="btn btn-icon btn-sm btn-danger" onclick="deleteRoutine('${r.id}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function nextRoutineDate(r){
+  if(!r.lastDate) return new Date().toISOString().slice(0,10);
+  const d=new Date(r.lastDate);
+  d.setMonth(d.getMonth()+parseInt(r.cycle));
+  return d.toISOString().slice(0,10);
+}
+function daysSinceDate(dateStr){
+  const now=new Date(); now.setHours(0,0,0,0);
+  const d=new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((now-d)/86400000);
+}
+
+function populateMaintPropSelects(){
+  const opt=state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const allOpt='<option value="">全部物件</option>'+opt;
+  ['maint-filter-prop','hist-filter-prop'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=allOpt;});
+  ['m-prop','h-prop','rt-prop'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opt;});
+}
+
+// Maint CRUD
+function openMaintModal(id){
+  populateMaintPropSelects();
+  const m=id?( state.maints||[]).find(x=>x.id===id):null;
+  document.getElementById('modal-maint-title').textContent=m?'編輯維修安排':'新增維修安排';
+  document.getElementById('m-date').value=m?m.date:new Date().toISOString().slice(0,10);
+  document.getElementById('m-prop').value=m?m.propId:(state.properties[0]?.id||'');
+  document.getElementById('m-desc').value=m?m.desc:'';
+  document.getElementById('m-status').value=m?m.status:'pending';
+  document.getElementById('m-schedule-date').value=m?m.scheduleDate||'':'';
+  document.getElementById('m-note').value=m?m.note||'':'';
+  document.getElementById('m-edit-id').value=id||'';
+  toggleMaintSchedule();
+  document.getElementById('modal-maint').classList.add('open');
+}
+function toggleMaintSchedule(){
+  document.getElementById('m-schedule-row').style.display=
+    document.getElementById('m-status').value==='scheduled'?'flex':'none';
+}
+function saveMaint(){
+  const item={
+    id:document.getElementById('m-edit-id').value||uid(),
+    date:document.getElementById('m-date').value,
+    propId:document.getElementById('m-prop').value,
+    desc:document.getElementById('m-desc').value.trim(),
+    status:document.getElementById('m-status').value,
+    scheduleDate:document.getElementById('m-schedule-date').value,
+    note:document.getElementById('m-note').value.trim(),
+  };
+  if(!item.date||!item.propId||!item.desc){alert('請填寫日期、物件與問題描述');return;}
+  if(!state.maints) state.maints=[];
+  const idx=state.maints.findIndex(m=>m.id===item.id);
+  if(idx>=0) state.maints[idx]=item; else state.maints.push(item);
+  saveData(); closeModal('modal-maint'); renderMaintPending(); scheduleNotifications();
+}
+function deleteMaint(id){
+  if(!confirm('確定刪除？'))return;
+  state.maints=(state.maints||[]).filter(m=>m.id!==id);
+  saveData(); renderMaintPending();
+}
+function openCompleteModal(id){
+  const m=(state.maints||[]).find(x=>x.id===id); if(!m)return;
+  const p=getProp(m.propId);
+  document.getElementById('complete-maint-id').value=id;
+  document.getElementById('complete-maint-info').textContent=`${p?p.name:'?'} — ${m.desc}（${m.date}）`;
+  document.getElementById('modal-complete').classList.add('open');
+}
+function completeMaint(addHistory){
+  const id=document.getElementById('complete-maint-id').value;
+  const m=(state.maints||[]).find(x=>x.id===id); if(!m)return;
+  closeModal('modal-complete');
+  if(addHistory){
+    closeModal('modal-complete');
+    // open hist modal pre-filled so user can add cost + photos
+    if(!state.maintHistory) state.maintHistory=[];
+    populateMaintPropSelects();
+    document.getElementById('modal-hist-title').textContent='建立維修紀錄';
+    document.getElementById('h-date').value=new Date().toISOString().slice(0,10);
+    document.getElementById('h-prop').value=m.propId;
+    document.getElementById('h-desc').value=m.desc;
+    document.getElementById('h-vendor').value='';
+    document.getElementById('h-cost').value='';
+    document.getElementById('h-note').value=m.note||'';
+    document.getElementById('h-edit-id').value='';
+    ['before','after'].forEach(type=>{
+      document.getElementById('h-'+type+'-photo').value='';
+      document.getElementById('h-'+type+'-input').value='';
+      document.getElementById('h-'+type+'-preview').innerHTML='<span style="font-size:11px;color:var(--text3)">無照片</span>';
+      document.getElementById('h-'+type+'-clear').style.display='none';
+    });
+    state.maints=(state.maints||[]).filter(x=>x.id!==id);
+    saveData();
+    document.getElementById('modal-hist').classList.add('open');
+    renderMaintPending();
+  } else {
+    state.maints=(state.maints||[]).filter(x=>x.id!==id);
+    saveData(); renderMaintPending();
+  }
+}
+
+// History CRUD
+function openHistModal(id){
+  populateMaintPropSelects();
+  const h=id?(state.maintHistory||[]).find(x=>x.id===id):null;
+  document.getElementById('modal-hist-title').textContent=h?'編輯維修紀錄':'新增維修紀錄';
+  document.getElementById('h-date').value=h?h.date:new Date().toISOString().slice(0,10);
+  document.getElementById('h-prop').value=h?h.propId:(state.properties[0]?.id||'');
+  document.getElementById('h-desc').value=h?h.desc:'';
+  document.getElementById('h-vendor').value=h?h.vendor||'':'';
+  document.getElementById('h-cost').value=h?h.cost||'':'';
+  document.getElementById('h-note').value=h?h.note||'':'';
+  document.getElementById('h-edit-id').value=id||'';
+  // photos
+  ['before','after'].forEach(type=>{
+    const data=h?h[type+'Photo']||'':'';
+    document.getElementById('h-'+type+'-photo').value=data;
+    const prev=document.getElementById('h-'+type+'-preview');
+    prev.innerHTML=data?`<img src="${data}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:11px;color:var(--text3)">無照片</span>';
+    document.getElementById('h-'+type+'-clear').style.display=data?'inline-flex':'none';
+    document.getElementById('h-'+type+'-input').value='';
+  });
+  document.getElementById('modal-hist').classList.add('open');
+}
+function previewHistPhoto(type){
+  const file=document.getElementById('h-'+type+'-input').files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const data=e.target.result;
+    document.getElementById('h-'+type+'-photo').value=data;
+    document.getElementById('h-'+type+'-preview').innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover">`;
+    document.getElementById('h-'+type+'-clear').style.display='inline-flex';
+  };
+  reader.readAsDataURL(file);
+}
+function clearHistPhoto(type){
+  document.getElementById('h-'+type+'-photo').value='';
+  document.getElementById('h-'+type+'-input').value='';
+  document.getElementById('h-'+type+'-preview').innerHTML='<span style="font-size:11px;color:var(--text3)">無照片</span>';
+  document.getElementById('h-'+type+'-clear').style.display='none';
+}
+function saveHist(){
+  const item={
+    id:document.getElementById('h-edit-id').value||uid(),
+    date:document.getElementById('h-date').value,
+    propId:document.getElementById('h-prop').value,
+    desc:document.getElementById('h-desc').value.trim(),
+    vendor:document.getElementById('h-vendor').value.trim(),
+    cost:+document.getElementById('h-cost').value||0,
+    note:document.getElementById('h-note').value.trim(),
+    beforePhoto:document.getElementById('h-before-photo').value,
+    afterPhoto:document.getElementById('h-after-photo').value,
+  };
+  if(!item.date||!item.propId||!item.desc){alert('請填寫日期、物件與維修項目');return;}
+  if(!state.maintHistory) state.maintHistory=[];
+  const isNew = !document.getElementById('h-edit-id').value;
+  const idx=state.maintHistory.findIndex(h=>h.id===item.id);
+  if(idx>=0) state.maintHistory[idx]=item; else state.maintHistory.push(item);
+  saveData();
+  closeModal('modal-hist');
+  renderMaintHistory();
+  // 有費用且是新增 → 用自訂視窗詢問是否建立支出帳目
+  if(item.cost>0 && isNew){
+    pendingExpense = {
+      date:item.date, propId:item.propId,
+      amount:item.cost, desc:item.desc, vendor:item.vendor
+    };
+    const p=getProp(item.propId);
+    document.getElementById('expense-confirm-info').innerHTML=
+      `<strong>${p?p.name:'?'}</strong> · ${item.desc}<br>費用：<strong style="color:var(--red-mid)">${fmtMoney(item.cost)}</strong>${item.vendor?' · '+item.vendor:''}`;
+    document.getElementById('modal-expense-confirm').classList.add('open');
+  }
+}
+function deleteHist(id){
+  if(!confirm('確定刪除？'))return;
+  state.maintHistory=(state.maintHistory||[]).filter(h=>h.id!==id);
+  saveData(); renderMaintHistory();
+}
+function viewPhoto(id,type){
+  const h=(state.maintHistory||[]).find(x=>x.id===id); if(!h)return;
+  const data=h[type+'Photo']; if(!data)return;
+  const w=window.open(); w.document.write(`<img src="${data}" style="max-width:100%;max-height:100vh">`);
+}
+
+// Routine CRUD
+function openRoutineModal(id){
+  populateMaintPropSelects();
+  const r=id?(state.routines||[]).find(x=>x.id===id):null;
+  document.getElementById('modal-routine-title').textContent=r?'編輯保養項目':'新增保養項目';
+  document.getElementById('rt-prop').value=r?r.propId:(state.properties[0]?.id||'');
+  document.getElementById('rt-item').value=r?r.item:'';
+  document.getElementById('rt-cycle').value=r?r.cycle:'24';
+  document.getElementById('rt-last').value=r?r.lastDate||'':'';
+  document.getElementById('rt-note').value=r?r.note||'':'';
+  document.getElementById('rt-edit-id').value=id||'';
+  document.getElementById('modal-routine').classList.add('open');
+}
+function saveRoutine(){
+  const item={
+    id:document.getElementById('rt-edit-id').value||uid(),
+    propId:document.getElementById('rt-prop').value,
+    item:document.getElementById('rt-item').value.trim(),
+    cycle:document.getElementById('rt-cycle').value,
+    lastDate:document.getElementById('rt-last').value,
+    note:document.getElementById('rt-note').value.trim(),
+  };
+  if(!item.propId||!item.item){alert('請填寫物件與保養項目');return;}
+  if(!state.routines) state.routines=[];
+  const idx=state.routines.findIndex(r=>r.id===item.id);
+  if(idx>=0) state.routines[idx]=item; else state.routines.push(item);
+  saveData(); closeModal('modal-routine'); renderRoutine();
+}
+function deleteRoutine(id){
+  if(!confirm('確定刪除？'))return;
+  state.routines=(state.routines||[]).filter(r=>r.id!==id);
+  saveData(); renderRoutine();
+}
+function doneRoutine(id){
+  const r=(state.routines||[]).find(x=>x.id===id); if(!r)return;
+  const p=getProp(r.propId);
+  document.getElementById('rt-done-id').value=id;
+  document.getElementById('rt-done-cost').value='';
+  document.getElementById('rt-done-vendor').value='';
+  document.getElementById('rt-done-note').value='';
+  document.getElementById('done-routine-info').innerHTML=
+    `<strong>${p?p.name:'?'}</strong> · ${r.item}<br><span style="color:var(--text3)">上次保養：${r.lastDate||'未記錄'}</span>`;
+  document.getElementById('modal-done-routine').classList.add('open');
+}
+function saveDoneRoutine(){
+  const id=document.getElementById('rt-done-id').value;
+  const r=(state.routines||[]).find(x=>x.id===id); if(!r)return;
+  const cost=+document.getElementById('rt-done-cost').value||0;
+  const vendor=document.getElementById('rt-done-vendor').value.trim();
+  const note=document.getElementById('rt-done-note').value.trim();
+  const today=new Date().toISOString().slice(0,10);
+  r.lastDate=today;
+  // 自動存入維修與保養紀錄
+  if(!state.maintHistory) state.maintHistory=[];
+  state.maintHistory.push({
+    id:uid(), date:today, propId:r.propId,
+    desc:r.item, vendor:vendor, cost:cost,
+    note:note, beforePhoto:'', afterPhoto:'',
+    kind:'routine',
+  });
+  saveData();
+  closeModal('modal-done-routine');
+  renderRoutine();
+  // 有費用 → 詢問建立支出帳目
+  if(cost>0){
+    pendingExpense={
+      date:today, propId:r.propId,
+      amount:cost, desc:r.item, vendor:vendor, note:note,
+      cat:'修繕費'
+    };
+    const p=getProp(r.propId);
+    document.getElementById('expense-confirm-info').innerHTML=
+      `<strong>${p?p.name:'?'}</strong> · ${r.item}<br>費用：<strong style="color:var(--red-mid)">${fmtMoney(cost)}</strong>${vendor?' · '+vendor:''}`;
+    document.getElementById('modal-expense-confirm').classList.add('open');
+  }
+}
+
+/* ── Export ── */
+function renderExportPage(){
+  const ms = allMonths();
+  ['exp-from','exp-to'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.innerHTML=ms.map(m=>`<option value="${m}">${m}</option>`).join('');
+    if(i===0) el.value=ms[ms.length-1];
+  });
+  populatePropSelects();
+}
+function getExportRecs(){
+  const from=document.getElementById('exp-from').value;
+  const to=document.getElementById('exp-to').value;
+  const pid=document.getElementById('exp-prop').value;
+  let recs=state.records.filter(r=>{ const ym=toYM(r.date); return ym>=from&&ym<=to; });
+  if(pid) recs=recs.filter(r=>r.propId===pid);
+  return recs.sort((a,b)=>a.date.localeCompare(b.date));
+}
+function buildExportContent(fmt){
+  const recs = getExportRecs();
+  if(fmt==='csv'){
+    let c = '\uFEFF日期,物件名稱,租客,類型,項目,金額,備註\n';
+    recs.forEach(r=>{
+      const p=getProp(r.propId);
+      c+=`${r.date},"${p?p.name:'?'}","${p?p.tenant||'':''}", ${r.type==='in'?'收入':'支出'},${r.cat},${r.amount},"${r.note}"\n`;
+    });
+    return c;
+  } else {
+    const months=[...new Set(recs.map(r=>toYM(r.date)))].sort();
+    let c='';
+    months.forEach(ym=>{
+      const mr=recs.filter(r=>toYM(r.date)===ym);
+      const inc=mr.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
+      const exp=mr.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
+      c+=`\n━━━━━━━━━━  ${ym} 帳目報表  ━━━━━━━━━━\n`;
+      mr.forEach(r=>{
+        const p=getProp(r.propId);
+        c+=`  ${r.date}  [${r.type==='in'?'收入':'支出'}]  ${(p?p.name:'?').padEnd(12)}  ${r.cat.padEnd(6)}  ${r.type==='in'?'+':'-'}$${r.amount.toLocaleString('zh-TW')}${r.note?' │ '+r.note:''}\n`;
+      });
+      c+=`\n  小計 ── 收入：$${inc.toLocaleString('zh-TW')}  支出：$${exp.toLocaleString('zh-TW')}  淨額：$${(inc-exp).toLocaleString('zh-TW')}\n`;
+    });
+    const totalInc=recs.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
+    const totalExp=recs.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
+    c+=`\n══════════════════════════════════════\n合計 收入：$${totalInc.toLocaleString('zh-TW')}  支出：$${totalExp.toLocaleString('zh-TW')}  淨額：$${(totalInc-totalExp).toLocaleString('zh-TW')}\n`;
+    return c;
+  }
+}
+function previewExport(){
+  const fmt=document.getElementById('exp-fmt').value;
+  const content=buildExportContent(fmt);
+  document.getElementById('export-preview-content').innerHTML=`<pre>${escHtml(content)}</pre>`;
+  document.getElementById('export-preview').style.display='block';
+}
+function doExport(){
+  const fmt=document.getElementById('exp-fmt').value;
+  const content=buildExportContent(fmt);
+  const from=document.getElementById('exp-from').value;
+  const to=document.getElementById('exp-to').value;
+  const mime=fmt==='csv'?'text/csv;charset=utf-8':'text/plain;charset=utf-8';
+  const ext=fmt==='csv'?'.csv':'.txt';
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`租屋帳目_${from}_${to}${ext}`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  previewExport();
+}
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+/* ── Modals ── */
+function updateCatOptions(){
+  const type=document.getElementById('r-type').value;
+  const cats=type==='in'?CAT_IN:CAT_OUT;
+  document.getElementById('r-cat').innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  onCatChange();
+}
+function pickType(type){
+  document.getElementById('r-type').value=type;
+  const inBtn=document.getElementById('type-btn-in');
+  const outBtn=document.getElementById('type-btn-out');
+  if(type==='in'){
+    inBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center;background:var(--green-bg);border-color:var(--green-mid);color:var(--green-mid)';
+    outBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center';
+  } else {
+    outBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center;background:var(--red-bg);border-color:var(--red-mid);color:var(--red-mid)';
+    inBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center';
+  }
+  document.getElementById('record-form-body').style.display='block';
+  document.getElementById('r-save-btn').style.display='inline-flex';
+  document.getElementById('split-suggest-row').style.display=type==='out'?'flex':'none';
+  document.getElementById('split-expand').style.display='none';
+  if(document.getElementById('r-split-toggle')) document.getElementById('r-split-toggle').checked=false;
+  document.getElementById('r-prop').closest('.form-row').style.display='flex';
+  // Set prop options based on type
+  const onlyProp = state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const expensePropOpt = `<option value="${SHARED_PROP_ID}">整體支出（不分物件）</option>`
+    + '<option disabled>──────────────</option>'
+    + onlyProp;
+  document.getElementById('r-prop').innerHTML = type==='in' ? onlyProp : expensePropOpt;
+  document.getElementById('r-date').value=new Date().toISOString().slice(0,10);
+  populatePropSelects();
+  updateCatOptions();
+}
+function toggleSplitMode(){
+  const on=document.getElementById('r-split-toggle').checked;
+  document.getElementById('split-expand').style.display=on?'block':'none';
+  document.getElementById('r-prop').closest('.form-row').style.display=on?'none':'flex';
+  if(on) renderSplitPropList();
+}
+function onPropChange(){ onCatChange(); }
+function onCatChange(){
+  const cat=document.getElementById('r-cat').value;
+  const propId=document.getElementById('r-prop').value;
+  const prop=getProp(propId);
+  const type=document.getElementById('r-type').value;
+  document.getElementById('custom-cat-row').style.display=cat==='自訂...'?'flex':'none';
+  const waterRow=document.getElementById('water-hint-row');
+  if(cat==='水費'&&type==='in'&&prop&&prop.waterFee){
+    document.getElementById('water-hint-amount').textContent=fmtMoney(prop.waterFee);
+    waterRow.style.display='flex';
+    if(!document.getElementById('r-amount').value) document.getElementById('r-amount').value=prop.waterFee;
+  } else { waterRow.style.display='none'; }
+  const elecRow=document.getElementById('elec-calc-row');
+  elecRow.style.display=(cat==='電費'&&type==='in'&&prop&&prop.elecEnabled)?'flex':'none';
+}
+function calcElec(){
+  const prev=+document.getElementById('elec-prev').value||0;
+  const curr=+document.getElementById('elec-curr').value||0;
+  const rate=+document.getElementById('elec-rate').value||0;
+  const used=Math.max(0,curr-prev);
+  const total=Math.round(used*rate);
+  document.getElementById('elec-formula').textContent=`使用 ${used} 度 × ${rate} 元`;
+  document.getElementById('elec-result').textContent=fmtMoney(total);
+  if(total>0) document.getElementById('r-amount').value=total;
+}
+
+/* ── Split (embedded in record modal) ── */
+function renderSplitPropList(){
+  const mode=document.getElementById('sp-mode')?.value||'equal';
+  const list=document.getElementById('sp-prop-list');
+  if(!list) return;
+  list.innerHTML=state.properties.map(p=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:0.5px solid var(--border)">
+      <input type="checkbox" id="sp-chk-${p.id}" value="${p.id}" onchange="calcSplit()" style="width:16px;height:16px;cursor:pointer;flex-shrink:0">
+      <label for="sp-chk-${p.id}" style="flex:1;cursor:pointer;font-size:13px">
+        <span style="font-weight:500">${p.name}</span>
+        ${p.tenant?`<span style="color:var(--text3);margin-left:6px;font-size:12px">${p.tenant}</span>`:''}
+      </label>
+      <input type="number" id="sp-amt-${p.id}" placeholder="0" min="0" oninput="onManualAmtChange()"
+        style="width:90px;display:${mode==='manual'?'block':'none'};text-align:right">
+      <span id="sp-calc-${p.id}" style="font-size:13px;font-weight:600;color:var(--blue-mid);min-width:60px;text-align:right;display:${mode==='equal'?'block':'none'}">—</span>
+    </div>`).join('');
+}
+function calcSplit(){
+  const mode=document.getElementById('sp-mode').value;
+  const total=+document.getElementById('r-amount').value||0;
+  const checked=state.properties.filter(p=>document.getElementById('sp-chk-'+p.id)?.checked);
+  state.properties.forEach(p=>{
+    const a=document.getElementById('sp-amt-'+p.id);
+    const c=document.getElementById('sp-calc-'+p.id);
+    if(a) a.style.display=mode==='manual'?'block':'none';
+    if(c) c.style.display=mode==='equal'?'block':'none';
+  });
+  if(mode==='equal'&&checked.length>0){
+    const base=Math.floor(total/checked.length);
+    const rem=total-(base*checked.length);
+    checked.forEach((p,i)=>{ const el=document.getElementById('sp-calc-'+p.id); if(el) el.textContent=fmtMoney(base+(i===0?rem:0)); });
+    state.properties.filter(p=>!document.getElementById('sp-chk-'+p.id)?.checked).forEach(p=>{ const el=document.getElementById('sp-calc-'+p.id); if(el) el.textContent='—'; });
+  }
+  const sumEl=document.getElementById('sp-summary');
+  const remEl=document.getElementById('sp-remainder');
+  if(sumEl) sumEl.textContent=`已選 ${checked.length} 個物件`;
+  if(remEl){
+    if(mode==='equal'){ remEl.textContent=total&&checked.length?`每間 ${fmtMoney(Math.floor(total/checked.length))} 元`:''; remEl.style.color='var(--text2)'; }
+  }
+}
+function onManualAmtChange(){
+  const total=+document.getElementById('r-amount').value||0;
+  const checked=state.properties.filter(p=>document.getElementById('sp-chk-'+p.id)?.checked);
+  const used=checked.reduce((a,p)=>a+(+document.getElementById('sp-amt-'+p.id)?.value||0),0);
+  const rem=total-used;
+  const remEl=document.getElementById('sp-remainder');
+  if(remEl){ remEl.textContent=rem===0?'✓ 分配完畢':rem>0?`剩餘 ${fmtMoney(rem)} 未分配`:`超出 ${fmtMoney(-rem)}`; remEl.style.color=rem===0?'var(--green-mid)':rem>0?'var(--amber-mid)':'var(--red-mid)'; }
+}
+function saveRecordOrSplit(){
+  const isSplit=document.getElementById('r-split-toggle')?.checked;
+  if(isSplit) saveSplitFromModal(); else saveRecord();
+}
+function saveSplitFromModal(){
+  const date=document.getElementById('r-date').value;
+  const catRaw=document.getElementById('r-cat').value;
+  const cat=catRaw==='自訂...'?document.getElementById('r-custom-cat').value.trim()||'其他支出':catRaw;
+  const total=+document.getElementById('r-amount').value||0;
+  const mode=document.getElementById('sp-mode').value;
+  const note=document.getElementById('r-note').value.trim();
+  const checked=state.properties.filter(p=>document.getElementById('sp-chk-'+p.id)?.checked);
+  if(!date||!total||checked.length===0){ alert('請填寫日期、總金額並選擇至少一個物件'); return; }
+  checked.forEach((p,i)=>{
+    let amt;
+    if(mode==='manual'){ amt=+document.getElementById('sp-amt-'+p.id)?.value||0; }
+    else { const base=Math.floor(total/checked.length); amt=base+(i===0?total-(base*checked.length):0); }
+    if(amt<=0) return;
+    state.records.push({ id:uid(), date, propId:p.id, type:'out', cat, amount:amt, note:note?`${note}（分攤）`:'分攤支出' });
+  });
+  saveData();
+  closeModal('modal-record');
+  populateMonthSelects();
+  if(currentPage==='records') renderRecords();
+  if(currentPage==='overview') renderOverview();
+}
+function toggleCustomCat(){
+  document.getElementById('custom-cat-row').style.display=
+    document.getElementById('r-cat').value==='自訂...'?'flex':'none';
+}
+function openRecordModal(id){
+  populatePropSelects();
+  const r=id?state.records.find(x=>x.id===id):null;
+  document.getElementById('modal-rec-title').textContent=r?'編輯帳目':'新增帳目';
+  ['elec-prev','elec-curr','elec-rate'].forEach(fid=>document.getElementById(fid).value='');
+  document.getElementById('elec-formula').textContent='使用 — 度 × — 元';
+  document.getElementById('elec-result').textContent='$0';
+  const inBtn=document.getElementById('type-btn-in');
+  const outBtn=document.getElementById('type-btn-out');
+  inBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center';
+  outBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center';
+  if(document.getElementById('r-split-toggle')) document.getElementById('r-split-toggle').checked=false;
+  document.getElementById('split-expand').style.display='none';
+  if(r){
+    document.getElementById('r-type').value=r.type;
+    document.getElementById('type-picker').style.display='none';
+    document.getElementById('record-form-body').style.display='block';
+    document.getElementById('r-save-btn').style.display='inline-flex';
+    document.getElementById('split-suggest-row').style.display=r.type==='out'?'flex':'none';
+    document.getElementById('r-prop').closest('.form-row').style.display='flex';
+    if(r.type==='in') inBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center;background:var(--green-bg);border-color:var(--green-mid);color:var(--green-mid)';
+    else outBtn.style.cssText='flex:1;padding:10px;font-size:14px;justify-content:center;background:var(--red-bg);border-color:var(--red-mid);color:var(--red-mid)';
+    document.getElementById('r-date').value=r.date;
+    document.getElementById('r-prop').value=r.propId;
+    updateCatOptions();
+    const cats=r.type==='in'?CAT_IN:CAT_OUT;
+    if(cats.includes(r.cat)) document.getElementById('r-cat').value=r.cat;
+    else{ document.getElementById('r-cat').value='自訂...'; document.getElementById('r-custom-cat').value=r.cat; }
+    document.getElementById('r-amount').value=r.amount;
+    document.getElementById('r-note').value=r.note;
+  } else {
+    document.getElementById('type-picker').style.display='flex';
+    document.getElementById('record-form-body').style.display='none';
+    document.getElementById('r-save-btn').style.display='none';
+    document.getElementById('split-suggest-row').style.display='none';
+    document.getElementById('r-type').value='in';
+    document.getElementById('r-amount').value='';
+    document.getElementById('r-note').value='';
+    document.getElementById('r-custom-cat').value='';
+    document.getElementById('r-prop').closest('.form-row').style.display='flex';
+  }
+  document.getElementById('r-edit-id').value=id||'';
+  onCatChange();
+  document.getElementById('modal-record').classList.add('open');
+}
+function saveRecord(){
+  const cat=document.getElementById('r-cat').value==='自訂...'
+    ? document.getElementById('r-custom-cat').value.trim()
+    : document.getElementById('r-cat').value;
+  const rec={
+    id: document.getElementById('r-edit-id').value || uid(),
+    date: document.getElementById('r-date').value,
+    propId: document.getElementById('r-prop').value,
+    type: document.getElementById('r-type').value,
+    cat: cat || '其他',
+    amount: +document.getElementById('r-amount').value,
+    note: document.getElementById('r-note').value.trim(),
+  };
+  if(!rec.date||!rec.propId||!rec.amount){ alert('請填寫日期、物件與金額'); return; }
+  const idx=state.records.findIndex(r=>r.id===rec.id);
+  if(idx>=0) state.records[idx]=rec; else state.records.push(rec);
+  saveData();
+  closeModal('modal-record');
+  populateMonthSelects();
+  if(currentPage==='records') renderRecords();
+  if(currentPage==='overview') renderOverview();
+}
+function deleteRecord(id){
+  if(!confirm('確定刪除此筆帳目？')) return;
+  state.records=state.records.filter(r=>r.id!==id);
+  saveData();
+  renderRecords();
+}
+function toggleVacantFields(){
+  const status = document.getElementById('p-status').value;
+  const isVacant = status!=='rented';
+  document.getElementById('p-tenant-row').style.display = isVacant?'none':'flex';
+  document.getElementById('p-start-row').style.display = isVacant?'none':'flex';
+  document.getElementById('p-end-row').style.display = isVacant?'none':'flex';
+  document.getElementById('p-vacant-since-row').style.display = isVacant?'flex':'none';
+}
+function previewPhoto(){
+  const file = document.getElementById('p-photo-input').files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const data = e.target.result;
+    document.getElementById('p-photo').value = data;
+    const preview = document.getElementById('p-photo-preview');
+    preview.innerHTML = `<img src="${data}" style="width:100%;height:100%;object-fit:cover">`;
+    document.getElementById('p-photo-clear').style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+function clearPhoto(){
+  document.getElementById('p-photo').value='';
+  document.getElementById('p-photo-input').value='';
+  document.getElementById('p-photo-preview').innerHTML='<span style="font-size:11px;color:var(--text3)">無照片</span>';
+  document.getElementById('p-photo-clear').style.display='none';
+}
+function toggleNotaryDate(){
+  const checked = document.getElementById('p-notarized').checked;
+  const row = document.getElementById('p-notary-date-row');
+  row.style.display = checked ? 'block' : 'none';
+}
+function openPropModal(id){
+  const p=id?state.properties.find(x=>x.id===id):null;
+  document.getElementById('modal-prop-title').textContent=p?'編輯物件':'新增物件';
+  document.getElementById('p-name').value=p?p.name:'';
+  document.getElementById('p-addr').value=p?p.addr:'';
+  document.getElementById('p-rent').value=p?p.rent:'';
+  document.getElementById('p-tenant').value=p?p.tenant:'';
+  document.getElementById('p-start').value=p?p.start:'';
+  document.getElementById('p-end').value=p?p.end:'';
+  document.getElementById('p-note').value=p?p.note:'';
+  document.getElementById('p-status').value=p?(p.status||'rented'):'rented';
+  document.getElementById('p-vacant-since').value=p?(p.vacantSince||''):'';
+  document.getElementById('p-water-fee').value=p?(p.waterFee||''):'';
+  document.getElementById('p-elec-enabled').value=p?(p.elecEnabled?'1':'0'):'0';
+  document.getElementById('p-notarized').checked=p?!!p.notarized:false;
+  document.getElementById('p-notary-date').value=p?(p.notaryDate||''):'';
+  document.getElementById('p-notary-date-row').style.display=p&&p.notarized?'block':'none';
+  document.getElementById('p-line').value=p?(p.lineGroup||''):'';
+  // photo
+  const photoData = p?(p.photo||''):'';
+  document.getElementById('p-photo').value=photoData;
+  const preview=document.getElementById('p-photo-preview');
+  if(photoData){
+    preview.innerHTML=`<img src="${photoData}" style="width:100%;height:100%;object-fit:cover">`;
+    document.getElementById('p-photo-clear').style.display='block';
+  } else {
+    preview.innerHTML='<span style="font-size:11px;color:var(--text3)">無照片</span>';
+    document.getElementById('p-photo-clear').style.display='none';
+  }
+  document.getElementById('p-photo-input').value='';
+  document.getElementById('p-edit-id').value=id||'';
+  toggleVacantFields();
+  document.getElementById('modal-prop').classList.add('open');
+}
+function saveProp(){
+  const status=document.getElementById('p-status').value;
+  const notarized=document.getElementById('p-notarized').checked;
+  const prop={
+    id: document.getElementById('p-edit-id').value || uid(),
+    name: document.getElementById('p-name').value.trim(),
+    addr: document.getElementById('p-addr').value.trim(),
+    rent: +document.getElementById('p-rent').value,
+    status: status,
+    tenant: status==='rented'?document.getElementById('p-tenant').value.trim():'',
+    start: status==='rented'?document.getElementById('p-start').value:'',
+    end: status==='rented'?document.getElementById('p-end').value:'',
+    vacantSince: status!=='rented'?document.getElementById('p-vacant-since').value:'',
+    note: document.getElementById('p-note').value.trim(),
+    waterFee: +document.getElementById('p-water-fee').value||0,
+    elecEnabled: document.getElementById('p-elec-enabled').value==='1',
+    notarized: notarized,
+    notaryDate: notarized?document.getElementById('p-notary-date').value:'',
+    lineGroup: document.getElementById('p-line').value.trim(),
+    photo: document.getElementById('p-photo').value||'',
+  };
+  if(!prop.name||!prop.addr){ alert('請填寫物件名稱與地址'); return; }
+  const idx=state.properties.findIndex(p=>p.id===prop.id);
+  if(idx>=0) state.properties[idx]=prop; else state.properties.push(prop);
+  saveData();
+  closeModal('modal-prop');
+  populatePropSelects();
+  renderProperties();
+}
+function deleteProp(id){
+  if(!confirm('確定刪除此物件？（相關帳目不會刪除）')) return;
+  state.properties=state.properties.filter(p=>p.id!==id);
+  saveData();
+  populatePropSelects();
+  renderProperties();
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open') }
+document.querySelectorAll('.modal-backdrop').forEach(el=>{
+  el.addEventListener('click', e=>{ if(e.target===el) el.classList.remove('open') });
+});
+
+/* ── 密碼保護 ── */
+const APP_PASSWORD = '0000'; // ← 在這裡修改密碼
+const SESSION_KEY = 'rental_auth_session';
+const LOCK_AFTER_MINUTES = 30; // 幾分鐘無操作後自動鎖定
+
+function doLogin(){
+  const input = document.getElementById('login-input').value;
+  if(input === APP_PASSWORD){
+    sessionStorage.setItem(SESSION_KEY, Date.now().toString());
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-shell').style.display='flex';
+    document.getElementById('login-input').value='';
+    document.getElementById('login-error').textContent='';
+  } else {
+    const err = document.getElementById('login-error');
+    err.textContent='密碼錯誤，請再試一次';
+    document.getElementById('login-input').value='';
+    document.getElementById('login-input').focus();
+  }
+}
+function checkSession(){
+  const ts = sessionStorage.getItem(SESSION_KEY);
+  if(ts && Date.now() - parseInt(ts) < LOCK_AFTER_MINUTES * 60 * 1000){
+    sessionStorage.setItem(SESSION_KEY, Date.now().toString());
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-shell').style.display='flex';
+  }
+}
+function lockApp(){
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  setTimeout(()=>document.getElementById('login-input').focus(), 100);
+}
+// Reset session timer on any interaction
+let lockTimer;
+function resetLockTimer(){
+  clearTimeout(lockTimer);
+  if(sessionStorage.getItem(SESSION_KEY)){
+    sessionStorage.setItem(SESSION_KEY, Date.now().toString());
+    lockTimer = setTimeout(lockApp, LOCK_AFTER_MINUTES * 60 * 1000);
+  }
+}
+document.addEventListener('click', resetLockTimer);
+document.addEventListener('keydown', resetLockTimer);
+checkSession();
+
+/* ── Init ── */
+(async () => {
+  await loadData();
+  populateMonthSelects();
+  populatePropSelects();
+  populatePeriodSelects();
+  setViewMode('month');
+  requestNotifyPermission();
+  scheduleNotifications();
+  // Update nav badge on load
+  const expiring = state.properties.filter(p=>{ const d=daysUntilExpiry(p.end); return d!==null&&d<=45&&(p.status||'rented')==='rented'; });
+  const navBadge = document.getElementById('nav-lease-badge');
+  if(expiring.length){ navBadge.style.display='inline-flex'; navBadge.textContent=expiring.length; }
+})();
+</script>
+</body>
+</html>
