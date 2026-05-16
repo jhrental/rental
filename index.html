@@ -308,15 +308,39 @@ select{cursor:pointer}
 
 <!-- 登入畫面 -->
 <div id="login-screen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center">
-  <div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:2.5rem 2rem;width:320px;text-align:center">
-    <div style="font-size:28px;margin-bottom:8px">🔒</div>
-    <div style="font-size:18px;font-weight:600;letter-spacing:-0.3px;margin-bottom:4px">租屋記帳系統</div>
-    <div style="font-size:13px;color:var(--text3);margin-bottom:1.5rem">請輸入密碼</div>
-    <input type="password" id="login-input" placeholder="密碼"
-      style="width:100%;padding:10px 14px;font-size:16px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);text-align:center;letter-spacing:4px;margin-bottom:10px"
-      onkeydown="if(event.key==='Enter') doLogin()">
+  <div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:2.5rem 2rem;width:340px;text-align:center">
+    <div style="font-size:28px;margin-bottom:8px" id="login-icon">🔒</div>
+    <div style="font-size:18px;font-weight:600;letter-spacing:-0.3px;margin-bottom:4px" id="login-title">租屋記帳系統</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:1.5rem" id="login-subtitle">請輸入帳號與密碼</div>
+
+    <!-- 鎖定倒數 -->
+    <div id="login-lockout" style="display:none;background:var(--red-bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:500;color:var(--red-mid);margin-bottom:6px">剩餘等待時間</div>
+      <div id="login-countdown" style="font-size:28px;font-weight:500;color:var(--red-mid);letter-spacing:2px;margin-bottom:4px">10:00</div>
+      <div style="font-size:11px;color:var(--red-mid)">輸入錯誤次數過多，帳號暫時鎖定</div>
+    </div>
+
+    <input type="text" id="login-username" placeholder="帳號"
+      style="width:100%;padding:10px 14px;font-size:15px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);margin-bottom:8px"
+      onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()">
+
+    <div style="position:relative;margin-bottom:10px">
+      <input type="password" id="login-password" placeholder="密碼"
+        style="width:100%;padding:10px 40px 10px 14px;font-size:15px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text)"
+        onkeydown="if(event.key==='Enter') doLogin()">
+      <button onclick="togglePasswordVisibility()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--text3)" id="pw-toggle-btn">
+        <svg id="pw-eye-icon" class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+
+    <!-- 嘗試次數圓點 -->
+    <div id="login-attempts" style="margin-bottom:8px;display:none">
+      <span style="font-size:12px;color:var(--text3)">剩餘嘗試次數：</span>
+      <span id="attempt-dots"></span>
+    </div>
+
     <div id="login-error" style="font-size:12px;color:var(--red-mid);margin-bottom:10px;min-height:16px"></div>
-    <button onclick="doLogin()" style="width:100%;padding:10px;background:var(--blue-mid);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">進入系統</button>
+    <button id="login-btn" onclick="doLogin()" style="width:100%;padding:10px;background:var(--blue-mid);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">進入系統</button>
   </div>
 </div>
 
@@ -328,11 +352,13 @@ select{cursor:pointer}
   <div class="nav-item" onclick="showPage('records')"><svg class="ico" viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2l-2 2l-2-2l-2 2l-2-2l-3 2M9 7h6M9 11h6M9 15h4"/></svg><span>帳目記錄</span></div>
   <div class="nav-item" onclick="showPage('properties')"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21h18M9 21V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14M9 11h6M5 21V11l2-2M19 21V11l-2-2"/></svg><span>物件管理</span><span id="nav-lease-badge" style="display:none" class="nav-badge"></span></div>
   <div class="nav-item" onclick="showPage('maintenance')"><svg class="ico" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>維修管理</span><span id="nav-maint-badge" style="display:none" class="nav-badge" style="background:var(--amber-mid)"></span></div>
+  <div class="nav-item" id="nav-accounts" onclick="showPage('accounts')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>帳號管理</span></div>
   <div class="nav-item" onclick="showPage('export')"><svg class="ico" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM12 11v6M9 15l3 3l3-3"/></svg><span>匯出報表</span></div>
   <div class="sidebar-footer">
     <div class="save-indicator" id="save-indicator"><svg class="ico" viewBox="0 0 24 24"><path d="M7 18a4.6 4.4 0 0 1 0-9 5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7H7"/><path d="M9 15l2 2l4-4"/></svg><span id="save-text">✓ 已儲存</span></div>
-    <div style="margin-top:6px;color:var(--text3)">資料儲存於本機</div>
-    <button onclick="lockApp()" style="margin-top:10px;width:100%;padding:6px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit">🔒 鎖定</button>
+    <div style="margin-top:6px;color:var(--text3);font-size:12px">登入：<span id="current-user-label" style="color:var(--text2)"></span></div>
+    <button onclick="openChangePasswordModal()" style="margin-top:6px;width:100%;padding:6px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit">🔑 修改密碼</button>
+    <button onclick="lockApp()" style="margin-top:6px;width:100%;padding:6px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit">🔒 鎖定</button>
   </div>
 </nav>
 
@@ -525,6 +551,30 @@ select{cursor:pointer}
       </div>
     </div>
     <div id="routine-list"></div>
+  </div>
+</div>
+
+<!-- 帳號管理 -->
+<div class="page" id="page-accounts" style="display:none">
+  <div class="page-title">帳號管理</div>
+  <!-- 子頁籤 -->
+  <div style="display:flex;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem">
+    <div class="maint-tab active" id="atab-accounts" onclick="showAccountTab('accounts')">帳號</div>
+    <div class="maint-tab" id="atab-roles" onclick="showAccountTab('roles')">角色設定</div>
+  </div>
+  <!-- 帳號列表 -->
+  <div id="apanel-accounts">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+      <button class="btn btn-primary" onclick="openAccountModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增帳號</button>
+    </div>
+    <div id="accounts-list"></div>
+  </div>
+  <!-- 角色設定 -->
+  <div id="apanel-roles" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+      <button class="btn btn-primary" onclick="openRoleModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增角色</button>
+    </div>
+    <div id="roles-list"></div>
   </div>
 </div>
 
@@ -873,6 +923,96 @@ select{cursor:pointer}
   </div>
 </div>
 
+<!-- Modal：新增/編輯帳號 -->
+<div class="modal-backdrop" id="modal-account">
+  <div class="modal" style="width:460px">
+    <div class="modal-title" id="modal-account-title">新增帳號</div>
+    <div class="form-grid">
+      <div class="form-row"><label>帳號名稱</label><input type="text" id="acc-username" placeholder="英文+數字，3-20字元" maxlength="20"></div>
+      <div class="form-row"><label>顯示名稱</label><input type="text" id="acc-displayname" placeholder="例：王師傅、社宅業者-大安"></div>
+      <div class="form-row span2"><label>初始密碼</label><input type="password" id="acc-password" placeholder="最少6個字元"></div>
+      <div class="form-row span2"><label>角色</label>
+        <select id="acc-role" onchange="togglePropSelect()">
+        </select>
+      </div>
+      <div class="form-row span2" id="acc-prop-select-row">
+        <label>負責物件（可多選）</label>
+        <div id="acc-prop-checkboxes" style="border:0.5px solid var(--border);border-radius:var(--radius-sm);max-height:200px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <input type="hidden" id="acc-edit-username">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-account')">取消</button>
+      <button class="btn btn-primary" onclick="saveAccount()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：重設密碼 -->
+<div class="modal-backdrop" id="modal-reset-pw">
+  <div class="modal" style="width:380px">
+    <div class="modal-title">重設密碼</div>
+    <div id="reset-pw-info" style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
+    <div class="form-grid">
+      <div class="form-row span2"><label>新密碼</label><input type="password" id="reset-pw-input" placeholder="最少6個字元"></div>
+    </div>
+    <input type="hidden" id="reset-pw-username">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-reset-pw')">取消</button>
+      <button class="btn btn-primary" onclick="saveResetPassword()">確認重設</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：修改自己密碼 -->
+<div class="modal-backdrop" id="modal-change-pw">
+  <div class="modal" style="width:380px">
+    <div class="modal-title">修改密碼</div>
+    <div class="form-grid">
+      <div class="form-row span2"><label>目前密碼</label><input type="password" id="change-pw-old" placeholder="輸入目前密碼"></div>
+      <div class="form-row span2"><label>新密碼</label><input type="password" id="change-pw-new" placeholder="最少6個字元"></div>
+      <div class="form-row span2"><label>確認新密碼</label><input type="password" id="change-pw-confirm" placeholder="再輸入一次新密碼"></div>
+    </div>
+    <div id="change-pw-error" style="font-size:12px;color:var(--red-mid);margin-top:4px;min-height:16px"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-change-pw')">取消</button>
+      <button class="btn btn-primary" onclick="saveChangePassword()">確認修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：新增/編輯角色 -->
+<div class="modal-backdrop" id="modal-role">
+  <div class="modal" style="width:440px">
+    <div class="modal-title" id="modal-role-title">新增角色</div>
+    <div class="form-grid">
+      <div class="form-row span2"><label>角色名稱</label><input type="text" id="role-name" placeholder="例：社宅業者、維修師傅"></div>
+      <div class="form-row span2">
+        <label>可使用功能</label>
+        <div style="border:0.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid var(--border);cursor:pointer">
+            <input type="checkbox" id="role-perm-maint" style="width:16px;height:16px"> 維修管理（查看、新增、編輯、完成）
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid var(--border);cursor:pointer">
+            <input type="checkbox" id="role-perm-props" style="width:16px;height:16px"> 物件基本資料（只能查看）
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid var(--border);cursor:pointer">
+            <input type="checkbox" id="role-perm-records" style="width:16px;height:16px"> 帳目記錄（查看）
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer">
+            <input type="checkbox" id="role-perm-overview" style="width:16px;height:16px"> 總覽
+          </label>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="role-edit-id">
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-role')">取消</button>
+      <button class="btn btn-primary" onclick="saveRole()">儲存</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const STORAGE_KEY = 'rental_accounting_v1';
 const SHARED_PROP_ID = '__shared__';
@@ -1015,12 +1155,13 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(el => el.style.display='none');
   document.getElementById('page-'+name).style.display='block';
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['overview','records','properties','maintenance','export'][i]===name);
+    el.classList.toggle('active', ['overview','records','properties','maintenance','accounts','export'][i]===name);
   });
   if(name==='overview') renderOverview();
   if(name==='records') renderRecords();
   if(name==='properties') renderProperties();
   if(name==='maintenance'){ populateMaintPropSelects(); showMaintTab('pending'); }
+  if(name==='accounts'){ getRoles(); showAccountTab('accounts'); }
   if(name==='export') renderExportPage();
 }
 let viewMode = 'month'; // 'month' | 'quarter' | 'year'
@@ -2388,62 +2529,541 @@ document.querySelectorAll('.modal-backdrop').forEach(el=>{
   el.addEventListener('click', e=>{ if(e.target===el) el.classList.remove('open') });
 });
 
-/* ── 密碼保護 ── */
-const APP_PASSWORD = '0000'; // ← 在這裡修改密碼
+/* ── 帳號權限系統 ── */
+const ADMIN_USERNAME = 'bbbigfans';
 const SESSION_KEY = 'rental_auth_session';
-const LOCK_AFTER_MINUTES = 30; // 幾分鐘無操作後自動鎖定
+const LOCK_AFTER_MINUTES = 30;
 
-function doLogin(){
-  const input = document.getElementById('login-input').value;
-  if(input === APP_PASSWORD){
-    sessionStorage.setItem(SESSION_KEY, Date.now().toString());
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-shell').style.display='flex';
-    document.getElementById('login-input').value='';
-    document.getElementById('login-error').textContent='';
+// 預設管理員帳號（如果 state.accounts 還沒有的話）
+function getDefaultAccounts() {
+  return [{
+    username: 'bbbigfans',
+    password: 'JimmyHuang73826',
+    displayName: '管理員',
+    role: 'admin',
+    props: [],
+    active: true,
+  }];
+}
+
+let currentUser = null; // 目前登入的帳號物件
+
+function hashPassword(pw) {
+  // 簡單的雜湊（非加密用途，僅混淆）
+  let hash = 0;
+  for (let i = 0; i < pw.length; i++) {
+    hash = ((hash << 5) - hash) + pw.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'h' + Math.abs(hash).toString(36) + pw.length.toString(36);
+}
+
+function getAccounts() {
+  if (!state.accounts || state.accounts.length === 0) {
+    state.accounts = getDefaultAccounts().map(a => ({...a, password: hashPassword(a.password)}));
+  }
+  return state.accounts;
+}
+
+const MAX_ATTEMPTS = 3;
+const LOCKOUT_MINUTES = 10;
+let countdownInterval = null;
+
+function togglePasswordVisibility() {
+  const input = document.getElementById('login-password');
+  const icon = document.getElementById('pw-eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
   } else {
-    const err = document.getElementById('login-error');
-    err.textContent='密碼錯誤，請再試一次';
-    document.getElementById('login-input').value='';
-    document.getElementById('login-input').focus();
+    input.type = 'password';
+    icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   }
 }
-function checkSession(){
-  const ts = sessionStorage.getItem(SESSION_KEY);
-  if(ts && Date.now() - parseInt(ts) < LOCK_AFTER_MINUTES * 60 * 1000){
-    sessionStorage.setItem(SESSION_KEY, Date.now().toString());
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-shell').style.display='flex';
+
+function getLockoutKey(username) { return 'lockout_' + username; }
+function getAttemptsKey(username) { return 'attempts_' + username; }
+
+function getLockout(username) {
+  try { return JSON.parse(localStorage.getItem(getLockoutKey(username)) || 'null'); } catch(e) { return null; }
+}
+function setLockout(username, until) {
+  localStorage.setItem(getLockoutKey(username), JSON.stringify({ until }));
+}
+function clearLockout(username) {
+  localStorage.removeItem(getLockoutKey(username));
+  localStorage.removeItem(getAttemptsKey(username));
+}
+function getAttempts(username) {
+  return parseInt(localStorage.getItem(getAttemptsKey(username)) || '0');
+}
+function setAttempts(username, n) {
+  localStorage.setItem(getAttemptsKey(username), n.toString());
+}
+
+function updateAttemptDots(username) {
+  const attempts = getAttempts(username);
+  const remaining = MAX_ATTEMPTS - attempts;
+  const dotsEl = document.getElementById('attempt-dots');
+  const attEl = document.getElementById('login-attempts');
+  if (attempts > 0 && remaining > 0) {
+    attEl.style.display = 'block';
+    dotsEl.innerHTML = Array.from({length: MAX_ATTEMPTS}, (_, i) =>
+      `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${i < attempts ? 'var(--red-mid)' : 'var(--border2)'};margin:0 2px"></span>`
+    ).join('');
+  } else {
+    attEl.style.display = 'none';
   }
 }
-function lockApp(){
+
+function startCountdown(until) {
+  clearInterval(countdownInterval);
+  const btn = document.getElementById('login-btn');
+  const lockEl = document.getElementById('login-lockout');
+  const countEl = document.getElementById('login-countdown');
+  document.getElementById('login-username').disabled = true;
+  document.getElementById('login-password').disabled = true;
+  btn.disabled = true;
+  btn.textContent = '請等待解鎖';
+  btn.style.background = 'var(--surface2)';
+  btn.style.color = 'var(--text3)';
+  lockEl.style.display = 'block';
+
+  countdownInterval = setInterval(() => {
+    const remaining = Math.max(0, until - Date.now());
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    countEl.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      lockEl.style.display = 'none';
+      document.getElementById('login-username').disabled = false;
+      document.getElementById('login-password').disabled = false;
+      btn.disabled = false;
+      btn.textContent = '進入系統';
+      btn.style.background = 'var(--blue-mid)';
+      btn.style.color = '#fff';
+      document.getElementById('login-subtitle').textContent = '🔓 鎖定已解除，請重新登入';
+      document.getElementById('login-icon').textContent = '🔓';
+      document.getElementById('login-attempts').style.display = 'none';
+    }
+  }, 1000);
+}
+
+function sendLoginAlert(username, type) {
+  const now = new Date().toLocaleString('zh-TW', {hour12: false});
+  let msg = '';
+  if (type === 'lockout') msg = `⚠️ 登入警告：帳號「${username}」輸入錯誤 ${MAX_ATTEMPTS} 次，已鎖定 ${LOCKOUT_MINUTES} 分鐘（${now}）`;
+  if (type === 'repeated') msg = `🚨 安全警報：帳號「${username}」多次被鎖定，請注意是否有人嘗試攻擊（${now}）`;
+  if (msg) fetch(GAS_URL + '?action=notify&key=' + GAS_KEY + '&msg=' + encodeURIComponent(msg)).catch(()=>{});
+}
+
+function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+
+  if (!username) { errEl.textContent = '請輸入帳號'; return; }
+
+  // 檢查是否鎖定中
+  const lockout = getLockout(username);
+  if (lockout && lockout.until > Date.now()) {
+    startCountdown(lockout.until);
+    errEl.textContent = '帳號已鎖定，請等待解鎖';
+    return;
+  } else if (lockout) {
+    clearLockout(username);
+  }
+
+  const accounts = getAccounts();
+  const account = accounts.find(a => a.username === username && a.active !== false);
+
+  if (account && account.password === hashPassword(password)) {
+    // 登入成功，清除錯誤記錄
+    clearLockout(username);
+    currentUser = account;
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ username: account.username, ts: Date.now() }));
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-shell').style.display = 'flex';
+    document.getElementById('login-username').value = '';
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('login-attempts').style.display = 'none';
+    applyPermissions();
+  } else {
+    // 登入失敗
+    const attempts = getAttempts(username) + 1;
+    setAttempts(username, attempts);
+    updateAttemptDots(username);
+
+    if (attempts >= MAX_ATTEMPTS) {
+      const until = Date.now() + LOCKOUT_MINUTES * 60 * 1000;
+      setLockout(username, until);
+      // 檢查是否重複鎖定
+      const lockCount = parseInt(localStorage.getItem('lockcount_' + username) || '0') + 1;
+      localStorage.setItem('lockcount_' + username, lockCount.toString());
+      sendLoginAlert(username, lockCount >= 3 ? 'repeated' : 'lockout');
+      startCountdown(until);
+      errEl.textContent = `帳號已鎖定 ${LOCKOUT_MINUTES} 分鐘`;
+      document.getElementById('login-icon').textContent = '🔐';
+      document.getElementById('login-title').textContent = '帳號已鎖定';
+    } else {
+      errEl.textContent = `帳號或密碼錯誤（還可嘗試 ${MAX_ATTEMPTS - attempts} 次）`;
+    }
+  }
+}
+
+function applyPermissions() {
+  if (!currentUser) return;
+  const isAdmin = currentUser.role === 'admin';
+  const role = getRoles().find(r => r.id === currentUser.role);
+  const perms = isAdmin ? { maint: true, props: true, records: true, overview: true } : (role?.perms || { maint: true, props: true, records: false, overview: false });
+
+  // 顯示當前使用者
+  const label = document.getElementById('current-user-label');
+  if (label) label.textContent = currentUser.displayName || currentUser.username;
+
+  // 帳號管理只有管理員看得到
+  const navAcc = document.getElementById('nav-accounts');
+  if (navAcc) navAcc.style.display = isAdmin ? 'flex' : 'none';
+
+  // 根據權限顯示/隱藏導覽項目
+  document.querySelectorAll('.nav-item').forEach(el => {
+    const onclick = el.getAttribute('onclick') || '';
+    if (onclick.includes('accounts')) { el.style.display = isAdmin ? 'flex' : 'none'; return; }
+    if (onclick.includes('overview')) { el.style.display = (isAdmin || perms.overview) ? 'flex' : 'none'; return; }
+    if (onclick.includes('records')) { el.style.display = (isAdmin || perms.records) ? 'flex' : 'none'; return; }
+    if (onclick.includes('properties')) { el.style.display = (isAdmin || perms.props) ? 'flex' : 'none'; return; }
+    if (onclick.includes('maintenance')) { el.style.display = (isAdmin || perms.maint) ? 'flex' : 'none'; return; }
+    if (onclick.includes('export')) { el.style.display = isAdmin ? 'flex' : 'none'; return; }
+    el.style.display = 'flex';
+  });
+
+  // 預設頁面
+  if (isAdmin || perms.overview) setViewMode('month');
+  else if (perms.maint) showPage('maintenance');
+  else if (perms.props) showPage('properties');
+  else if (perms.records) showPage('records');
+}
+
+function checkSession() {
+  const raw = sessionStorage.getItem(SESSION_KEY);
+  if (!raw) return;
+  try {
+    const session = JSON.parse(raw);
+    if (Date.now() - session.ts < LOCK_AFTER_MINUTES * 60 * 1000) {
+      const accounts = getAccounts();
+      const account = accounts.find(a => a.username === session.username && a.active !== false);
+      if (account) {
+        currentUser = account;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ username: account.username, ts: Date.now() }));
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-shell').style.display = 'flex';
+        applyPermissions();
+      }
+    }
+  } catch(e) {}
+}
+
+function lockApp() {
   sessionStorage.removeItem(SESSION_KEY);
-  document.getElementById('app-shell').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  setTimeout(()=>document.getElementById('login-input').focus(), 100);
+  currentUser = null;
+  document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  setTimeout(() => document.getElementById('login-username').focus(), 100);
 }
-// Reset session timer on any interaction
+
 let lockTimer;
-function resetLockTimer(){
+function resetLockTimer() {
   clearTimeout(lockTimer);
-  if(sessionStorage.getItem(SESSION_KEY)){
-    sessionStorage.setItem(SESSION_KEY, Date.now().toString());
+  if (sessionStorage.getItem(SESSION_KEY)) {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    try {
+      const session = JSON.parse(raw);
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...session, ts: Date.now() }));
+    } catch(e) {}
     lockTimer = setTimeout(lockApp, LOCK_AFTER_MINUTES * 60 * 1000);
   }
 }
 document.addEventListener('click', resetLockTimer);
 document.addEventListener('keydown', resetLockTimer);
+
+/* ── 角色管理 ── */
+function getDefaultRoles() {
+  return [
+    { id: 'admin', name: '管理員', isSystem: true, perms: { maint: true, props: true, records: true, overview: true } },
+    { id: 'staff', name: '代管', isSystem: false, perms: { maint: true, props: true, records: false, overview: false } },
+  ];
+}
+
+function getRoles() {
+  if (!state.roles || state.roles.length === 0) {
+    state.roles = getDefaultRoles();
+  }
+  return state.roles;
+}
+
+function showAccountTab(tab) {
+  ['accounts', 'roles'].forEach(t => {
+    document.getElementById('atab-' + t).className = 'maint-tab' + (t === tab ? ' active' : '');
+    document.getElementById('apanel-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  if (tab === 'accounts') renderAccounts();
+  if (tab === 'roles') renderRoles();
+}
+
+function renderRoles() {
+  const roles = getRoles();
+  const list = document.getElementById('roles-list');
+  if (!list) return;
+  list.innerHTML = roles.map(r => `
+    <div class="maint-card">
+      <div class="maint-card-head">
+        <div style="flex:1">
+          <div class="maint-card-title" style="display:flex;align-items:center;gap:8px">
+            ${r.name}
+            ${r.isSystem ? '<span class="badge badge-in" style="font-size:11px">系統預設</span>' : ''}
+          </div>
+          <div class="maint-card-sub">
+            ${r.perms.overview ? '✓ 總覽 ' : ''}
+            ${r.perms.records ? '✓ 帳目 ' : ''}
+            ${r.perms.props ? '✓ 物件資料 ' : ''}
+            ${r.perms.maint ? '✓ 維修管理' : ''}
+          </div>
+        </div>
+        <div class="maint-card-actions">
+          <button class="btn btn-sm" onclick="openRoleModal('${r.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
+          ${!r.isSystem ? `<button class="btn btn-icon btn-sm btn-danger" onclick="deleteRole('${r.id}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openRoleModal(id) {
+  const r = id ? getRoles().find(x => x.id === id) : null;
+  document.getElementById('modal-role-title').textContent = r ? '編輯角色' : '新增角色';
+  document.getElementById('role-name').value = r ? r.name : '';
+  document.getElementById('role-name').disabled = r?.isSystem || false;
+  document.getElementById('role-perm-maint').checked = r ? r.perms.maint : true;
+  document.getElementById('role-perm-props').checked = r ? r.perms.props : true;
+  document.getElementById('role-perm-records').checked = r ? r.perms.records : false;
+  document.getElementById('role-perm-overview').checked = r ? r.perms.overview : false;
+  document.getElementById('role-edit-id').value = id || '';
+  document.getElementById('modal-role').classList.add('open');
+}
+
+function saveRole() {
+  const editId = document.getElementById('role-edit-id').value;
+  const name = document.getElementById('role-name').value.trim();
+  const perms = {
+    maint: document.getElementById('role-perm-maint').checked,
+    props: document.getElementById('role-perm-props').checked,
+    records: document.getElementById('role-perm-records').checked,
+    overview: document.getElementById('role-perm-overview').checked,
+  };
+  if (!name) { alert('請填寫角色名稱'); return; }
+  if (!state.roles) state.roles = getDefaultRoles();
+  if (editId) {
+    const idx = state.roles.findIndex(r => r.id === editId);
+    if (idx >= 0) { state.roles[idx].name = name; state.roles[idx].perms = perms; }
+  } else {
+    state.roles.push({ id: uid(), name, isSystem: false, perms });
+  }
+  saveData();
+  closeModal('modal-role');
+  renderRoles();
+}
+
+function deleteRole(id) {
+  const inUse = (state.accounts || []).some(a => a.role === id);
+  if (inUse) { alert('此角色有帳號在使用，無法刪除'); return; }
+  if (!confirm('確定刪除此角色？')) return;
+  state.roles = state.roles.filter(r => r.id !== id);
+  saveData();
+  renderRoles();
+}
+
+function populateRoleSelect() {
+  const sel = document.getElementById('acc-role');
+  if (!sel) return;
+  const roles = getRoles().filter(r => r.id !== 'admin');
+  sel.innerHTML = roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+}
+function renderAccounts() {
+  const accounts = getAccounts();
+  const list = document.getElementById('accounts-list');
+  if (!list) return;
+  list.innerHTML = accounts.map(a => {
+    const isAdmin = a.role === 'admin';
+    const isSelf = currentUser && a.username === currentUser.username;
+    const propNames = (a.props || []).map(pid => {
+      const p = getProp(pid); return p ? p.name : pid;
+    }).join('、') || '全部物件';
+    return `<div class="maint-card" style="opacity:${a.active===false?0.5:1}">
+      <div class="maint-card-head">
+        <div style="flex:1">
+          <div class="maint-card-title" style="display:flex;align-items:center;gap:8px">
+            ${a.displayName || a.username}
+            <span style="font-size:12px;color:var(--text3);font-weight:400">@${a.username}</span>
+            <span class="badge ${isAdmin?'badge-in':'badge-warn'}" style="${isAdmin?'':'background:var(--amber-bg);color:var(--amber)'}">${isAdmin?'管理員':(getRoles().find(r=>r.id===a.role)?.name||a.role)}</span>
+            ${a.active===false?'<span class="badge badge-out">停用</span>':''}
+          </div>
+          <div class="maint-card-sub">${isAdmin?'全部功能':'負責物件：'+propNames}</div>
+        </div>
+        <div class="maint-card-actions">
+          ${!isAdmin||isSelf?`<button class="btn btn-sm" onclick="openResetPwModal('${a.username}')">重設密碼</button>`:''}
+          ${!isAdmin?`<button class="btn btn-sm" onclick="openAccountModal('${a.username}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>`:''}
+          ${!isAdmin&&!isSelf?`<button class="btn btn-sm ${a.active===false?'btn-primary':'btn-danger'}" onclick="toggleAccount('${a.username}')">${a.active===false?'啟用':'停用'}</button>`:''}
+          ${!isAdmin&&!isSelf&&getLockout(a.username)?.until>Date.now()?`<button class="btn btn-sm btn-primary" onclick="adminUnlock('${a.username}')">解鎖</button>`:''}
+          ${!isAdmin&&!isSelf?`<button class="btn btn-icon btn-sm btn-danger" onclick="deleteAccount('${a.username}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAccountModal(username) {
+  populateRoleSelect();
+  const a = username ? getAccounts().find(x => x.username === username) : null;
+  document.getElementById('modal-account-title').textContent = a ? '編輯帳號' : '新增帳號';
+  document.getElementById('acc-username').value = a ? a.username : '';
+  document.getElementById('acc-username').disabled = !!a;
+  document.getElementById('acc-displayname').value = a ? a.displayName || '' : '';
+  document.getElementById('acc-password').value = '';
+  document.getElementById('acc-password').placeholder = a ? '留空則不修改密碼' : '最少6個字元';
+  document.getElementById('acc-role').value = a ? a.role : 'staff';
+  document.getElementById('acc-edit-username').value = username || '';
+  // prop checkboxes
+  const box = document.getElementById('acc-prop-checkboxes');
+  box.innerHTML = state.properties.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:0.5px solid var(--border);cursor:pointer;font-size:13px">
+      <input type="checkbox" value="${p.id}" ${(a?.props||[]).includes(p.id)?'checked':''} style="width:16px;height:16px">
+      ${p.name}
+    </label>`).join('');
+  togglePropSelect();
+  document.getElementById('modal-account').classList.add('open');
+}
+
+function togglePropSelect() {
+  const role = document.getElementById('acc-role').value;
+  document.getElementById('acc-prop-select-row').style.display = role === 'admin' ? 'none' : 'flex';
+}
+
+function saveAccount() {
+  const editUsername = document.getElementById('acc-edit-username').value;
+  const username = document.getElementById('acc-username').value.trim();
+  const displayName = document.getElementById('acc-displayname').value.trim();
+  const password = document.getElementById('acc-password').value;
+  const role = document.getElementById('acc-role').value;
+  const props = Array.from(document.querySelectorAll('#acc-prop-checkboxes input:checked')).map(el => el.value);
+
+  if (!username || username.length < 3) { alert('帳號名稱至少3個字元'); return; }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) { alert('帳號只能使用英文、數字和底線'); return; }
+  if (!editUsername && password.length < 6) { alert('密碼至少6個字元'); return; }
+  if (password && password.length < 6) { alert('密碼至少6個字元'); return; }
+
+  if (!state.accounts) state.accounts = getDefaultAccounts().map(a => ({...a, password: hashPassword(a.password)}));
+
+  if (editUsername) {
+    const idx = state.accounts.findIndex(a => a.username === editUsername);
+    if (idx >= 0) {
+      state.accounts[idx].displayName = displayName;
+      state.accounts[idx].role = role;
+      state.accounts[idx].props = props;
+      if (password) state.accounts[idx].password = hashPassword(password);
+    }
+  } else {
+    if (state.accounts.find(a => a.username === username)) { alert('帳號名稱已存在'); return; }
+    state.accounts.push({
+      username, password: hashPassword(password),
+      displayName, role, props, active: true,
+    });
+  }
+  saveData();
+  closeModal('modal-account');
+  renderAccounts();
+}
+
+function toggleAccount(username) {
+  const acc = state.accounts.find(a => a.username === username);
+  if (!acc) return;
+  acc.active = acc.active === false ? true : false;
+  saveData();
+  renderAccounts();
+}
+
+function deleteAccount(username) {
+  if (!confirm('確定刪除這個帳號？')) return;
+  state.accounts = state.accounts.filter(a => a.username !== username);
+  saveData();
+  renderAccounts();
+}
+
+function adminUnlock(username) {
+  clearLockout(username);
+  localStorage.removeItem('lockcount_' + username);
+  renderAccounts();
+  alert(`「${username}」帳號已解鎖`);
+}
+
+function openResetPwModal(username) {
+  const acc = getAccounts().find(a => a.username === username);
+  document.getElementById('reset-pw-username').value = username;
+  document.getElementById('reset-pw-input').value = '';
+  document.getElementById('reset-pw-info').textContent = `重設「${acc?.displayName || username}」的密碼`;
+  document.getElementById('modal-reset-pw').classList.add('open');
+}
+
+function saveResetPassword() {
+  const username = document.getElementById('reset-pw-username').value;
+  const newPw = document.getElementById('reset-pw-input').value;
+  if (newPw.length < 6) { alert('密碼至少6個字元'); return; }
+  const acc = state.accounts.find(a => a.username === username);
+  if (acc) { acc.password = hashPassword(newPw); saveData(); }
+  closeModal('modal-reset-pw');
+  alert('密碼已重設');
+}
+
+function openChangePasswordModal() {
+  document.getElementById('change-pw-old').value = '';
+  document.getElementById('change-pw-new').value = '';
+  document.getElementById('change-pw-confirm').value = '';
+  document.getElementById('change-pw-error').textContent = '';
+  document.getElementById('modal-change-pw').classList.add('open');
+}
+
+function saveChangePassword() {
+  const oldPw = document.getElementById('change-pw-old').value;
+  const newPw = document.getElementById('change-pw-new').value;
+  const confirmPw = document.getElementById('change-pw-confirm').value;
+  const errEl = document.getElementById('change-pw-error');
+  if (!currentUser) return;
+  const acc = state.accounts.find(a => a.username === currentUser.username);
+  if (!acc || acc.password !== hashPassword(oldPw)) { errEl.textContent = '目前密碼錯誤'; return; }
+  if (newPw.length < 6) { errEl.textContent = '新密碼至少6個字元'; return; }
+  if (newPw !== confirmPw) { errEl.textContent = '兩次輸入的密碼不一致'; return; }
+  acc.password = hashPassword(newPw);
+  currentUser = acc;
+  saveData();
+  closeModal('modal-change-pw');
+  alert('密碼修改成功');
+}
 checkSession();
 
 /* ── Init ── */
 (async () => {
   await loadData();
+  // 確保帳號系統初始化
+  if (!state.accounts || state.accounts.length === 0) {
+    state.accounts = getDefaultAccounts().map(a => ({...a, password: hashPassword(a.password)}));
+    saveData();
+  }
   populateMonthSelects();
   populatePropSelects();
   populatePeriodSelects();
-  setViewMode('month');
   requestNotifyPermission();
   scheduleNotifications();
+  checkSession();
   // Update nav badge on load
   const expiring = state.properties.filter(p=>{ const d=daysUntilExpiry(p.end); return d!==null&&d<=45&&(p.status||'rented')==='rented'; });
   const navBadge = document.getElementById('nav-lease-badge');
