@@ -1251,6 +1251,7 @@ function navYear(dir){
   const ni=opts.indexOf(sel.value)-dir;
   if(ni>=0&&ni<opts.length){sel.value=opts[ni]; renderOverview();}
 }
+function navMonth(dir){
   const sel=document.getElementById('ov-month');
   const opts=Array.from(sel.options).map(o=>o.value);
   const ni=opts.indexOf(sel.value)-dir;
