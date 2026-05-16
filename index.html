@@ -354,6 +354,7 @@ select{cursor:pointer}
   <div class="nav-item" onclick="showPage('maintenance')"><svg class="ico" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>維修管理</span><span id="nav-maint-badge" style="display:none" class="nav-badge" style="background:var(--amber-mid)"></span></div>
   <div class="nav-item" id="nav-accounts" onclick="showPage('accounts')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>帳號管理</span></div>
   <div class="nav-item" onclick="showPage('export')"><svg class="ico" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM12 11v6M9 15l3 3l3-3"/></svg><span>匯出報表</span></div>
+  <div class="nav-item" id="nav-settings" onclick="showPage('settings')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>通知設定</span></div>
   <div class="sidebar-footer">
     <div class="save-indicator" id="save-indicator"><svg class="ico" viewBox="0 0 24 24"><path d="M7 18a4.6 4.4 0 0 1 0-9 5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7H7"/><path d="M9 15l2 2l4-4"/></svg><span id="save-text">✓ 已儲存</span></div>
     <div style="margin-top:6px;color:var(--text3);font-size:12px">登入：<span id="current-user-label" style="color:var(--text2)"></span></div>
@@ -486,6 +487,169 @@ select{cursor:pointer}
   <div class="card" id="export-preview" style="display:none">
     <div class="card-title">預覽內容</div>
     <div id="export-preview-content"></div>
+  </div>
+</div>
+
+<!-- 通知設定 -->
+<div class="page" id="page-settings" style="display:none">
+  <div class="page-title">通知設定</div>
+
+  <!-- 租約到期 -->
+  <div class="card" id="settings-card-lease">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--amber-mid);flex-shrink:0"></div>
+        <div class="card-title" style="margin:0">租約到期提醒</div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <span style="font-size:12px;color:var(--text2)" id="settings-lease-label">開啟</span>
+        <div id="settings-lease-toggle" onclick="settingsToggle('lease')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
+          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+        </div>
+      </label>
+    </div>
+    <div id="settings-lease-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="form-row">
+        <label>首次提醒（剩幾天開始）</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="7" max="90" step="1" id="cfg-lease-start" style="flex:1" oninput="document.getElementById('cfg-lease-start-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-lease-start-val">30</span>
+          <span style="font-size:12px;color:var(--text3)">天前</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>通知間隔</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="1" max="14" step="1" id="cfg-lease-interval" style="flex:1" oninput="document.getElementById('cfg-lease-interval-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-lease-interval-val">7</span>
+          <span style="font-size:12px;color:var(--text3)">天/次</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>「知道了」暫停天數</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="3" max="60" step="1" id="cfg-lease-snooze" style="flex:1" oninput="document.getElementById('cfg-lease-snooze-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-lease-snooze-val">30</span>
+          <span style="font-size:12px;color:var(--text3)">天</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 維修未跟進 -->
+  <div class="card" id="settings-card-maint">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--red-mid);flex-shrink:0"></div>
+        <div class="card-title" style="margin:0">維修未跟進</div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <span style="font-size:12px;color:var(--text2)" id="settings-maint-label">開啟</span>
+        <div id="settings-maint-toggle" onclick="settingsToggle('maint')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
+          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+        </div>
+      </label>
+    </div>
+    <div id="settings-maint-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="form-row">
+        <label>超過幾天算逾期</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="1" max="14" step="1" id="cfg-maint-trigger" style="flex:1" oninput="document.getElementById('cfg-maint-trigger-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-maint-trigger-val">3</span>
+          <span style="font-size:12px;color:var(--text3)">天</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>通知間隔</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="1" max="14" step="1" id="cfg-maint-interval" style="flex:1" oninput="document.getElementById('cfg-maint-interval-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-maint-interval-val">3</span>
+          <span style="font-size:12px;color:var(--text3)">天/次</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>「知道了」暫停天數</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="1" max="14" step="1" id="cfg-maint-snooze" style="flex:1" oninput="document.getElementById('cfg-maint-snooze-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-maint-snooze-val">3</span>
+          <span style="font-size:12px;color:var(--text3)">天</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 定期保養 -->
+  <div class="card" id="settings-card-routine">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--blue-mid);flex-shrink:0"></div>
+        <div class="card-title" style="margin:0">定期保養提醒</div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <span style="font-size:12px;color:var(--text2)" id="settings-routine-label">開啟</span>
+        <div id="settings-routine-toggle" onclick="settingsToggle('routine')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
+          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+        </div>
+      </label>
+    </div>
+    <div id="settings-routine-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="form-row">
+        <label>提前幾天提醒</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="3" max="30" step="1" id="cfg-routine-start" style="flex:1" oninput="document.getElementById('cfg-routine-start-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-routine-start-val">14</span>
+          <span style="font-size:12px;color:var(--text3)">天前</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>「知道了」暫停天數</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="3" max="30" step="1" id="cfg-routine-snooze" style="flex:1" oninput="document.getElementById('cfg-routine-snooze-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-routine-snooze-val">14</span>
+          <span style="font-size:12px;color:var(--text3)">天</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 物件閒置 -->
+  <div class="card" id="settings-card-vacant">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--text3);flex-shrink:0"></div>
+        <div class="card-title" style="margin:0">物件閒置提醒</div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <span style="font-size:12px;color:var(--text2)" id="settings-vacant-label">開啟</span>
+        <div id="settings-vacant-toggle" onclick="settingsToggle('vacant')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
+          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+        </div>
+      </label>
+    </div>
+    <div id="settings-vacant-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="form-row">
+        <label>閒置幾天後提醒</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="7" max="90" step="1" id="cfg-vacant-trigger" style="flex:1" oninput="document.getElementById('cfg-vacant-trigger-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-vacant-trigger-val">30</span>
+          <span style="font-size:12px;color:var(--text3)">天後</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>「知道了」暫停天數</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <input type="range" min="7" max="60" step="1" id="cfg-vacant-snooze" style="flex:1" oninput="document.getElementById('cfg-vacant-snooze-val').textContent=this.value">
+          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-vacant-snooze-val">30</span>
+          <span style="font-size:12px;color:var(--text3)">天</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 儲存按鈕 -->
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:0.5rem">
+    <button class="btn" onclick="resetNotifySettings()">恢復預設值</button>
+    <button class="btn btn-primary" onclick="saveNotifySettings()">儲存設定</button>
   </div>
 </div>
 
@@ -1043,6 +1207,13 @@ const SHARED_PROP_ID = '__shared__';
 const CAT_IN = ['租金','水費','電費','押金','其他收入','自訂...'];
 const CAT_OUT = ['修繕費','水費','電費','天然氣','洗樓梯','自訂...'];
 
+const NOTIFY_DEFAULTS = {
+  lease:   { on: true, start: 30, interval: 7,  snooze: 30 },
+  maint:   { on: true, trigger: 3, interval: 3, snooze: 3  },
+  routine: { on: true, start: 14,               snooze: 14 },
+  vacant:  { on: true, trigger: 30,             snooze: 30 },
+};
+
 let state = {
   properties: [],
   records: [],
@@ -1079,6 +1250,7 @@ async function loadData() {
   if (!state.maintHistory) state.maintHistory = [];
   if (!state.routines) state.routines = [];
   if (!state.notifySnoozed) state.notifySnoozed = {};
+  if (!state.notifyConfig) state.notifyConfig = JSON.parse(JSON.stringify(NOTIFY_DEFAULTS));
   if (state.properties.length === 0) seedDemo();
   setSaveIndicator('saved');
   runDailyNotifyCheck();
@@ -1181,7 +1353,7 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(el => el.style.display='none');
   document.getElementById('page-'+name).style.display='block';
   document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['overview','records','properties','maintenance','accounts','export'][i]===name);
+    el.classList.toggle('active', ['overview','records','properties','maintenance','accounts','export','settings'][i]===name);
   });
   if(name==='overview') renderOverview();
   if(name==='records') renderRecords();
@@ -1189,6 +1361,7 @@ function showPage(name) {
   if(name==='maintenance'){ populateMaintPropSelects(); showMaintTab('pending'); }
   if(name==='accounts'){ getRoles(); showAccountTab('accounts'); }
   if(name==='export') renderExportPage();
+  if(name==='settings') renderSettingsPage();
 }
 let viewMode = 'month'; // 'month' | 'quarter' | 'year'
 
@@ -1763,75 +1936,165 @@ function scheduleNotifications(){
 }
 
 /* ══════════════════════════════════════════
+   通知設定
+   ══════════════════════════════════════════ */
+
+function getNotifyConfig() {
+  if (!state.notifyConfig) state.notifyConfig = JSON.parse(JSON.stringify(NOTIFY_DEFAULTS));
+  // 補齊缺少的 key
+  Object.keys(NOTIFY_DEFAULTS).forEach(k => {
+    if (!state.notifyConfig[k]) state.notifyConfig[k] = { ...NOTIFY_DEFAULTS[k] };
+    Object.keys(NOTIFY_DEFAULTS[k]).forEach(f => {
+      if (state.notifyConfig[k][f] === undefined) state.notifyConfig[k][f] = NOTIFY_DEFAULTS[k][f];
+    });
+  });
+  return state.notifyConfig;
+}
+
+function renderSettingsPage() {
+  const cfg = getNotifyConfig();
+  ['lease','maint','routine','vacant'].forEach(key => {
+    const c = cfg[key];
+    // 開關
+    const tog = document.getElementById('settings-'+key+'-toggle');
+    const lbl = document.getElementById('settings-'+key+'-label');
+    const body = document.getElementById('settings-'+key+'-body');
+    if (tog) {
+      tog.style.background = c.on ? 'var(--blue-mid)' : 'var(--text3)';
+      tog.querySelector('div').style.left = c.on ? '20px' : '4px';
+    }
+    if (lbl) { lbl.textContent = c.on ? '開啟' : '關閉'; lbl.style.color = c.on ? 'var(--text2)' : 'var(--red-mid)'; }
+    if (body) { body.style.opacity = c.on ? '1' : '0.35'; body.style.pointerEvents = c.on ? '' : 'none'; }
+    // 滑桿值
+    const fields = key==='lease' ? ['start','interval','snooze'] :
+                   key==='maint' ? ['trigger','interval','snooze'] :
+                   key==='routine' ? ['start','snooze'] : ['trigger','snooze'];
+    fields.forEach(f => {
+      const el = document.getElementById('cfg-'+key+'-'+f);
+      const vl = document.getElementById('cfg-'+key+'-'+f+'-val');
+      if (el && c[f] !== undefined) { el.value = c[f]; if (vl) vl.textContent = c[f]; }
+    });
+  });
+}
+
+function settingsToggle(key) {
+  const cfg = getNotifyConfig();
+  cfg[key].on = !cfg[key].on;
+  renderSettingsPage();
+}
+
+function saveNotifySettings() {
+  const cfg = getNotifyConfig();
+  ['lease','maint','routine','vacant'].forEach(key => {
+    const fields = key==='lease' ? ['start','interval','snooze'] :
+                   key==='maint' ? ['trigger','interval','snooze'] :
+                   key==='routine' ? ['start','snooze'] : ['trigger','snooze'];
+    fields.forEach(f => {
+      const el = document.getElementById('cfg-'+key+'-'+f);
+      if (el) cfg[key][f] = parseInt(el.value);
+    });
+  });
+  state.notifyConfig = cfg;
+  saveData();
+  showToast('通知設定已儲存');
+}
+
+function resetNotifySettings() {
+  if (!confirm('確定恢復所有預設值？')) return;
+  state.notifyConfig = JSON.parse(JSON.stringify(NOTIFY_DEFAULTS));
+  renderSettingsPage();
+  saveData();
+  showToast('已恢復預設值');
+}
+
+/* ══════════════════════════════════════════
    分層 LINE 通知系統
    ══════════════════════════════════════════ */
 
-// LINE 通知設定
 const LINE_TOKEN = 'CdmVa9ZIXeexrecOwBSKPtCwyp2T0YXZR6iNIYhQEu/VAAsVP73LndaHKuPpR9YVXB9o8XHNw5UXAwpDjp0pa4f4mRQ6aE6vIQhDieNm/r+vg2i2wuB8hFqrKa+JNDpWTkkZhfOpnmdFJlofZ9XgfQdB04t89/1O/w1cDnyilFU=';
 const LINE_USER_ID = 'U6f292466245cc39e490fd64c1bcd77bb';
 
-// 暫停鍵格式：notify_{type}_{id}  例：notify_lease_p1、notify_maint_m2
 function snoozeKey(type, id){ return `notify_${type}_${id}`; }
 
-// 檢查是否在暫停期內
 function isSnoozed(type, id){
   if(!state.notifySnoozed) state.notifySnoozed = {};
   const key = snoozeKey(type, id);
-  const until = state.notifySnoozed[key];
-  if(!until) return false;
-  if(Date.now() < until) return true;
-  // 過期自動清除
+  const val = state.notifySnoozed[key];
+  if(!val) return false;
+  if(val === 'permanent') return true;
+  if(Date.now() < val) return true;
   delete state.notifySnoozed[key];
   return false;
 }
 
-// 設定暫停（days 天）
+function isPermanentlySnoozed(type, id){
+  if(!state.notifySnoozed) return false;
+  return state.notifySnoozed[snoozeKey(type, id)] === 'permanent';
+}
+
 function snooze(type, id, days){
   if(!state.notifySnoozed) state.notifySnoozed = {};
   state.notifySnoozed[snoozeKey(type, id)] = Date.now() + days * 86400000;
   saveData();
-  // 重新 render 各頁面 banner
   if(currentPage==='properties') renderProperties();
   if(currentPage==='maintenance') showMaintTab('pending');
   showToast('已暫停通知 ' + days + ' 天');
 }
 
-// 清除暫停（事件解決時）
+function snoozeForever(type, id){
+  if(!state.notifySnoozed) state.notifySnoozed = {};
+  state.notifySnoozed[snoozeKey(type, id)] = 'permanent';
+  saveData();
+  if(currentPage==='properties') renderProperties();
+  if(currentPage==='maintenance') showMaintTab('pending');
+  showToast('已停止這筆通知');
+}
+
 function clearSnooze(type, id){
   if(!state.notifySnoozed) return;
   delete state.notifySnoozed[snoozeKey(type, id)];
 }
 
-// 暫停按鈕 HTML
 function snoozeBtnHtml(type, id, days, alreadySnoozed){
+  if(isPermanentlySnoozed(type, id)){
+    return `<span style="font-size:11px;color:var(--text3);padding:3px 8px;border-radius:100px;background:var(--surface2)">已停止通知</span>`;
+  }
   if(alreadySnoozed){
-    const until = state.notifySnoozed?.[snoozeKey(type,id)];
-    const untilStr = until ? new Date(until).toLocaleDateString('zh-TW') : '';
+    const val = state.notifySnoozed?.[snoozeKey(type,id)];
+    const untilStr = (val && val !== 'permanent') ? new Date(val).toLocaleDateString('zh-TW') : '';
     return `<span style="font-size:11px;color:var(--text3);padding:3px 8px;border-radius:100px;background:var(--surface2)">已暫停至 ${untilStr}</span>`;
   }
-  return `<button class="btn btn-sm" style="font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface);border-color:var(--border2);color:var(--text2)" onclick="snooze('${type}','${id}',${days})">知道了，先暫停通知</button>`;
+  return `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+    <button class="btn btn-sm" style="font-size:11px;padding:3px 10px;border-radius:100px" onclick="snooze('${type}','${id}',${days})">知道了，暫停通知 ${days} 天</button>
+    <button class="btn btn-sm btn-danger" style="font-size:11px;padding:3px 10px;border-radius:100px" onclick="snoozeForever('${type}','${id}')">不再通知這筆</button>
+  </div>`;
 }
 
-// 判斷通知對象：社宅→管理員，非社宅→代管
 function getNotifyTarget(prop){
   if(!prop) return 'admin';
   return prop.rentalType === 'social' ? 'admin' : 'staff';
 }
 
-// 透過 GAS 發送 LINE 訊息
-async function sendLineNotify(msg, target){
-  // target: 'admin' 或 'staff'（目前都送給管理員，未來可擴充代管 token）
+// 計算下次提醒日期字串
+function nextNotifyDate(intervalDays){
+  const d = new Date();
+  d.setDate(d.getDate() + intervalDays);
+  return d.toLocaleDateString('zh-TW');
+}
+
+// 透過 GAS 發送 LINE Flex Message
+async function sendLineNotify(payload, target){
   try {
     await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
-        action: 'line_notify',
+        action: 'line_flex',
         key: GAS_KEY,
         token: LINE_TOKEN,
         userId: LINE_USER_ID,
-        message: msg,
-        target: target,
+        payload,
+        target,
       }),
     });
   } catch(e) {
@@ -1839,108 +2102,154 @@ async function sendLineNotify(msg, target){
   }
 }
 
-// 記錄上次通知時間，避免重複發送
-function getLastNotified(type, id){ 
-  const key = `lastNotify_${type}_${id}`;
-  return parseInt(localStorage.getItem(key)||'0');
+// 建立 LINE Flex Message payload
+function buildFlexMsg(title, lines, type, id, snoozeDays, intervalDays){
+  const nextDate = nextNotifyDate(intervalDays);
+  const bodyContents = lines.map(l => ({
+    type: 'text', text: l, size: 'sm', color: '#555555', margin: 'sm', wrap: true
+  }));
+  bodyContents.push({
+    type: 'text',
+    text: `下次提醒：${nextDate}（${intervalDays} 天後）`,
+    size: 'xs', color: '#aaaaaa', margin: 'md'
+  });
+  return {
+    type: 'flex',
+    altText: title,
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box', layout: 'vertical',
+        contents: [{ type: 'text', text: title, weight: 'bold', size: 'md', color: '#ffffff' }],
+        backgroundColor: '#185FA5', paddingAll: '16px'
+      },
+      body: {
+        type: 'box', layout: 'vertical', spacing: 'sm',
+        contents: bodyContents
+      },
+      footer: {
+        type: 'box', layout: 'vertical', spacing: 'sm',
+        contents: [
+          {
+            type: 'button', style: 'primary', height: 'sm',
+            action: { type: 'postback', label: `知道了，暫停通知 ${snoozeDays} 天`,
+              data: `action=snooze&type=${type}&id=${id}&days=${snoozeDays}` }
+          },
+          {
+            type: 'button', style: 'secondary', height: 'sm',
+            action: { type: 'postback', label: '不再通知這筆',
+              data: `action=forever&type=${type}&id=${id}` }
+          }
+        ]
+      }
+    }
+  };
 }
-function setLastNotified(type, id){ 
+
+function getLastNotified(type, id){
+  return parseInt(localStorage.getItem(`lastNotify_${type}_${id}`) || '0');
+}
+function setLastNotified(type, id){
   localStorage.setItem(`lastNotify_${type}_${id}`, Date.now().toString());
 }
 
-// 每日通知檢查（頁面載入時執行一次）
 async function runDailyNotifyCheck(){
-  // 今天是否已執行過（避免重整頁面重複發送）
   const todayKey = 'notifyCheckDate';
   const today = new Date().toISOString().slice(0,10);
   if(localStorage.getItem(todayKey) === today) return;
   localStorage.setItem(todayKey, today);
 
+  const cfg = getNotifyConfig();
   const now = Date.now();
-  const msgs = [];
-
-  /* ── 1. 租約到期提醒 ── */
-  state.properties.forEach(p=>{
-    if((p.status||'rented')!=='rented') return;
-    const d = daysUntilExpiry(p.end);
-    if(d===null) return;
-    if(d > 30) return; // 超過30天不通知
-    if(isSnoozed('lease', p.id)) return;
-
-    // 間隔：剩14天內每3天，其他每7天
-    const interval = d <= 14 ? 3 : 7;
-    const last = getLastNotified('lease', p.id);
-    if(now - last < interval * 86400000) return;
-
-    const target = getNotifyTarget(p);
-    let msg;
-    if(d < 0) msg = `🚨 租約已到期 ${Math.abs(d)} 天\n物件：${p.name}\n租客：${p.tenant||'未設定'}\n到期日：${p.end}`;
-    else if(d <= 14) msg = `⚠️ 租約即將到期（剩 ${d} 天）\n物件：${p.name}\n租客：${p.tenant||'未設定'}\n到期日：${p.end}`;
-    else msg = `📋 租約提醒（剩 ${d} 天）\n物件：${p.name}\n租客：${p.tenant||'未設定'}\n到期日：${p.end}`;
-
-    msgs.push({ msg, target, type:'lease', id:p.id });
-  });
-
-  /* ── 2. 維修未跟進（超過3天pending）── */
   const nowDate = new Date(); nowDate.setHours(0,0,0,0);
-  (state.maints||[]).forEach(m=>{
-    if(m.status==='done') return;
-    if(m.status!=='pending') return;
-    const d = new Date(m.date); d.setHours(0,0,0,0);
-    const days = Math.round((nowDate-d)/86400000);
-    if(days < 3) return;
-    if(isSnoozed('maint', m.id)) return;
+  const tasks = [];
 
-    const last = getLastNotified('maint', m.id);
-    if(now - last < 3 * 86400000) return;
+  /* ── 1. 租約到期 ── */
+  if(cfg.lease.on){
+    state.properties.forEach(p=>{
+      if((p.status||'rented')!=='rented') return;
+      const d = daysUntilExpiry(p.end);
+      if(d===null || d > cfg.lease.start) return;
+      if(isSnoozed('lease', p.id)) return;
+      const last = getLastNotified('lease', p.id);
+      if(now - last < cfg.lease.interval * 86400000) return;
+      const label = d < 0 ? `已到期 ${Math.abs(d)} 天` : `剩 ${d} 天`;
+      const title = d < 0 ? `🚨 租約已到期` : `📋 租約到期提醒（${label}）`;
+      const payload = buildFlexMsg(title, [
+        `物件：${p.name}`,
+        `租客：${p.tenant||'未設定'}`,
+        `到期日：${p.end}`,
+      ], 'lease', p.id, cfg.lease.snooze, cfg.lease.interval);
+      tasks.push({ payload, target: getNotifyTarget(p), type:'lease', id:p.id });
+    });
+  }
 
-    const p = getProp(m.propId);
-    const target = getNotifyTarget(p);
-    const msg = `🔧 維修未跟進（已 ${days} 天）\n物件：${p?p.name:'?'}\n問題：${m.desc}\n回報日：${m.date}`;
-    msgs.push({ msg, target, type:'maint', id:m.id });
-  });
+  /* ── 2. 維修未跟進 ── */
+  if(cfg.maint.on){
+    (state.maints||[]).forEach(m=>{
+      if(m.status!=='pending') return;
+      const d = new Date(m.date); d.setHours(0,0,0,0);
+      const days = Math.round((nowDate-d)/86400000);
+      if(days < cfg.maint.trigger) return;
+      if(isSnoozed('maint', m.id)) return;
+      const last = getLastNotified('maint', m.id);
+      if(now - last < cfg.maint.interval * 86400000) return;
+      const p = getProp(m.propId);
+      const payload = buildFlexMsg(`🔧 維修未跟進（已 ${days} 天）`, [
+        `物件：${p?p.name:'?'}`,
+        `問題：${m.desc}`,
+        `回報日：${m.date}`,
+      ], 'maint', m.id, cfg.maint.snooze, cfg.maint.interval);
+      tasks.push({ payload, target: getNotifyTarget(p), type:'maint', id:m.id });
+    });
+  }
 
-  /* ── 3. 保養快到期（14天內）── */
-  (state.routines||[]).forEach(r=>{
-    const next = nextRoutineDate(r);
-    const nextD = new Date(next); nextD.setHours(0,0,0,0);
-    const days = Math.round((nextD-nowDate)/86400000);
-    if(days > 14 || days < 0) return;
-    if(isSnoozed('routine', r.id)) return;
+  /* ── 3. 定期保養 ── */
+  if(cfg.routine.on){
+    (state.routines||[]).forEach(r=>{
+      const next = nextRoutineDate(r);
+      const nextD = new Date(next); nextD.setHours(0,0,0,0);
+      const days = Math.round((nextD-nowDate)/86400000);
+      if(days > cfg.routine.start || days < 0) return;
+      if(isSnoozed('routine', r.id)) return;
+      const last = getLastNotified('routine', r.id);
+      if(now - last < cfg.routine.snooze * 86400000) return;
+      const p = getProp(r.propId);
+      const payload = buildFlexMsg(`🛠 保養提醒（剩 ${days} 天）`, [
+        `物件：${p?p.name:'?'}`,
+        `保養項目：${r.item}`,
+        `預計日期：${next}`,
+      ], 'routine', r.id, cfg.routine.snooze, cfg.routine.snooze);
+      tasks.push({ payload, target: getNotifyTarget(p), type:'routine', id:r.id });
+    });
+  }
 
-    const last = getLastNotified('routine', r.id);
-    if(now - last < 14 * 86400000) return; // 只通知一次
+  /* ── 4. 物件閒置 ── */
+  if(cfg.vacant.on){
+    state.properties.forEach(p=>{
+      if((p.status||'rented')==='rented') return;
+      const days = daysSince(p.vacantSince);
+      if(days===null || days < cfg.vacant.trigger) return;
+      if(isSnoozed('vacant', p.id)) return;
+      const last = getLastNotified('vacant', p.id);
+      if(now - last < cfg.vacant.snooze * 86400000) return;
+      const statusLabel = p.status==='repair'?'整修中':'閒置中';
+      const payload = buildFlexMsg(`🏠 物件${statusLabel}已 ${days} 天`, [
+        `物件：${p.name}`,
+        `起始日：${p.vacantSince||'未設定'}`,
+        p.note ? `備註：${p.note}` : '',
+      ].filter(Boolean), 'vacant', p.id, cfg.vacant.snooze, cfg.vacant.snooze);
+      tasks.push({ payload, target:'admin', type:'vacant', id:p.id });
+    });
+  }
 
-    const p = getProp(r.propId);
-    const target = getNotifyTarget(p);
-    const msg = `🛠 定期保養提醒（剩 ${days} 天）\n物件：${p?p.name:'?'}\n保養項目：${r.item}\n預計日期：${next}`;
-    msgs.push({ msg, target, type:'routine', id:r.id });
-  });
-
-  /* ── 4. 物件閒置超過30天 ── */
-  state.properties.forEach(p=>{
-    if((p.status||'rented')==='rented') return;
-    const days = daysSince(p.vacantSince);
-    if(days===null || days < 30) return;
-    if(isSnoozed('vacant', p.id)) return;
-
-    const last = getLastNotified('vacant', p.id);
-    if(now - last < 30 * 86400000) return; // 只通知一次
-
-    const statusLabel = p.status==='repair'?'整修中':'閒置中';
-    const msg = `🏠 物件${statusLabel}已 ${days} 天\n物件：${p.name}\n起始日：${p.vacantSince||'未設定'}`;
-    msgs.push({ msg, target:'admin', type:'vacant', id:p.id });
-  });
-
-  // 發送所有通知
-  for(const m of msgs){
-    await sendLineNotify(m.msg, m.target);
-    setLastNotified(m.type, m.id);
-    await new Promise(r=>setTimeout(r,300)); // 間隔300ms避免限流
+  for(const t of tasks){
+    await sendLineNotify(t.payload, t.target);
+    setLastNotified(t.type, t.id);
+    await new Promise(r=>setTimeout(r,300));
   }
 }
 
-// Toast 提示（輕量級）
 function showToast(msg){
   let toast = document.getElementById('app-toast');
   if(!toast){
@@ -3027,6 +3336,9 @@ function applyPermissions() {
   // 帳號管理只有管理員看得到
   const navAcc = document.getElementById('nav-accounts');
   if (navAcc) navAcc.style.display = isAdmin ? 'flex' : 'none';
+  // 通知設定只有管理員看得到
+  const navSet = document.getElementById('nav-settings');
+  if (navSet) navSet.style.display = isAdmin ? 'flex' : 'none';
 
   // 根據權限顯示/隱藏導覽項目
   document.querySelectorAll('.nav-item').forEach(el => {
