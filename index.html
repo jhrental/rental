@@ -551,6 +551,13 @@ select{cursor:pointer}
 
   <!-- 定期保養 -->
   <div id="mpanel-routine" style="display:none">
+    <div id="routine-alert-banner" style="display:none" class="alert-banner">
+      <span style="font-size:18px">🛠</span>
+      <div class="alert-banner-body">
+        <div class="alert-banner-title">保養即將到期提醒</div>
+        <div id="routine-alert-list"></div>
+      </div>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center">
       <div style="margin-left:auto">
         <button class="btn btn-primary" onclick="openRoutineModal()">
@@ -702,16 +709,25 @@ select{cursor:pointer}
       <div class="form-row" id="p-vacant-since-row" style="display:none"><label>閒置起始日</label><input type="date" id="p-vacant-since"></div>
       <div class="form-row" id="p-start-row"><label>租約起始</label><input type="date" id="p-start"></div>
       <div class="form-row" id="p-end-row"><label>租約到期</label><input type="date" id="p-end"></div>
+      <div class="form-row"><label>出租類型</label>
+        <select id="p-rental-type" onchange="onRentalTypeChange()">
+          <option value="general">一般出租</option>
+          <option value="public">公益出租人</option>
+          <option value="social">社會住宅</option>
+        </select>
+      </div>
       <div class="form-row span2" id="p-notary-row">
         <label style="margin-bottom:6px">合約公證</label>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;width:auto">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;width:auto" id="p-notary-label">
             <input type="checkbox" id="p-notarized" onchange="toggleNotaryDate()" style="width:16px;height:16px"> 已公證
           </label>
-          <div id="p-notary-date-row" style="display:none;flex:1;display:none">
+          <span id="p-notary-lock" style="display:none;font-size:12px;color:var(--text3)">🔒 社會住宅必要條件</span>
+          <div id="p-notary-date-row" style="display:none;flex:1">
             <input type="date" id="p-notary-date" placeholder="公證日期">
           </div>
         </div>
+        <div id="p-notary-hint" style="font-size:11px;color:var(--text3);margin-top:6px"></div>
       </div>
       <div class="form-row span2"><label>物件照片</label>
         <div style="display:flex;align-items:center;gap:12px">
@@ -1062,8 +1078,10 @@ async function loadData() {
   if (!state.maints) state.maints = [];
   if (!state.maintHistory) state.maintHistory = [];
   if (!state.routines) state.routines = [];
+  if (!state.notifySnoozed) state.notifySnoozed = {};
   if (state.properties.length === 0) seedDemo();
   setSaveIndicator('saved');
+  runDailyNotifyCheck();
 }
 
 function saveData() {
@@ -1524,12 +1542,14 @@ function renderProperties(){
       const d=daysUntilExpiry(p.end);
       const cls = d<0?'days-expired': d<=14?'days-urgent':'days-warn';
       const label = d<0?`已過期 ${Math.abs(d)} 天`:`還有 ${d} 天到期`;
-      return `<div class="alert-item">
+      const snoozed = isSnoozed('lease', p.id);
+      return `<div class="alert-item" style="flex-wrap:wrap;gap:6px;align-items:center">
         <span class="days-badge ${cls}">${label}</span>
         <strong>${p.name}</strong>
         ${p.tenant?`・${p.tenant}`:''}
         ・到期日 ${p.end}
         <button class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="openPropModal('${p.id}')">編輯更新</button>
+        ${snoozeBtnHtml('lease', p.id, 30, snoozed)}
       </div>`;
     }).join('');
   } else {
@@ -1547,12 +1567,14 @@ function renderProperties(){
       const days = daysSince(p.vacantSince);
       const statusLabel = (p.status==='repair')?'整修中':'閒置中';
       const daysLabel = days!==null&&days>0?`已 ${days} 天`:'';
-      return `<div class="alert-item">
+      const snoozed = isSnoozed('vacant', p.id);
+      return `<div class="alert-item" style="flex-wrap:wrap;gap:6px;align-items:center">
         <span class="days-badge ${p.status==='repair'?'days-warn':'days-expired'}">${statusLabel}${daysLabel?' · '+daysLabel:''}</span>
         <strong>${p.name}</strong>
         ${p.vacantSince?`・起始 ${p.vacantSince}`:''}
         ${p.note?`・${p.note}`:''}
         <button class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="openPropModal('${p.id}')">更新狀態</button>
+        ${days!==null&&days>=30 ? snoozeBtnHtml('vacant', p.id, 30, snoozed) : ''}
       </div>`;
     }).join('');
   } else {
@@ -1578,6 +1600,10 @@ function renderProperties(){
       <div class="prop-info">
         <div class="prop-name">${p.name}</div>
         <div class="prop-sub">${p.addr}${!isVacant&&p.tenant?' ∙ 租客：'+p.tenant:''}</div>
+        <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+          ${p.rentalType==='social'?'<span class="badge" style="background:var(--blue-bg);color:var(--blue-mid);font-size:11px">社會住宅</span>':p.rentalType==='public'?'<span class="badge" style="background:var(--green-bg);color:var(--green-mid);font-size:11px">公益出租人</span>':''}
+          ${p.notarized?'<span class="badge" style="background:var(--surface2);color:var(--text2);font-size:11px">已公證</span>':''}
+        </div>
         <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           ${leaseStatusBadge(p)}
           ${!isVacant&&p.end?`<span style="font-size:11px;color:var(--text3)">租約 ${p.start||'?'} ～ ${p.end}</span>`:''}
@@ -1716,14 +1742,13 @@ function requestNotifyPermission(){
 }
 const notifyTimers={};
 function scheduleNotifications(){
-  // clear existing timers
   Object.values(notifyTimers).forEach(t=>clearTimeout(t));
   const now=Date.now();
   (state.maints||[]).forEach(m=>{
     if(m.status==='done'||!m.scheduleDate) return;
     const target=new Date(m.scheduleDate).getTime();
     const diff=target-now;
-    if(diff>0 && diff<7*24*60*60*1000){ // within 7 days
+    if(diff>0 && diff<7*24*60*60*1000){
       notifyTimers[m.id]=setTimeout(()=>{
         if(Notification.permission==='granted'){
           const p=getProp(m.propId);
@@ -1735,6 +1760,199 @@ function scheduleNotifications(){
       }, diff);
     }
   });
+}
+
+/* ══════════════════════════════════════════
+   分層 LINE 通知系統
+   ══════════════════════════════════════════ */
+
+// LINE 通知設定
+const LINE_TOKEN = 'CdmVa9ZIXeexrecOwBSKPtCwyp2T0YXZR6iNIYhQEu/VAAsVP73LndaHKuPpR9YVXB9o8XHNw5UXAwpDjp0pa4f4mRQ6aE6vIQhDieNm/r+vg2i2wuB8hFqrKa+JNDpWTkkZhfOpnmdFJlofZ9XgfQdB04t89/1O/w1cDnyilFU=';
+const LINE_USER_ID = 'U6f292466245cc39e490fd64c1bcd77bb';
+
+// 暫停鍵格式：notify_{type}_{id}  例：notify_lease_p1、notify_maint_m2
+function snoozeKey(type, id){ return `notify_${type}_${id}`; }
+
+// 檢查是否在暫停期內
+function isSnoozed(type, id){
+  if(!state.notifySnoozed) state.notifySnoozed = {};
+  const key = snoozeKey(type, id);
+  const until = state.notifySnoozed[key];
+  if(!until) return false;
+  if(Date.now() < until) return true;
+  // 過期自動清除
+  delete state.notifySnoozed[key];
+  return false;
+}
+
+// 設定暫停（days 天）
+function snooze(type, id, days){
+  if(!state.notifySnoozed) state.notifySnoozed = {};
+  state.notifySnoozed[snoozeKey(type, id)] = Date.now() + days * 86400000;
+  saveData();
+  // 重新 render 各頁面 banner
+  if(currentPage==='properties') renderProperties();
+  if(currentPage==='maintenance') showMaintTab('pending');
+  showToast('已暫停通知 ' + days + ' 天');
+}
+
+// 清除暫停（事件解決時）
+function clearSnooze(type, id){
+  if(!state.notifySnoozed) return;
+  delete state.notifySnoozed[snoozeKey(type, id)];
+}
+
+// 暫停按鈕 HTML
+function snoozeBtnHtml(type, id, days, alreadySnoozed){
+  if(alreadySnoozed){
+    const until = state.notifySnoozed?.[snoozeKey(type,id)];
+    const untilStr = until ? new Date(until).toLocaleDateString('zh-TW') : '';
+    return `<span style="font-size:11px;color:var(--text3);padding:3px 8px;border-radius:100px;background:var(--surface2)">已暫停至 ${untilStr}</span>`;
+  }
+  return `<button class="btn btn-sm" style="font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface);border-color:var(--border2);color:var(--text2)" onclick="snooze('${type}','${id}',${days})">知道了，先暫停通知</button>`;
+}
+
+// 判斷通知對象：社宅→管理員，非社宅→代管
+function getNotifyTarget(prop){
+  if(!prop) return 'admin';
+  return prop.rentalType === 'social' ? 'admin' : 'staff';
+}
+
+// 透過 GAS 發送 LINE 訊息
+async function sendLineNotify(msg, target){
+  // target: 'admin' 或 'staff'（目前都送給管理員，未來可擴充代管 token）
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'line_notify',
+        key: GAS_KEY,
+        token: LINE_TOKEN,
+        userId: LINE_USER_ID,
+        message: msg,
+        target: target,
+      }),
+    });
+  } catch(e) {
+    console.warn('LINE 通知發送失敗', e);
+  }
+}
+
+// 記錄上次通知時間，避免重複發送
+function getLastNotified(type, id){ 
+  const key = `lastNotify_${type}_${id}`;
+  return parseInt(localStorage.getItem(key)||'0');
+}
+function setLastNotified(type, id){ 
+  localStorage.setItem(`lastNotify_${type}_${id}`, Date.now().toString());
+}
+
+// 每日通知檢查（頁面載入時執行一次）
+async function runDailyNotifyCheck(){
+  // 今天是否已執行過（避免重整頁面重複發送）
+  const todayKey = 'notifyCheckDate';
+  const today = new Date().toISOString().slice(0,10);
+  if(localStorage.getItem(todayKey) === today) return;
+  localStorage.setItem(todayKey, today);
+
+  const now = Date.now();
+  const msgs = [];
+
+  /* ── 1. 租約到期提醒 ── */
+  state.properties.forEach(p=>{
+    if((p.status||'rented')!=='rented') return;
+    const d = daysUntilExpiry(p.end);
+    if(d===null) return;
+    if(d > 30) return; // 超過30天不通知
+    if(isSnoozed('lease', p.id)) return;
+
+    // 間隔：剩14天內每3天，其他每7天
+    const interval = d <= 14 ? 3 : 7;
+    const last = getLastNotified('lease', p.id);
+    if(now - last < interval * 86400000) return;
+
+    const target = getNotifyTarget(p);
+    let msg;
+    if(d < 0) msg = `🚨 租約已到期 ${Math.abs(d)} 天\n物件：${p.name}\n租客：${p.tenant||'未設定'}\n到期日：${p.end}`;
+    else if(d <= 14) msg = `⚠️ 租約即將到期（剩 ${d} 天）\n物件：${p.name}\n租客：${p.tenant||'未設定'}\n到期日：${p.end}`;
+    else msg = `📋 租約提醒（剩 ${d} 天）\n物件：${p.name}\n租客：${p.tenant||'未設定'}\n到期日：${p.end}`;
+
+    msgs.push({ msg, target, type:'lease', id:p.id });
+  });
+
+  /* ── 2. 維修未跟進（超過3天pending）── */
+  const nowDate = new Date(); nowDate.setHours(0,0,0,0);
+  (state.maints||[]).forEach(m=>{
+    if(m.status==='done') return;
+    if(m.status!=='pending') return;
+    const d = new Date(m.date); d.setHours(0,0,0,0);
+    const days = Math.round((nowDate-d)/86400000);
+    if(days < 3) return;
+    if(isSnoozed('maint', m.id)) return;
+
+    const last = getLastNotified('maint', m.id);
+    if(now - last < 3 * 86400000) return;
+
+    const p = getProp(m.propId);
+    const target = getNotifyTarget(p);
+    const msg = `🔧 維修未跟進（已 ${days} 天）\n物件：${p?p.name:'?'}\n問題：${m.desc}\n回報日：${m.date}`;
+    msgs.push({ msg, target, type:'maint', id:m.id });
+  });
+
+  /* ── 3. 保養快到期（14天內）── */
+  (state.routines||[]).forEach(r=>{
+    const next = nextRoutineDate(r);
+    const nextD = new Date(next); nextD.setHours(0,0,0,0);
+    const days = Math.round((nextD-nowDate)/86400000);
+    if(days > 14 || days < 0) return;
+    if(isSnoozed('routine', r.id)) return;
+
+    const last = getLastNotified('routine', r.id);
+    if(now - last < 14 * 86400000) return; // 只通知一次
+
+    const p = getProp(r.propId);
+    const target = getNotifyTarget(p);
+    const msg = `🛠 定期保養提醒（剩 ${days} 天）\n物件：${p?p.name:'?'}\n保養項目：${r.item}\n預計日期：${next}`;
+    msgs.push({ msg, target, type:'routine', id:r.id });
+  });
+
+  /* ── 4. 物件閒置超過30天 ── */
+  state.properties.forEach(p=>{
+    if((p.status||'rented')==='rented') return;
+    const days = daysSince(p.vacantSince);
+    if(days===null || days < 30) return;
+    if(isSnoozed('vacant', p.id)) return;
+
+    const last = getLastNotified('vacant', p.id);
+    if(now - last < 30 * 86400000) return; // 只通知一次
+
+    const statusLabel = p.status==='repair'?'整修中':'閒置中';
+    const msg = `🏠 物件${statusLabel}已 ${days} 天\n物件：${p.name}\n起始日：${p.vacantSince||'未設定'}`;
+    msgs.push({ msg, target:'admin', type:'vacant', id:p.id });
+  });
+
+  // 發送所有通知
+  for(const m of msgs){
+    await sendLineNotify(m.msg, m.target);
+    setLastNotified(m.type, m.id);
+    await new Promise(r=>setTimeout(r,300)); // 間隔300ms避免限流
+  }
+}
+
+// Toast 提示（輕量級）
+function showToast(msg){
+  let toast = document.getElementById('app-toast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--surface);padding:10px 20px;border-radius:100px;font-size:13px;z-index:99999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(()=>{ toast.style.opacity='0'; }, 2500);
 }
 
 /* ── Maintenance ── */
@@ -1776,7 +1994,12 @@ function renderMaintPending(){
       const p=getProp(m.propId);
       const d=new Date(m.date); d.setHours(0,0,0,0);
       const days=Math.round((now-d)/86400000);
-      return `<div class="alert-item"><span class="days-badge days-urgent">超過 ${days} 天</span><strong>${p?p.name:'?'}</strong> · ${m.desc}</div>`;
+      const snoozed = isSnoozed('maint', m.id);
+      return `<div class="alert-item" style="flex-wrap:wrap;gap:6px;align-items:center">
+        <span class="days-badge days-urgent">超過 ${days} 天</span>
+        <strong>${p?p.name:'?'}</strong> · ${m.desc}
+        ${snoozeBtnHtml('maint', m.id, 3, snoozed)}
+      </div>`;
     }).join('');
   } else {
     banner.style.display='none';
@@ -1859,12 +2082,36 @@ function renderRoutine(){
   const list=document.getElementById('routine-list');
   if(!items.length){ list.innerHTML='<div style="text-align:center;color:var(--text3);padding:2rem;font-size:13px">尚無保養項目</div>'; return; }
 
-  // check for alerts
-  const alerts=items.filter(r=>{
+  // 保養即將到期 banner（14天內）
+  const alertBanner = document.getElementById('routine-alert-banner');
+  const alertList = document.getElementById('routine-alert-list');
+  const alerts = items.filter(r=>{
     const next=new Date(nextRoutineDate(r)); next.setHours(0,0,0,0);
     const days=Math.round((next-now)/86400000);
-    return days<=3;
+    return days<=14;
   });
+  if(alertBanner && alertList){
+    if(alerts.length){
+      alertBanner.style.display='flex';
+      alertList.innerHTML = alerts.map(r=>{
+        const next=nextRoutineDate(r);
+        const nextD=new Date(next); nextD.setHours(0,0,0,0);
+        const days=Math.round((nextD-now)/86400000);
+        const p=getProp(r.propId);
+        const snoozed=isSnoozed('routine',r.id);
+        const label=days<0?`已過期 ${Math.abs(days)} 天`:`還有 ${days} 天`;
+        return `<div class="alert-item" style="flex-wrap:wrap;gap:6px;align-items:center">
+          <span class="days-badge ${days<0?'days-expired':'days-warn'}">${label}</span>
+          <strong>${p?p.name:'?'}</strong> · ${r.item}
+          ${snoozeBtnHtml('routine', r.id, 14, snoozed)}
+        </div>`;
+      }).join('');
+    } else {
+      alertBanner.style.display='none';
+    }
+  }
+
+  // check for nav badge
   const navBadge=document.getElementById('nav-maint-badge');
   if(alerts.length){ navBadge.style.display='inline-flex'; navBadge.textContent=(state.maints||[]).filter(m=>m.status!=='done'&&daysSinceDate(m.date)>2).length+alerts.length||alerts.length; }
 
@@ -1986,10 +2233,12 @@ function completeMaint(addHistory){
     });
     state.maints=(state.maints||[]).filter(x=>x.id!==id);
     saveData();
+    clearSnooze('maint', id);
     document.getElementById('modal-hist').classList.add('open');
     renderMaintPending();
   } else {
     state.maints=(state.maints||[]).filter(x=>x.id!==id);
+    clearSnooze('maint', id);
     saveData(); renderMaintPending();
   }
 }
@@ -2138,6 +2387,7 @@ function saveDoneRoutine(){
     kind:'routine',
   });
   saveData();
+  clearSnooze('routine', id);
   closeModal('modal-done-routine');
   renderRoutine();
   // 有費用 → 詢問建立支出帳目
@@ -2469,6 +2719,28 @@ function clearPhoto(){
   document.getElementById('p-photo-preview').innerHTML='<span style="font-size:11px;color:var(--text3)">無照片</span>';
   document.getElementById('p-photo-clear').style.display='none';
 }
+function onRentalTypeChange() {
+  const type = document.getElementById('p-rental-type').value;
+  const checkbox = document.getElementById('p-notarized');
+  const lockEl = document.getElementById('p-notary-lock');
+  const labelEl = document.getElementById('p-notary-label');
+  const hintEl = document.getElementById('p-notary-hint');
+  if (type === 'social') {
+    checkbox.checked = true;
+    checkbox.disabled = true;
+    lockEl.style.display = 'inline';
+    labelEl.style.opacity = '0.5';
+    hintEl.textContent = '社會住宅合約必須公證，無法取消';
+    hintEl.style.color = 'var(--text3)';
+  } else {
+    checkbox.disabled = false;
+    lockEl.style.display = 'none';
+    labelEl.style.opacity = '1';
+    hintEl.textContent = '可自行決定是否公證';
+    hintEl.style.color = 'var(--text3)';
+  }
+  toggleNotaryDate();
+}
 function toggleNotaryDate(){
   const checked = document.getElementById('p-notarized').checked;
   const row = document.getElementById('p-notary-date-row');
@@ -2491,6 +2763,8 @@ function openPropModal(id){
   document.getElementById('p-notarized').checked=p?!!p.notarized:false;
   document.getElementById('p-notary-date').value=p?(p.notaryDate||''):'';
   document.getElementById('p-notary-date-row').style.display=p&&p.notarized?'block':'none';
+  document.getElementById('p-rental-type').value=p?(p.rentalType||'general'):'general';
+  onRentalTypeChange();
   document.getElementById('p-line').value=p?(p.lineGroup||''):'';
   // photo
   const photoData = p?(p.photo||''):'';
@@ -2524,6 +2798,7 @@ function saveProp(){
     note: document.getElementById('p-note').value.trim(),
     waterFee: +document.getElementById('p-water-fee').value||0,
     elecEnabled: document.getElementById('p-elec-enabled').value==='1',
+    rentalType: document.getElementById('p-rental-type').value,
     notarized: notarized,
     notaryDate: notarized?document.getElementById('p-notary-date').value:'',
     lineGroup: document.getElementById('p-line').value.trim(),
@@ -2675,7 +2950,7 @@ function sendLoginAlert(username, type) {
   let msg = '';
   if (type === 'lockout') msg = `⚠️ 登入警告：帳號「${username}」輸入錯誤 ${MAX_ATTEMPTS} 次，已鎖定 ${LOCKOUT_MINUTES} 分鐘（${now}）`;
   if (type === 'repeated') msg = `🚨 安全警報：帳號「${username}」多次被鎖定，請注意是否有人嘗試攻擊（${now}）`;
-  if (msg) fetch(GAS_URL + '?action=notify&key=' + GAS_KEY + '&msg=' + encodeURIComponent(msg)).catch(()=>{});
+  if (msg) sendLineNotify(msg, 'admin');
 }
 
 let dataLoaded = false;
