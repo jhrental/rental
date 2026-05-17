@@ -355,6 +355,7 @@ select{cursor:pointer}
   <div class="nav-item" id="nav-accounts" onclick="showPage('accounts')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>帳號管理</span></div>
   <div class="nav-item" onclick="showPage('export')"><svg class="ico" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM12 11v6M9 15l3 3l3-3"/></svg><span>匯出報表</span></div>
   <div class="nav-item" id="nav-settings" onclick="showPage('settings')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>通知設定</span></div>
+  <div class="nav-item" id="nav-audit" onclick="showPage('audit')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>操作記錄</span></div>
   <div class="sidebar-footer">
     <div class="save-indicator" id="save-indicator"><svg class="ico" viewBox="0 0 24 24"><path d="M7 18a4.6 4.4 0 0 1 0-9 5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7H7"/><path d="M9 15l2 2l4-4"/></svg><span id="save-text">✓ 已儲存</span></div>
     <div style="margin-top:6px;color:var(--text3);font-size:12px">登入：<span id="current-user-label" style="color:var(--text2)"></span></div>
@@ -487,6 +488,40 @@ select{cursor:pointer}
   <div class="card" id="export-preview" style="display:none">
     <div class="card-title">預覽內容</div>
     <div id="export-preview-content"></div>
+  </div>
+</div>
+
+<!-- 操作記錄 -->
+<div class="page" id="page-audit" style="display:none">
+  <div class="page-title">操作記錄</div>
+  <div class="card">
+    <!-- 篩選列 -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+      <select id="audit-filter-user" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);flex:1;min-width:120px">
+        <option value="">所有人員</option>
+      </select>
+      <select id="audit-filter-action" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);flex:1;min-width:120px">
+        <option value="">所有動作</option>
+        <option value="login">登入</option>
+        <option value="logout">登出</option>
+        <option value="pwd_change">修改密碼</option>
+        <option value="prop_add">新增物件</option>
+        <option value="prop_edit">編輯物件</option>
+        <option value="prop_delete">刪除物件</option>
+        <option value="record_add">新增帳目</option>
+        <option value="record_edit">編輯帳目</option>
+        <option value="record_delete">刪除帳目</option>
+        <option value="maint_add">新增維修</option>
+        <option value="maint_edit">編輯維修</option>
+        <option value="maint_done">完成維修</option>
+        <option value="routine_add">新增保養</option>
+        <option value="routine_done">完成保養</option>
+        <option value="notify_settings">通知設定</option>
+      </select>
+      <input type="date" id="audit-filter-date" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text)">
+      <button class="btn btn-sm" onclick="document.getElementById('audit-filter-user').value='';document.getElementById('audit-filter-action').value='';document.getElementById('audit-filter-date').value='';renderAuditLog()">清除篩選</button>
+    </div>
+    <div id="audit-log-list"></div>
   </div>
 </div>
 
@@ -1251,6 +1286,7 @@ async function loadData() {
   if (!state.routines) state.routines = [];
   if (!state.notifySnoozed) state.notifySnoozed = {};
   if (!state.notifyConfig) state.notifyConfig = JSON.parse(JSON.stringify(NOTIFY_DEFAULTS));
+  if (!state.auditLog) state.auditLog = [];
   if (state.properties.length === 0) seedDemo();
   setSaveIndicator('saved');
   runDailyNotifyCheck();
@@ -1362,6 +1398,7 @@ function showPage(name) {
   if(name==='accounts'){ getRoles(); showAccountTab('accounts'); }
   if(name==='export') renderExportPage();
   if(name==='settings') renderSettingsPage();
+  if(name==='audit') renderAuditLog();
 }
 let viewMode = 'month'; // 'month' | 'quarter' | 'year'
 
@@ -1907,7 +1944,96 @@ function confirmCreateExpense(){
   closeModal('modal-expense-confirm');
 }
 
-/* ── 瀏覽器通知 ── */
+/* ══════════════════════════════════════════
+   操作記錄（Audit Log）
+   ══════════════════════════════════════════ */
+
+function addAuditLog(action, detail, propName) {
+  if (!state.auditLog) state.auditLog = [];
+  const entry = {
+    id: uid(),
+    ts: new Date().toISOString(),
+    user: currentUser ? (currentUser.displayName || currentUser.username) : '系統',
+    role: currentUser ? currentUser.role : 'system',
+    action,
+    detail: detail || '',
+    propName: propName || '',
+  };
+  state.auditLog.unshift(entry); // 最新的放最前面
+  if (state.auditLog.length > 500) state.auditLog = state.auditLog.slice(0, 500); // 最多保留500筆
+  saveData();
+}
+
+function renderAuditLog() {
+  const logs = state.auditLog || [];
+  const container = document.getElementById('audit-log-list');
+  if (!container) return;
+
+  // 篩選
+  const filterUser = document.getElementById('audit-filter-user')?.value || '';
+  const filterAction = document.getElementById('audit-filter-action')?.value || '';
+  const filterDate = document.getElementById('audit-filter-date')?.value || '';
+
+  let filtered = logs;
+  if (filterUser) filtered = filtered.filter(l => l.user === filterUser);
+  if (filterAction) filtered = filtered.filter(l => l.action === filterAction);
+  if (filterDate) filtered = filtered.filter(l => l.ts.slice(0,10) === filterDate);
+
+  // 更新使用者下拉
+  const userSel = document.getElementById('audit-filter-user');
+  if (userSel) {
+    const users = [...new Set(logs.map(l => l.user))];
+    const cur = userSel.value;
+    userSel.innerHTML = `<option value="">所有人員</option>` + users.map(u => `<option value="${u}" ${u===cur?'selected':''}>${u}</option>`).join('');
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--text3);padding:3rem;font-size:13px">尚無操作記錄</div>';
+    return;
+  }
+
+  const actionLabel = {
+    'login': '登入', 'logout': '登出', 'login_fail': '登入失敗', 'lock': '鎖定',
+    'pwd_change': '修改密碼',
+    'prop_add': '新增物件', 'prop_edit': '編輯物件', 'prop_delete': '刪除物件',
+    'record_add': '新增帳目', 'record_edit': '編輯帳目', 'record_delete': '刪除帳目',
+    'maint_add': '新增維修', 'maint_edit': '編輯維修', 'maint_done': '完成維修',
+    'routine_add': '新增保養', 'routine_edit': '編輯保養', 'routine_done': '完成保養',
+    'export': '匯出報表', 'notify_settings': '修改通知設定',
+  };
+  const actionColor = {
+    'login': '#1d9e75', 'logout': '#888', 'login_fail': '#d85a30', 'lock': '#d85a30',
+    'pwd_change': '#ba7517',
+    'prop_add': '#185fa5', 'prop_edit': '#185fa5', 'prop_delete': '#d85a30',
+    'record_add': '#1d9e75', 'record_edit': '#ba7517', 'record_delete': '#d85a30',
+    'maint_add': '#533ab7', 'maint_edit': '#533ab7', 'maint_done': '#1d9e75',
+    'routine_add': '#0f6e56', 'routine_edit': '#0f6e56', 'routine_done': '#1d9e75',
+    'export': '#888', 'notify_settings': '#888',
+  };
+
+  container.innerHTML = filtered.map(l => {
+    const dt = new Date(l.ts);
+    const dateStr = dt.toLocaleDateString('zh-TW');
+    const timeStr = dt.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+    const color = actionColor[l.action] || '#888';
+    const label = actionLabel[l.action] || l.action;
+    return `<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+      <div style="flex-shrink:0;text-align:right;min-width:80px">
+        <div style="font-size:12px;color:var(--text2);font-weight:500">${dateStr}</div>
+        <div style="font-size:11px;color:var(--text3)">${timeStr}</div>
+      </div>
+      <div style="flex-shrink:0;width:3px;height:36px;border-radius:2px;background:${color};margin-top:4px"></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:600;padding:2px 8px;border-radius:100px;background:${color}20;color:${color}">${label}</span>
+          <span style="font-size:13px;color:var(--text2)">${l.user}</span>
+          ${l.propName ? `<span style="font-size:12px;color:var(--text3)">・${l.propName}</span>` : ''}
+        </div>
+        ${l.detail ? `<div style="font-size:12px;color:var(--text3);margin-top:3px">${l.detail}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 function requestNotifyPermission(){
   if('Notification' in window && Notification.permission==='default'){
     Notification.requestPermission();
@@ -1996,6 +2122,7 @@ function saveNotifySettings() {
   });
   state.notifyConfig = cfg;
   saveData();
+  addAuditLog('notify_settings', '修改通知設定');
   showToast('通知設定已儲存');
 }
 
@@ -2502,12 +2629,18 @@ function saveMaint(){
   if(!item.date||!item.propId||!item.desc){alert('請填寫日期、物件與問題描述');return;}
   if(!state.maints) state.maints=[];
   const idx=state.maints.findIndex(m=>m.id===item.id);
+  const isNew = idx < 0;
+  const p = getProp(item.propId);
   if(idx>=0) state.maints[idx]=item; else state.maints.push(item);
+  addAuditLog(isNew ? 'maint_add' : 'maint_edit', item.desc, p?.name||'');
   saveData(); closeModal('modal-maint'); renderMaintPending(); scheduleNotifications();
 }
 function deleteMaint(id){
   if(!confirm('確定刪除？'))return;
+  const m=(state.maints||[]).find(x=>x.id===id);
+  const p = m ? getProp(m.propId) : null;
   state.maints=(state.maints||[]).filter(m=>m.id!==id);
+  addAuditLog('maint_edit', `刪除維修：${m?.desc||''}`, p?.name||'');
   saveData(); renderMaintPending();
 }
 function openCompleteModal(id){
@@ -2543,11 +2676,13 @@ function completeMaint(addHistory){
     state.maints=(state.maints||[]).filter(x=>x.id!==id);
     saveData();
     clearSnooze('maint', id);
+    addAuditLog('maint_done', `完成維修：${m.desc}`, getProp(m.propId)?.name||'');
     document.getElementById('modal-hist').classList.add('open');
     renderMaintPending();
   } else {
     state.maints=(state.maints||[]).filter(x=>x.id!==id);
     clearSnooze('maint', id);
+    addAuditLog('maint_done', `完成維修：${m.desc}`, getProp(m.propId)?.name||'');
     saveData(); renderMaintPending();
   }
 }
@@ -2660,12 +2795,16 @@ function saveRoutine(){
   if(!item.propId||!item.item){alert('請填寫物件與保養項目');return;}
   if(!state.routines) state.routines=[];
   const idx=state.routines.findIndex(r=>r.id===item.id);
+  const isNew = idx < 0;
   if(idx>=0) state.routines[idx]=item; else state.routines.push(item);
+  addAuditLog(isNew ? 'routine_add' : 'routine_edit', item.item, getProp(item.propId)?.name||'');
   saveData(); closeModal('modal-routine'); renderRoutine();
 }
 function deleteRoutine(id){
   if(!confirm('確定刪除？'))return;
+  const r=(state.routines||[]).find(x=>x.id===id);
   state.routines=(state.routines||[]).filter(r=>r.id!==id);
+  addAuditLog('routine_edit', `刪除保養：${r?.item||''}`, getProp(r?.propId)?.name||'');
   saveData(); renderRoutine();
 }
 function doneRoutine(id){
@@ -2697,6 +2836,7 @@ function saveDoneRoutine(){
   });
   saveData();
   clearSnooze('routine', id);
+  addAuditLog('routine_done', `完成保養：${r.item}`, getProp(r.propId)?.name||'');
   closeModal('modal-done-routine');
   renderRoutine();
   // 有費用 → 詢問建立支出帳目
@@ -2988,7 +3128,12 @@ function saveRecord(){
   };
   if(!rec.date||!rec.propId||!rec.amount){ alert('請填寫日期、物件與金額'); return; }
   const idx=state.records.findIndex(r=>r.id===rec.id);
+  const isNew = idx < 0;
   if(idx>=0) state.records[idx]=rec; else state.records.push(rec);
+  const p = getProp(rec.propId);
+  addAuditLog(isNew ? 'record_add' : 'record_edit',
+    `${rec.type==='in'?'收入':'支出'} ${rec.cat} $${rec.amount}`,
+    p?.name||'');
   saveData();
   closeModal('modal-record');
   populateMonthSelects();
@@ -2997,7 +3142,10 @@ function saveRecord(){
 }
 function deleteRecord(id){
   if(!confirm('確定刪除此筆帳目？')) return;
+  const rec = state.records.find(r=>r.id===id);
+  const p = rec ? getProp(rec.propId) : null;
   state.records=state.records.filter(r=>r.id!==id);
+  addAuditLog('record_delete', `刪除 ${rec?.cat||''} $${rec?.amount||''}`, p?.name||'');
   saveData();
   renderRecords();
 }
@@ -3115,7 +3263,9 @@ function saveProp(){
   };
   if(!prop.name||!prop.addr){ alert('請填寫物件名稱與地址'); return; }
   const idx=state.properties.findIndex(p=>p.id===prop.id);
+  const isNew = idx < 0;
   if(idx>=0) state.properties[idx]=prop; else state.properties.push(prop);
+  addAuditLog(isNew ? 'prop_add' : 'prop_edit', isNew ? '新增物件' : '編輯物件資料', prop.name);
   saveData();
   closeModal('modal-prop');
   populatePropSelects();
@@ -3123,7 +3273,9 @@ function saveProp(){
 }
 function deleteProp(id){
   if(!confirm('確定刪除此物件？（相關帳目不會刪除）')) return;
+  const prop = state.properties.find(p=>p.id===id);
   state.properties=state.properties.filter(p=>p.id!==id);
+  addAuditLog('prop_delete', '刪除物件', prop?.name||'');
   saveData();
   populatePropSelects();
   renderProperties();
@@ -3300,6 +3452,7 @@ function doLogin() {
     document.getElementById('login-error').textContent = '';
     document.getElementById('login-attempts').style.display = 'none';
     applyPermissions();
+    addAuditLog('login', '登入系統');
   } else {
     // 登入失敗
     const attempts = getAttempts(username) + 1;
@@ -3339,6 +3492,8 @@ function applyPermissions() {
   // 通知設定只有管理員看得到
   const navSet = document.getElementById('nav-settings');
   if (navSet) navSet.style.display = isAdmin ? 'flex' : 'none';
+  const navAudit = document.getElementById('nav-audit');
+  if (navAudit) navAudit.style.display = isAdmin ? 'flex' : 'none';
 
   // 根據權限顯示/隱藏導覽項目
   document.querySelectorAll('.nav-item').forEach(el => {
@@ -3379,6 +3534,7 @@ function checkSession() {
 }
 
 function lockApp() {
+  addAuditLog('logout', '登出／鎖定系統');
   sessionStorage.removeItem(SESSION_KEY);
   currentUser = null;
   document.getElementById('app-shell').style.display = 'none';
@@ -3632,7 +3788,9 @@ function saveResetPassword() {
   const newPw = document.getElementById('reset-pw-input').value;
   if (newPw.length < 6) { alert('密碼至少6個字元'); return; }
   const acc = state.accounts.find(a => a.username === username);
-  if (acc) { acc.password = hashPassword(newPw); saveData(); }
+  if (acc) { acc.password = hashPassword(newPw); saveData();
+    addAuditLog('pwd_change', `管理員重設「${username}」的密碼`);
+  }
   closeModal('modal-reset-pw');
   alert('密碼已重設');
 }
@@ -3658,6 +3816,7 @@ function saveChangePassword() {
   acc.password = hashPassword(newPw);
   currentUser = acc;
   saveData();
+  addAuditLog('pwd_change', '修改自己的登入密碼');
   closeModal('modal-change-pw');
   alert('密碼修改成功');
 }
