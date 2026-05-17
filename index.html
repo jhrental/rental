@@ -302,6 +302,20 @@ select{cursor:pointer}
   .nav-item span{font-size:11px}
   .stats-grid{grid-template-columns:1fr 1fr}
 }
+
+/* FAB 快速記帳 */
+.fab{position:fixed;bottom:24px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--blue-mid);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(24,95,165,0.4);z-index:999;transition:transform .15s;font-family:inherit}
+.fab:hover{transform:scale(1.06)}
+.fab:active{transform:scale(0.95)}
+.fab svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.quick-sheet-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000}
+.quick-sheet-backdrop.open{display:block}
+.quick-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:16px 16px 0 0;padding:1.25rem 1.25rem 2rem;z-index:1001;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.quick-sheet.open{transform:translateY(0)}
+.quick-sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1.25rem}
+.quick-cat-btn{padding:6px 14px;border-radius:100px;font-size:13px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.quick-cat-btn.active{background:var(--blue-bg);color:var(--blue-mid);border-color:var(--blue-mid);font-weight:600}
+.record-photo-thumb{width:60px;height:45px;border-radius:var(--radius-sm);object-fit:cover;cursor:pointer;border:0.5px solid var(--border)}
 </style>
 </head>
 <body>
@@ -795,7 +809,83 @@ select{cursor:pointer}
 </main>
 </div>
 
-<!-- Modal：帳目 -->
+<!-- FAB 快速記帳按鈕 -->
+<button class="fab" id="fab-quick" onclick="openQuickSheet()" title="快速記帳" style="display:none">
+  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- 快速記帳底部滑出 -->
+<div class="quick-sheet-backdrop" id="quick-sheet-backdrop" onclick="closeQuickSheet()"></div>
+<div class="quick-sheet" id="quick-sheet">
+  <div class="quick-sheet-handle"></div>
+  <div style="font-size:16px;font-weight:600;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between">
+    <span>快速記帳</span>
+    <button onclick="closeQuickSheet()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;padding:4px;font-size:20px;line-height:1">×</button>
+  </div>
+
+  <!-- 物件 -->
+  <div class="form-row">
+    <label>物件</label>
+    <select id="qs-prop"></select>
+  </div>
+
+  <!-- 類別快選 -->
+  <div class="form-row">
+    <label>費用類別</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="qs-cat-btns">
+      <button class="quick-cat-btn active" onclick="qsCatSelect(this,'電費')">電費</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'水費')">水費</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'瓦斯')">瓦斯</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'網路')">網路</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'第四台')">第四台</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'洗樓梯')">洗樓梯</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'洗水塔')">洗水塔</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'修繕費')">修繕費</button>
+      <button class="quick-cat-btn" onclick="qsCatSelect(this,'其他')">其他</button>
+    </div>
+    <input type="hidden" id="qs-cat" value="電費">
+  </div>
+
+  <!-- 金額 + 日期 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-row">
+      <label>金額</label>
+      <input type="number" id="qs-amount" placeholder="0" min="0">
+    </div>
+    <div class="form-row">
+      <label>日期</label>
+      <input type="date" id="qs-date">
+    </div>
+  </div>
+
+  <!-- 備註 -->
+  <div class="form-row">
+    <label>備註（選填）</label>
+    <input type="text" id="qs-note" placeholder="例：5月電費">
+  </div>
+
+  <!-- 附照片 -->
+  <div class="form-row">
+    <label>附上帳單照片（選填）</label>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+      <button class="btn btn-sm" onclick="document.getElementById('qs-photo-input').click()">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        拍照 / 選圖
+      </button>
+      <input type="file" id="qs-photo-input" accept="image/*" capture="environment" style="display:none" onchange="qsPhotoPreview(this)">
+      <div id="qs-photo-preview" style="display:none;position:relative">
+        <img id="qs-photo-img" style="width:64px;height:48px;border-radius:6px;object-fit:cover;border:0.5px solid var(--border)">
+        <button onclick="qsClearPhoto()" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red-mid);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0">×</button>
+      </div>
+    </div>
+    <input type="hidden" id="qs-photo">
+  </div>
+
+  <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:15px;margin-top:8px" onclick="saveQuickRecord()">
+    <svg class="ico" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    確認建立支出帳目
+  </button>
+</div>
 <div class="modal-backdrop" id="modal-record">
   <div class="modal" style="width:500px">
     <div class="modal-title" id="modal-rec-title">新增帳目</div>
@@ -812,12 +902,12 @@ select{cursor:pointer}
 
     <div id="record-form-body" style="display:none">
       <div class="form-grid">
-        <div class="form-row"><label>日期</label><input type="date" id="r-date"></div>
-        <div class="form-row"><label>物件</label><select id="r-prop" onchange="onPropChange()"></select></div>
-        <div class="form-row span2"><label>項目</label>
+        <div class="form-row"><input type="date" id="r-date"></div>
+        <div class="form-row"><select id="r-prop" onchange="onPropChange()"></select></div>
+        <div class="form-row span2">
           <select id="r-cat" onchange="onCatChange()"></select>
         </div>
-        <div class="form-row span2" id="custom-cat-row" style="display:none"><label>自訂項目名稱</label><input type="text" id="r-custom-cat" placeholder="輸入項目"></div>
+        <div class="form-row span2" id="custom-cat-row" style="display:none"><input type="text" id="r-custom-cat" placeholder="自訂項目名稱"></div>
 
         <!-- 水費提示 -->
         <div class="form-row span2" id="water-hint-row" style="display:none">
@@ -846,8 +936,27 @@ select{cursor:pointer}
           </div>
         </div>
 
-        <div class="form-row"><label>金額（元）</label><input type="number" id="r-amount" placeholder="0" min="0"></div>
-        <div class="form-row span2"><label>備註</label><input type="text" id="r-note" placeholder="選填"></div>
+        <!-- 金額 + 附照片並排 -->
+        <div class="form-row" style="grid-column:1/-1">
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="position:relative;flex:1">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text3)">$</span>
+              <input type="number" id="r-amount" placeholder="金額" min="0" style="padding-left:24px">
+            </div>
+            <button type="button" class="btn btn-sm" onclick="document.getElementById('r-photo-input').click()" style="white-space:nowrap;flex-shrink:0">
+              <svg class="ico" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              附照片
+            </button>
+            <input type="file" id="r-photo-input" accept="image/*" capture="environment" style="display:none" onchange="rPhotoPreview(this)">
+            <div id="r-photo-preview" style="display:none;position:relative;align-items:center;flex-shrink:0">
+              <img id="r-photo-img" style="width:56px;height:42px;border-radius:6px;object-fit:cover;border:0.5px solid var(--border)">
+              <button type="button" onclick="rClearPhoto()" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red-mid);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0">×</button>
+            </div>
+          </div>
+          <input type="hidden" id="r-photo">
+        </div>
+
+        <div class="form-row span2"><input type="text" id="r-note" placeholder="備註（選填）"></div>
 
         <!-- 情境引導：分攤到多個物件（支出時才出現） -->
         <div class="form-row span2" id="split-suggest-row" style="display:none">
@@ -2034,6 +2143,91 @@ function renderAuditLog() {
     </div>`;
   }).join('');
 }
+/* ══════════════════════════════════════════
+   快速記帳（FAB）
+   ══════════════════════════════════════════ */
+
+function openQuickSheet(){
+  const sel = document.getElementById('qs-prop');
+  sel.innerHTML = state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  document.getElementById('qs-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('qs-amount').value = '';
+  document.getElementById('qs-note').value = '';
+  qsClearPhoto();
+  document.querySelectorAll('.quick-cat-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.getElementById('qs-cat').value = '電費';
+  document.getElementById('quick-sheet-backdrop').classList.add('open');
+  document.getElementById('quick-sheet').classList.add('open');
+  setTimeout(()=>document.getElementById('qs-amount').focus(), 350);
+}
+
+function closeQuickSheet(){
+  document.getElementById('quick-sheet-backdrop').classList.remove('open');
+  document.getElementById('quick-sheet').classList.remove('open');
+}
+
+function qsCatSelect(btn, cat){
+  document.querySelectorAll('.quick-cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('qs-cat').value = cat;
+}
+
+function qsPhotoPreview(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    document.getElementById('qs-photo').value = e.target.result;
+    document.getElementById('qs-photo-img').src = e.target.result;
+    document.getElementById('qs-photo-preview').style.display = 'flex';
+  };
+  reader.readAsDataURL(file);
+}
+
+function qsClearPhoto(){
+  document.getElementById('qs-photo').value = '';
+  document.getElementById('qs-photo-preview').style.display = 'none';
+  const inp = document.getElementById('qs-photo-input');
+  if(inp) inp.value = '';
+}
+
+function rPhotoPreview(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    document.getElementById('r-photo').value = e.target.result;
+    document.getElementById('r-photo-img').src = e.target.result;
+    document.getElementById('r-photo-preview').style.display = 'flex';
+  };
+  reader.readAsDataURL(file);
+}
+function rClearPhoto(){
+  document.getElementById('r-photo').value = '';
+  document.getElementById('r-photo-preview').style.display = 'none';
+  document.getElementById('r-photo-input').value = '';
+}
+function saveQuickRecord(){
+  const propId = document.getElementById('qs-prop').value;
+  const amount = +document.getElementById('qs-amount').value;
+  const date = document.getElementById('qs-date').value;
+  const cat = document.getElementById('qs-cat').value;
+  const note = document.getElementById('qs-note').value.trim();
+  const photo = document.getElementById('qs-photo').value;
+  if(!propId){ showToast('請選擇物件'); return; }
+  if(!amount){ showToast('請填寫金額'); return; }
+  if(!date){ showToast('請填寫日期'); return; }
+  const rec = { id:uid(), date, propId, type:'out', cat:cat||'其他', amount, note, photo:photo||'' };
+  state.records.push(rec);
+  const p = getProp(propId);
+  addAuditLog('record_add', `快速記帳 ${cat} $${amount}`, p?.name||'');
+  saveData();
+  closeQuickSheet();
+  showToast('✅ 支出帳目已建立');
+  if(currentPage==='records') renderRecords();
+  if(currentPage==='overview') renderOverview();
+}
+
 function requestNotifyPermission(){
   if('Notification' in window && Notification.permission==='default'){
     Notification.requestPermission();
@@ -3098,6 +3292,9 @@ function openRecordModal(id){
     else{ document.getElementById('r-cat').value='自訂...'; document.getElementById('r-custom-cat').value=r.cat; }
     document.getElementById('r-amount').value=r.amount;
     document.getElementById('r-note').value=r.note;
+    // 照片
+    if(r.photo){ document.getElementById('r-photo').value=r.photo; document.getElementById('r-photo-img').src=r.photo; document.getElementById('r-photo-preview').style.display='flex'; }
+    else { rClearPhoto(); }
   } else {
     document.getElementById('type-picker').style.display='flex';
     document.getElementById('record-form-body').style.display='none';
@@ -3108,6 +3305,7 @@ function openRecordModal(id){
     document.getElementById('r-note').value='';
     document.getElementById('r-custom-cat').value='';
     document.getElementById('r-prop').closest('.form-row').style.display='flex';
+    rClearPhoto();
   }
   document.getElementById('r-edit-id').value=id||'';
   onCatChange();
@@ -3125,6 +3323,7 @@ function saveRecord(){
     cat: cat || '其他',
     amount: +document.getElementById('r-amount').value,
     note: document.getElementById('r-note').value.trim(),
+    photo: document.getElementById('r-photo')?.value || '',
   };
   if(!rec.date||!rec.propId||!rec.amount){ alert('請填寫日期、物件與金額'); return; }
   const idx=state.records.findIndex(r=>r.id===rec.id);
@@ -3494,6 +3693,9 @@ function applyPermissions() {
   if (navSet) navSet.style.display = isAdmin ? 'flex' : 'none';
   const navAudit = document.getElementById('nav-audit');
   if (navAudit) navAudit.style.display = isAdmin ? 'flex' : 'none';
+  // FAB 快速記帳 - 登入後顯示
+  const fab = document.getElementById('fab-quick');
+  if (fab) fab.style.display = 'flex';
 
   // 根據權限顯示/隱藏導覽項目
   document.querySelectorAll('.nav-item').forEach(el => {
