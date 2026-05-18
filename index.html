@@ -316,6 +316,14 @@ select{cursor:pointer}
 
 #p-dates-row input[type="date"]{width:100%;box-sizing:border-box;min-width:0}
 
+.prop-desktop{display:flex!important}
+.prop-mobile{display:none!important}
+@media(max-width:700px){
+  .prop-desktop{display:none!important}
+  .prop-mobile{display:flex!important}
+  .prop-mobile:last-child{flex-shrink:0}
+}
+
 /* Alert 電腦/手機詳細度 */
 .alert-tenant{display:inline}
 .alert-date{display:inline}
@@ -1265,6 +1273,39 @@ select{cursor:pointer}
   </div>
 </div>
 
+<!-- Modal：查看物件 -->
+<div class="modal-backdrop" id="modal-prop-view">
+  <div class="modal" style="width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div class="modal-title" id="view-name" style="margin:0"></div>
+        <div id="view-status-badge" style="margin-top:4px"></div>
+      </div>
+      <button onclick="closeModal('modal-prop-view')" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:22px;line-height:1;padding:4px">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px" id="view-body">
+      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">地址</span><span style="font-size:14px;color:var(--text)" id="view-addr"></span></div>
+      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">租客</span><span style="font-size:14px;color:var(--text)" id="view-tenant"></span></div>
+      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">月租金</span><span style="font-size:14px;font-weight:500;color:var(--blue-mid)" id="view-rent"></span></div>
+      <div style="border-top:0.5px solid var(--border);margin:4px 0"></div>
+      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">合約起始</span><span style="font-size:14px;color:var(--text)" id="view-start"></span></div>
+      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">合約到期</span><span style="font-size:14px;color:var(--text)" id="view-end"></span></div>
+      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">出租類型</span><span style="font-size:14px;color:var(--text)" id="view-type"></span></div>
+      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">公證合約</span><span style="font-size:14px;color:var(--text)" id="view-notary"></span></div>
+      <div style="display:flex;gap:8px" id="view-note-row"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">備註</span><span style="font-size:14px;color:var(--text2)" id="view-note"></span></div>
+      <div style="border-top:0.5px solid var(--border);margin:4px 0"></div>
+      <div style="display:flex;gap:8px" id="view-water-row"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">水費</span><span style="font-size:14px;color:var(--text)" id="view-water"></span></div>
+      <div style="display:flex;gap:8px" id="view-elec-row"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">電費</span><span style="font-size:14px;color:var(--text)" id="view-elec"></span></div>
+    </div>
+    <div class="modal-footer" style="margin-top:16px">
+      <button class="btn btn-danger" id="view-delete-btn">刪除</button>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="closeModal('modal-prop-view')">關閉</button>
+      <button class="btn btn-primary" id="view-edit-btn">編輯</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal：合約預覽 -->
 <div class="modal-backdrop" id="modal-contract">
   <div class="modal" style="width:680px;max-width:98vw">
@@ -1947,31 +1988,62 @@ function renderProperties(){
   list.innerHTML = state.properties.length ? state.properties.map((p,idx)=>{
     const status = p.status||'rented';
     const isVacant = status!=='rented';
-    const notaryBadge = p.notarized
-      ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--blue-bg);color:var(--blue-mid);font-weight:500">✓ 已公證${p.notaryDate?' '+p.notaryDate:''}</span>`
+    const d = daysUntilExpiry(p.end);
+    const isExpired = d!==null && d<0;
+    const isWarn = d!==null && d>=0 && d<=45;
+    const barColor = isVacant?'var(--border2)':isExpired?'var(--red-mid)':isWarn?'var(--amber-mid)':'var(--blue-mid)';
+    const borderColor = isExpired?'border-color:var(--red-mid);':isWarn?'border-color:var(--amber-mid);':'';
+
+    // status badge
+    const statusBadge = isVacant
+      ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--surface2);color:var(--text2);font-weight:600">${status==='repair'?'整修中':'閒置中'}</span>`
+      : isExpired
+        ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--red-bg);color:var(--red-mid);font-weight:600">已逾期</span>`
+        : isWarn
+          ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--amber-bg);color:var(--amber-mid);font-weight:600">剩 ${d}天</span>`
+          : '';
+
+    // type badges
+    const typeBadges = [
+      p.rentalType==='social' ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--blue-bg);color:var(--blue-mid);font-weight:500">社宅</span>` : '',
+      p.rentalType==='public' ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--green-bg);color:var(--green-mid);font-weight:500">公益</span>` : '',
+      p.notarized ? `<span style="font-size:11px;padding:2px 7px;border-radius:100px;background:var(--surface2);color:var(--text2);font-weight:500">公證</span>` : '',
+    ].filter(Boolean).join('');
+
+    const lineBtn = p.lineGroup
+      ? `<a href="${p.lineGroup}" target="_blank" class="btn btn-icon btn-sm" title="LINE" style="background:#06c755;border-color:#06c755;color:#fff;text-decoration:none"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.07 1.6 5.8 4.1 7.55V21l2.45-1.35C9.6 19.87 10.78 20 12 20c5.52 0 10-4.02 10-9S17.52 2 12 2zm1 13H8v-1.5h5V15zm3-3H8v-1.5h8V12zm0-3H8V7.5h8V9z"/></svg></a>`
       : '';
-    return `<div class="prop-row${isVacant?' is-vacant':''}" draggable="true" data-id="${p.id}">
+    const viewBtn = `<button class="btn btn-icon btn-sm" title="查看" onclick="openPropView('${p.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+
+    return `<div class="prop-row${isVacant?' is-vacant':''}" draggable="true" data-id="${p.id}" style="${borderColor}">
       <div class="drag-handle" title="拖曳可調整順序">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
       </div>
-      <div style="width:4px;border-radius:2px;align-self:stretch;background:${isVacant?'var(--border2)':'var(--blue-mid)'};flex-shrink:0;margin:0 4px"></div>
-      <div class="prop-info">
-        <div class="prop-name">${p.name}</div>
-        <div class="prop-sub">${p.addr}</div>
-        ${!isVacant&&p.tenant?`<div style="font-size:12px;color:var(--text2);margin-top:2px">${p.tenant}</div>`:''}
-        <div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          ${leaseStatusBadge(p)}
-          ${p.rentalType==='social'?'<span class="badge" style="background:var(--blue-bg);color:var(--blue-mid);font-size:11px">社宅</span>':p.rentalType==='public'?'<span class="badge" style="background:var(--green-bg);color:var(--green-mid);font-size:11px">公益</span>':''}
-          ${p.notarized?'<span class="badge" style="background:var(--surface2);color:var(--text2);font-size:11px">公證</span>':''}
+      <div style="width:4px;border-radius:2px;align-self:stretch;background:${barColor};flex-shrink:0;margin:0 4px"></div>
+
+      <!-- 電腦版：一行全展開 -->
+      <div class="prop-desktop" style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;width:200px;flex-shrink:0">
+          <span style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
+          ${typeBadges}
         </div>
+        <div style="flex:1;min-width:0;font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.addr}</div>
+        <div style="width:70px;flex-shrink:0;font-size:13px;color:var(--text2);white-space:nowrap">${!isVacant&&p.tenant?p.tenant:''}</div>
+        <div style="width:90px;flex-shrink:0">${statusBadge}</div>
+        <div style="width:100px;flex-shrink:0;text-align:right;font-size:14px;font-weight:500;color:var(--blue-mid)">${isVacant?'<span style="color:var(--text3);font-size:12px;font-weight:400">無收入</span>':fmtMoney(p.rent)+'<span style="font-size:11px;color:var(--text3);font-weight:400">/月</span>'}</div>
+        <div style="display:flex;gap:5px;flex-shrink:0">${lineBtn}${viewBtn}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="prop-rent">${isVacant?'<span style="color:var(--text3);font-size:12px;font-weight:400">無收入</span>':fmtMoney(p.rent)+'<span>/月</span>'}</div>
-        ${p.lineGroup?`<a href="${p.lineGroup}" target="_blank" class="btn btn-icon btn-sm" title="開啟 LINE 群組" style="background:#06c755;border-color:#06c755;color:#fff;text-decoration:none"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.07 1.6 5.8 4.1 7.55V21l2.45-1.35C9.6 19.87 10.78 20 12 20c5.52 0 10-4.02 10-9S17.52 2 12 2zm1 13H8v-1.5h5V15zm3-3H8v-1.5h8V12zm0-3H8V7.5h8V9z"/></svg></a>`:''}
-        ${p.contract1?`<button class="btn btn-icon btn-sm" title="查看簽約合約" onclick="openContractModal('${p.id}','contract1')"><svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>`:''}
-        ${p.contract2?`<button class="btn btn-icon btn-sm" title="查看公證合約" onclick="openContractModal('${p.id}','contract2')" style="color:var(--green-mid);border-color:var(--green-mid)"><svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>`:''}
-        <button class="btn btn-icon btn-sm" onclick="openPropModal('${p.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
-        <button class="btn btn-icon btn-sm btn-danger" onclick="deleteProp('${p.id}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+
+      <!-- 手機版：緊湊一行 -->
+      <div class="prop-mobile" style="flex:1;display:none;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:16px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
+          ${statusBadge}
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-top:2px">${!isVacant&&p.tenant?p.tenant+' · ':''} ${isVacant?'':fmtMoney(p.rent)+'/月'}</div>
+      </div>
+      <div class="prop-mobile" style="display:none;flex-shrink:0;display:none">
+        <div style="display:flex;gap:6px">${lineBtn}${viewBtn}</div>
       </div>
     </div>`;
   }).join('')
@@ -3540,6 +3612,36 @@ function saveProp(){
   closeModal('modal-prop');
   populatePropSelects();
   renderProperties();
+}
+function openPropView(id){
+  const p = getProp(id);
+  if(!p) return;
+  const d = daysUntilExpiry(p.end);
+  const isExpired = d!==null && d<0;
+  const isWarn = d!==null && d>=0 && d<=45;
+  const statusText = (p.status||'rented')==='rented'
+    ? (isExpired?`已逾期 ${Math.abs(d)}天`:isWarn?`剩 ${d}天`:'出租中')
+    : p.status==='repair'?'整修中':'閒置中';
+  const statusColor = isExpired?'var(--red-mid)':isWarn?'var(--amber-mid)':'var(--green-mid)';
+  const typeMap = {general:'一般出租',public:'公益出租人',social:'社會住宅'};
+
+  document.getElementById('view-name').textContent = p.name;
+  document.getElementById('view-status-badge').innerHTML = `<span style="font-size:12px;padding:2px 10px;border-radius:100px;background:${isExpired?'var(--red-bg)':isWarn?'var(--amber-bg)':'var(--green-bg)'};color:${statusColor};font-weight:600">${statusText}</span>`;
+  document.getElementById('view-addr').textContent = p.addr||'—';
+  document.getElementById('view-tenant').textContent = p.tenant||'—';
+  document.getElementById('view-rent').textContent = p.rent?fmtMoney(p.rent)+'/月':'—';
+  document.getElementById('view-start').textContent = p.start||'—';
+  const endEl = document.getElementById('view-end');
+  endEl.textContent = p.end||'—';
+  endEl.style.color = isExpired?'var(--red-mid)':isWarn?'var(--amber-mid)':'var(--text)';
+  document.getElementById('view-type').textContent = typeMap[p.rentalType]||'一般出租';
+  document.getElementById('view-notary').textContent = p.notarized?'是':'否';
+  document.getElementById('view-note').textContent = p.note||'—';
+  document.getElementById('view-water').textContent = p.waterFee>0?`固定收取 $${p.waterFee}/月`:'租客自付';
+  document.getElementById('view-elec').textContent = p.elecEnabled?`按度數收 $${p.elecRate||0}/度`:'租客自付';
+  document.getElementById('view-edit-btn').onclick = ()=>{ closeModal('modal-prop-view'); openPropModal(id); };
+  document.getElementById('view-delete-btn').onclick = ()=>{ closeModal('modal-prop-view'); deleteProp(id); };
+  document.getElementById('modal-prop-view').classList.add('open');
 }
 function openContractModal(propId, field){
   const p = getProp(propId);
