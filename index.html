@@ -336,6 +336,7 @@ select{cursor:pointer}
   .alert-date{display:none!important}
   .alert-label-full{display:none!important}
   .alert-label-short{display:inline!important;width:auto!important;min-width:64px}
+  .alert-item-wrap{justify-content:center!important;max-width:320px;margin:0 auto}
 }
 @media(min-width:701px){
   .alert-btn-icon{display:none}
@@ -1962,7 +1963,7 @@ function renderProperties(){
       if(snoozed){
         const until = state.notifySnoozed?.[`notify_lease_${p.id}`];
         const untilStr = (until && until!=='permanent') ? new Date(until).toLocaleDateString('zh-TW',{year:'numeric',month:'numeric',day:'numeric'}) : '';
-        return `<div style="display:flex;align-items:center;gap:0;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:8px">
+        return `<div class="alert-item-wrap" style="display:flex;align-items:center;gap:0;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:8px">
           <span class="alert-label-full" style="font-size:13px;font-weight:700;color:${labelColor};width:110px;flex-shrink:0">${labelFull}</span>
           <span class="alert-label-short" style="font-size:13px;font-weight:700;color:${labelColor};width:72px;flex-shrink:0;text-align:right;white-space:nowrap;margin-right:8px">${labelShort}</span>
           <span class="alert-name-col" style="font-size:14px;font-weight:500;color:var(--text);width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">${p.name}</span>
@@ -1971,7 +1972,7 @@ function renderProperties(){
           <span style="font-size:12px;color:var(--text3);white-space:nowrap;flex-shrink:0">${until==='permanent'?'已停止':`暫停至${untilStr}`}</span>
         </div>`;
       }
-      return `<div style="display:flex;align-items:center;gap:0;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:8px">
+      return `<div class="alert-item-wrap" style="display:flex;align-items:center;gap:0;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:8px">
         <span class="alert-label-full" style="font-size:13px;font-weight:700;color:${labelColor};width:110px;flex-shrink:0">${labelFull}</span>
         <span class="alert-label-short" style="font-size:13px;font-weight:700;color:${labelColor};width:72px;flex-shrink:0;text-align:right;white-space:nowrap;margin-right:8px">${labelShort}</span>
         <span class="alert-name-col" style="font-size:14px;font-weight:500;color:var(--text);width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">${p.name}</span>
