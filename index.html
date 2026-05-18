@@ -202,7 +202,7 @@ select{cursor:pointer}
 .prop-group tbody tr:last-child td{border-bottom:none}
 .prop-group-summary{font-size:11px;color:var(--text3);margin-left:auto;font-weight:400}
 
-@media(max-width:700px){
+@media(max-width:900px){
   /* Layout - sidebar 固定在底部 */
   .app-shell{flex-direction:column!important}
   .sidebar{width:100%!important;height:auto!important;position:fixed!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;flex-direction:row!important;padding:0!important;border-right:none!important;border-top:0.5px solid var(--border)!important;z-index:100;overflow-x:auto;background:var(--surface);justify-content:space-around!important;flex-shrink:0!important}
@@ -318,7 +318,7 @@ select{cursor:pointer}
 
 .prop-desktop{display:flex!important}
 .prop-mobile{display:none!important}
-@media(max-width:700px){
+@media(max-width:900px){
   .prop-desktop{display:none!important}
   .prop-mobile{display:flex!important}
   .prop-mobile:last-child{flex-shrink:0}
@@ -326,7 +326,7 @@ select{cursor:pointer}
 
 .alert-desktop-btns{display:flex!important}
 .alert-mobile-btns{display:none!important}
-@media(max-width:700px){
+@media(max-width:900px){
   .alert-desktop-btns{display:none!important}
   .alert-mobile-btns{display:flex!important}
   .alert-banner{padding:12px 12px}
@@ -347,7 +347,7 @@ select{cursor:pointer}
 .alert-date{display:inline}
 .alert-label-full{display:inline}
 .alert-label-short{display:none}
-@media(max-width:700px){
+@media(max-width:900px){
   .alert-tenant{display:none!important}
   .alert-date{display:none!important}
   .alert-label-full{display:none!important}
@@ -514,7 +514,7 @@ select{cursor:pointer}
     <svg class="ico" viewBox="0 0 24 24"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3V11a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
     <div class="alert-banner-body">
       <div class="alert-banner-title">租約到期提醒</div>
-      <div id="lease-alert-list"></div>
+      <div id="lease-alert-list" style="width:100%"></div>
     </div>
   </div>
   <div id="vacant-alert-banner" style="display:none" class="alert-banner" style="border-color:var(--border2);background:var(--surface2)">
@@ -1960,7 +1960,7 @@ function renderProperties(){
       const labelShort = isExpired ? `逾期` : `${d}天`;
       const labelColor = isExpired ? 'var(--red-mid)' : 'var(--amber-mid)';
       const snoozed = isSnoozed('lease', p.id);
-      const isMobile = window.innerWidth <= 700;
+      const isMobile = window.innerWidth <= 900;
       if(snoozed){
         const until = state.notifySnoozed?.[`notify_lease_${p.id}`];
         const untilStr = (until && until!=='permanent') ? new Date(until).toLocaleDateString('zh-TW',{year:'numeric',month:'numeric',day:'numeric'}) : '';
