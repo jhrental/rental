@@ -1002,75 +1002,101 @@ select{cursor:pointer}
 <div class="modal-backdrop" id="modal-prop">
   <div class="modal">
     <div class="modal-title" id="modal-prop-title">新增物件</div>
-    <div class="form-grid">
-      <div class="form-row span2"><label>物件名稱</label><input type="text" id="p-name" placeholder="例：大安A棟101"></div>
-      <div class="form-row span2"><label>地址</label><input type="text" id="p-addr" placeholder="完整地址"></div>
-      <div class="form-row"><label>狀態</label>
+    <div style="display:flex;flex-direction:column;gap:8px">
+
+      <!-- 名稱 -->
+      <input type="text" id="p-name" placeholder="物件名稱">
+
+      <!-- 地址 -->
+      <input type="text" id="p-addr" placeholder="地址">
+
+      <!-- 狀態 + 月租金 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <select id="p-status" onchange="toggleVacantFields()">
           <option value="rented">出租中</option>
           <option value="vacant">閒置中</option>
           <option value="repair">整修中</option>
         </select>
+        <div style="position:relative">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text3)">$</span>
+          <input type="number" id="p-rent" placeholder="月租金" min="0" style="padding-left:24px">
+        </div>
       </div>
-      <div class="form-row"><label>月租金（元）</label><input type="number" id="p-rent" placeholder="0" min="0"></div>
-      <div class="form-row" id="p-tenant-row"><label>租客姓名</label><input type="text" id="p-tenant" placeholder="選填"></div>
-      <div class="form-row" id="p-vacant-since-row" style="display:none"><label>閒置起始日</label><input type="date" id="p-vacant-since"></div>
-      <div class="form-row" id="p-start-row"><label>租約起始</label><input type="date" id="p-start"></div>
-      <div class="form-row" id="p-end-row"><label>租約到期</label><input type="date" id="p-end"></div>
-      <div class="form-row"><label>出租類型</label>
+
+      <!-- 租客姓名 -->
+      <input type="text" id="p-tenant" placeholder="租客姓名（多人用逗號分隔）">
+
+      <!-- 閒置起始日（閒置/整修時才顯示）-->
+      <input type="date" id="p-vacant-since" style="display:none">
+
+      <!-- 租約起始 + 到期 並排 -->
+      <div style="display:flex;gap:8px" id="p-dates-row">
+        <div style="position:relative;flex:1">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none;z-index:1">合約起始</span>
+          <input type="date" id="p-start" style="width:100%;padding-left:68px;text-align:center;box-sizing:border-box">
+        </div>
+        <div style="position:relative;flex:1">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none;z-index:1">合約到期</span>
+          <input type="date" id="p-end" style="width:100%;padding-left:68px;text-align:center;box-sizing:border-box">
+        </div>
+      </div>
+
+      <!-- 出租類型 + 公證合約 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <select id="p-rental-type" onchange="onRentalTypeChange()">
           <option value="general">一般出租</option>
           <option value="public">公益出租人</option>
           <option value="social">社會住宅</option>
         </select>
+        <label style="display:flex;align-items:center;gap:8px;padding:7px 12px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);cursor:pointer;font-size:13px" id="p-notary-label">
+          <input type="checkbox" id="p-notarized" style="width:15px;height:15px;flex-shrink:0">
+          <span>公證合約</span>
+          <span id="p-notary-lock" style="display:none;font-size:11px;color:var(--text3)">🔒</span>
+        </label>
       </div>
-      <div class="form-row span2" id="p-notary-row">
-        <label style="margin-bottom:6px">合約公證</label>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;width:auto" id="p-notary-label">
-            <input type="checkbox" id="p-notarized" onchange="toggleNotaryDate()" style="width:16px;height:16px"> 已公證
-          </label>
-          <span id="p-notary-lock" style="display:none;font-size:12px;color:var(--text3)">🔒 社會住宅必要條件</span>
-          <div id="p-notary-date-row" style="display:none;flex:1">
-            <input type="date" id="p-notary-date" placeholder="公證日期">
-          </div>
+
+      <!-- 備註 -->
+      <input type="text" id="p-note" placeholder="備註（選填）">
+
+      <div style="border-top:0.5px solid var(--border);margin:4px 0"></div>
+
+      <!-- LINE 連結 -->
+      <input type="text" id="p-line" placeholder="LINE 連結（選填）" style="font-size:12px">
+
+      <!-- 合約連結並排 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input type="text" id="p-contract1" placeholder="簽約合約連結" style="font-size:11px">
+        <input type="text" id="p-contract2" placeholder="公證合約連結" style="font-size:11px">
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:-4px">Drive 分享連結中的 /view 改成 /preview</div>
+
+      <div style="border-top:0.5px solid var(--border);margin:4px 0"></div>
+
+      <!-- 水費 toggle -->
+      <div style="display:flex;align-items:center;gap:0">
+        <span style="font-size:13px;color:var(--text2);width:32px;flex-shrink:0;margin-right:8px">水費</span>
+        <button type="button" id="w-btn1" onclick="toggleWaterFee(0)" style="font-size:13px;padding:7px 16px;border:0.5px solid var(--border2);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap">租客自付</button>
+        <button type="button" id="w-btn2" onclick="toggleWaterFee(1)" style="font-size:13px;padding:7px 16px;border:0.5px solid var(--border2);border-radius:0;background:var(--blue-mid);color:#fff;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap">固定收取</button>
+        <div id="p-water-inline" style="display:flex;align-items:center;border:0.5px solid var(--border2);border-left:none;border-radius:0 var(--radius-sm) var(--radius-sm) 0;background:var(--surface);flex-shrink:0">
+          <span style="font-size:12px;color:var(--text3);padding:0 4px 0 8px">$</span>
+          <input type="number" id="p-water-fee" placeholder="0" min="0" style="width:52px;padding:7px 2px;font-size:13px;border:none;background:transparent;color:var(--text);outline:none">
+          <span style="font-size:12px;color:var(--text3);padding:0 8px 0 2px;white-space:nowrap">元/月</span>
         </div>
-        <div id="p-notary-hint" style="font-size:11px;color:var(--text3);margin-top:6px"></div>
       </div>
-      <div class="form-row span2"><label>物件照片</label>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div id="p-photo-preview" style="width:64px;height:64px;border-radius:var(--radius-sm);background:var(--surface2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
-            <span style="font-size:11px;color:var(--text3)">無照片</span>
-          </div>
-          <div>
-            <input type="file" id="p-photo-input" accept="image/*" onchange="previewPhoto()" style="display:none">
-            <button type="button" class="btn btn-sm" onclick="document.getElementById('p-photo-input').click()">選擇照片</button>
-            <button type="button" class="btn btn-sm btn-danger" id="p-photo-clear" style="display:none;margin-top:4px" onclick="clearPhoto()">移除照片</button>
-            <div style="font-size:11px;color:var(--text3);margin-top:4px">建議尺寸：正方形，JPG 或 PNG</div>
-          </div>
+
+      <!-- 電費 toggle -->
+      <div style="display:flex;align-items:center;gap:0">
+        <span style="font-size:13px;color:var(--text2);width:32px;flex-shrink:0;margin-right:8px">電費</span>
+        <button type="button" id="e-btn1" onclick="toggleElecFee(0)" style="font-size:13px;padding:7px 16px;border:0.5px solid var(--border2);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap">租客自付</button>
+        <button type="button" id="e-btn2" onclick="toggleElecFee(1)" style="font-size:13px;padding:7px 16px;border:0.5px solid var(--border2);border-radius:0;background:var(--blue-mid);color:#fff;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap">按度數收</button>
+        <div id="p-elec-inline" style="display:flex;align-items:center;border:0.5px solid var(--border2);border-left:none;border-radius:0 var(--radius-sm) var(--radius-sm) 0;background:var(--surface);flex-shrink:0">
+          <span style="font-size:12px;color:var(--text3);padding:0 4px 0 8px">$</span>
+          <input type="number" id="p-elec-rate" placeholder="4.5" min="0" step="0.1" style="width:52px;padding:7px 2px;font-size:13px;border:none;background:transparent;color:var(--text);outline:none">
+          <span style="font-size:12px;color:var(--text3);padding:0 8px 0 2px;white-space:nowrap">元/度</span>
         </div>
-        <input type="hidden" id="p-photo">
       </div>
-      <div class="form-row span2"><label>備註</label><input type="text" id="p-note" placeholder="選填"></div>
-      <div class="form-row span2" id="p-line-row">
-        <label>LINE 聯絡連結</label>
-        <input type="text" id="p-line" placeholder="貼上 LINE 群組或個人連結" style="font-size:12px">
-        <div style="font-size:11px;color:var(--text3);margin-top:4px">群組邀請連結 或 個人：https://line.me/ti/p/~LINE_ID</div>
-      </div>
-      <div class="form-row span2" style="border-top:0.5px solid var(--border);padding-top:12px;margin-top:4px">
-        <label style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:2px">水電費設定（收租用）</label>
-      </div>
-      <div class="form-row">
-        <label>固定水費（元/月）</label>
-        <input type="number" id="p-water-fee" placeholder="0，留空表示不收" min="0">
-      </div>
-      <div class="form-row">
-        <label>電費收取方式</label>
-        <select id="p-elec-enabled">
-          <option value="0">租客自行繳納，不經手</option>
-          <option value="1">向租客收取，按度數計算</option>
-        </select>
-      </div>
+      <input type="hidden" id="p-elec-enabled" value="0">
+
     </div>
     <input type="hidden" id="p-edit-id">
     <div class="modal-footer">
@@ -1251,6 +1277,23 @@ select{cursor:pointer}
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('modal-done-routine')">取消</button>
       <button class="btn btn-primary" onclick="saveDoneRoutine()">完成保養</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal：合約預覽 -->
+<div class="modal-backdrop" id="modal-contract">
+  <div class="modal" style="width:680px;max-width:98vw">
+    <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span id="contract-modal-title">合約預覽</span>
+      <a id="contract-external-link" href="#" target="_blank" class="btn btn-sm" style="font-size:12px">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        另開視窗
+      </a>
+    </div>
+    <iframe id="contract-iframe" src="" style="width:100%;height:60vh;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2)" allowfullscreen></iframe>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeContractModal()">關閉</button>
     </div>
   </div>
 </div>
@@ -1911,27 +1954,22 @@ function renderProperties(){
       <div class="drag-handle" title="拖曳可調整順序">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
       </div>
-      <div class="prop-thumb" onclick="openPropModal('${p.id}')" title="點擊更換照片" style="cursor:pointer">
-        ${p.photo
-          ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">`
-          : `<span style="font-size:15px;font-weight:700;color:var(--blue-mid)">${p.name.slice(0,1)}</span>`}
-      </div>
+      <div style="width:4px;border-radius:2px;align-self:stretch;background:${isVacant?'var(--border2)':'var(--blue-mid)'};flex-shrink:0;margin:0 4px"></div>
       <div class="prop-info">
         <div class="prop-name">${p.name}</div>
-        <div class="prop-sub">${p.addr}${!isVacant&&p.tenant?' ∙ 租客：'+p.tenant:''}</div>
-        <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
-          ${p.rentalType==='social'?'<span class="badge" style="background:var(--blue-bg);color:var(--blue-mid);font-size:11px">社會住宅</span>':p.rentalType==='public'?'<span class="badge" style="background:var(--green-bg);color:var(--green-mid);font-size:11px">公益出租人</span>':''}
-          ${p.notarized?'<span class="badge" style="background:var(--surface2);color:var(--text2);font-size:11px">已公證</span>':''}
-        </div>
-        <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="prop-sub">${p.addr}</div>
+        ${!isVacant&&p.tenant?`<div style="font-size:12px;color:var(--text2);margin-top:2px">${p.tenant}</div>`:''}
+        <div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           ${leaseStatusBadge(p)}
-          ${!isVacant&&p.end?`<span style="font-size:11px;color:var(--text3)">租約 ${p.start||'?'} ～ ${p.end}</span>`:''}
-          ${notaryBadge}
+          ${p.rentalType==='social'?'<span class="badge" style="background:var(--blue-bg);color:var(--blue-mid);font-size:11px">社宅</span>':p.rentalType==='public'?'<span class="badge" style="background:var(--green-bg);color:var(--green-mid);font-size:11px">公益</span>':''}
+          ${p.notarized?'<span class="badge" style="background:var(--surface2);color:var(--text2);font-size:11px">公證</span>':''}
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <div class="prop-rent">${isVacant?'<span style="color:var(--text3);font-size:12px;font-weight:400">無收入</span>':fmtMoney(p.rent)+'<span>/月</span>'}</div>
         ${p.lineGroup?`<a href="${p.lineGroup}" target="_blank" class="btn btn-icon btn-sm" title="開啟 LINE 群組" style="background:#06c755;border-color:#06c755;color:#fff;text-decoration:none"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C6.48 2 2 6.02 2 11c0 3.07 1.6 5.8 4.1 7.55V21l2.45-1.35C9.6 19.87 10.78 20 12 20c5.52 0 10-4.02 10-9S17.52 2 12 2zm1 13H8v-1.5h5V15zm3-3H8v-1.5h8V12zm0-3H8V7.5h8V9z"/></svg></a>`:''}
+        ${p.contract1?`<button class="btn btn-icon btn-sm" title="查看簽約合約" onclick="openContractModal('${p.id}','contract1')"><svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>`:''}
+        ${p.contract2?`<button class="btn btn-icon btn-sm" title="查看公證合約" onclick="openContractModal('${p.id}','contract2')" style="color:var(--green-mid);border-color:var(--green-mid)"><svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>`:''}
         <button class="btn btn-icon btn-sm" onclick="openPropModal('${p.id}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
         <button class="btn btn-icon btn-sm btn-danger" onclick="deleteProp('${p.id}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>
@@ -3350,57 +3388,64 @@ function deleteRecord(id){
 }
 function toggleVacantFields(){
   const status = document.getElementById('p-status').value;
-  const isVacant = status!=='rented';
-  document.getElementById('p-tenant-row').style.display = isVacant?'none':'flex';
-  document.getElementById('p-start-row').style.display = isVacant?'none':'flex';
-  document.getElementById('p-end-row').style.display = isVacant?'none':'flex';
-  document.getElementById('p-vacant-since-row').style.display = isVacant?'flex':'none';
+  const isVacant = status !== 'rented';
+  const tenantEl = document.getElementById('p-tenant');
+  const vacantEl = document.getElementById('p-vacant-since');
+  const datesEl = document.getElementById('p-dates-row');
+  if(tenantEl) tenantEl.style.display = isVacant ? 'none' : '';
+  if(vacantEl) vacantEl.style.display = isVacant ? '' : 'none';
+  if(datesEl) datesEl.style.display = isVacant ? 'none' : '';
 }
-function previewPhoto(){
-  const file = document.getElementById('p-photo-input').files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e=>{
-    const data = e.target.result;
-    document.getElementById('p-photo').value = data;
-    const preview = document.getElementById('p-photo-preview');
-    preview.innerHTML = `<img src="${data}" style="width:100%;height:100%;object-fit:cover">`;
-    document.getElementById('p-photo-clear').style.display='block';
-  };
-  reader.readAsDataURL(file);
+function toggleWaterFee(val){
+  const b1=document.getElementById('w-btn1');
+  const b2=document.getElementById('w-btn2');
+  const box=document.getElementById('p-water-inline');
+  if(val===1){
+    b1.style.background='var(--surface2)'; b1.style.color='var(--text2)'; b1.style.fontWeight='';
+    b2.style.background='var(--blue-mid)'; b2.style.color='#fff'; b2.style.fontWeight='500';
+    b2.style.borderRadius='0'; b2.style.borderRight='none';
+    box.style.display='flex';
+    document.getElementById('p-elec-enabled').value='water-fixed';
+  } else {
+    b1.style.background='var(--blue-mid)'; b1.style.color='#fff'; b1.style.fontWeight='500';
+    b2.style.background='var(--surface2)'; b2.style.color='var(--text2)'; b2.style.fontWeight='';
+    b2.style.borderRadius='0 var(--radius-sm) var(--radius-sm) 0'; b2.style.borderRight='0.5px solid var(--border2)';
+    box.style.display='none';
+  }
 }
-function clearPhoto(){
-  document.getElementById('p-photo').value='';
-  document.getElementById('p-photo-input').value='';
-  document.getElementById('p-photo-preview').innerHTML='<span style="font-size:11px;color:var(--text3)">無照片</span>';
-  document.getElementById('p-photo-clear').style.display='none';
+function toggleElecFee(val){
+  const b1=document.getElementById('e-btn1');
+  const b2=document.getElementById('e-btn2');
+  const box=document.getElementById('p-elec-inline');
+  if(val===1){
+    b1.style.background='var(--surface2)'; b1.style.color='var(--text2)'; b1.style.fontWeight='';
+    b2.style.background='var(--blue-mid)'; b2.style.color='#fff'; b2.style.fontWeight='500';
+    b2.style.borderRadius='0'; b2.style.borderRight='none';
+    box.style.display='flex';
+    document.getElementById('p-elec-enabled').value='1';
+  } else {
+    b1.style.background='var(--blue-mid)'; b1.style.color='#fff'; b1.style.fontWeight='500';
+    b2.style.background='var(--surface2)'; b2.style.color='var(--text2)'; b2.style.fontWeight='';
+    b2.style.borderRadius='0 var(--radius-sm) var(--radius-sm) 0'; b2.style.borderRight='0.5px solid var(--border2)';
+    box.style.display='none';
+    document.getElementById('p-elec-enabled').value='0';
+  }
 }
 function onRentalTypeChange() {
   const type = document.getElementById('p-rental-type').value;
   const checkbox = document.getElementById('p-notarized');
   const lockEl = document.getElementById('p-notary-lock');
   const labelEl = document.getElementById('p-notary-label');
-  const hintEl = document.getElementById('p-notary-hint');
   if (type === 'social') {
     checkbox.checked = true;
     checkbox.disabled = true;
-    lockEl.style.display = 'inline';
-    labelEl.style.opacity = '0.5';
-    hintEl.textContent = '社會住宅合約必須公證，無法取消';
-    hintEl.style.color = 'var(--text3)';
+    if(lockEl) lockEl.style.display = 'inline';
+    if(labelEl) labelEl.style.opacity = '0.5';
   } else {
     checkbox.disabled = false;
-    lockEl.style.display = 'none';
-    labelEl.style.opacity = '1';
-    hintEl.textContent = '可自行決定是否公證';
-    hintEl.style.color = 'var(--text3)';
+    if(lockEl) lockEl.style.display = 'none';
+    if(labelEl) labelEl.style.opacity = '1';
   }
-  toggleNotaryDate();
-}
-function toggleNotaryDate(){
-  const checked = document.getElementById('p-notarized').checked;
-  const row = document.getElementById('p-notary-date-row');
-  row.style.display = checked ? 'block' : 'none';
 }
 function openPropModal(id){
   const p=id?state.properties.find(x=>x.id===id):null;
@@ -3414,26 +3459,20 @@ function openPropModal(id){
   document.getElementById('p-note').value=p?p.note:'';
   document.getElementById('p-status').value=p?(p.status||'rented'):'rented';
   document.getElementById('p-vacant-since').value=p?(p.vacantSince||''):'';
-  document.getElementById('p-water-fee').value=p?(p.waterFee||''):'';
-  document.getElementById('p-elec-enabled').value=p?(p.elecEnabled?'1':'0'):'0';
   document.getElementById('p-notarized').checked=p?!!p.notarized:false;
-  document.getElementById('p-notary-date').value=p?(p.notaryDate||''):'';
-  document.getElementById('p-notary-date-row').style.display=p&&p.notarized?'block':'none';
   document.getElementById('p-rental-type').value=p?(p.rentalType||'general'):'general';
   onRentalTypeChange();
   document.getElementById('p-line').value=p?(p.lineGroup||''):'';
-  // photo
-  const photoData = p?(p.photo||''):'';
-  document.getElementById('p-photo').value=photoData;
-  const preview=document.getElementById('p-photo-preview');
-  if(photoData){
-    preview.innerHTML=`<img src="${photoData}" style="width:100%;height:100%;object-fit:cover">`;
-    document.getElementById('p-photo-clear').style.display='block';
-  } else {
-    preview.innerHTML='<span style="font-size:11px;color:var(--text3)">無照片</span>';
-    document.getElementById('p-photo-clear').style.display='none';
-  }
-  document.getElementById('p-photo-input').value='';
+  document.getElementById('p-contract1').value=p?(p.contract1||''):'';
+  document.getElementById('p-contract2').value=p?(p.contract2||''):'';
+  // 水費 toggle
+  const waterFixed = p && p.waterFee > 0;
+  toggleWaterFee(waterFixed ? 1 : 0);
+  if(waterFixed) document.getElementById('p-water-fee').value = p.waterFee;
+  // 電費 toggle
+  const elecOn = p ? !!p.elecEnabled : false;
+  toggleElecFee(elecOn ? 1 : 0);
+  if(elecOn && p.elecRate) document.getElementById('p-elec-rate').value = p.elecRate;
   document.getElementById('p-edit-id').value=id||'';
   toggleVacantFields();
   document.getElementById('modal-prop').classList.add('open');
@@ -3441,6 +3480,8 @@ function openPropModal(id){
 function saveProp(){
   const status=document.getElementById('p-status').value;
   const notarized=document.getElementById('p-notarized').checked;
+  const waterFixed = document.getElementById('w-btn2').style.background.includes('185');
+  const elecOn = document.getElementById('p-elec-enabled').value==='1';
   const prop={
     id: document.getElementById('p-edit-id').value || uid(),
     name: document.getElementById('p-name').value.trim(),
@@ -3452,13 +3493,15 @@ function saveProp(){
     end: status==='rented'?document.getElementById('p-end').value:'',
     vacantSince: status!=='rented'?document.getElementById('p-vacant-since').value:'',
     note: document.getElementById('p-note').value.trim(),
-    waterFee: +document.getElementById('p-water-fee').value||0,
-    elecEnabled: document.getElementById('p-elec-enabled').value==='1',
+    waterFee: waterFixed?(+document.getElementById('p-water-fee').value||0):0,
+    elecEnabled: elecOn,
+    elecRate: elecOn?(+document.getElementById('p-elec-rate').value||0):0,
     rentalType: document.getElementById('p-rental-type').value,
     notarized: notarized,
-    notaryDate: notarized?document.getElementById('p-notary-date').value:'',
     lineGroup: document.getElementById('p-line').value.trim(),
-    photo: document.getElementById('p-photo').value||'',
+    contract1: document.getElementById('p-contract1').value.trim(),
+    contract2: document.getElementById('p-contract2').value.trim(),
+    photo: '',
   };
   if(!prop.name||!prop.addr){ alert('請填寫物件名稱與地址'); return; }
   const idx=state.properties.findIndex(p=>p.id===prop.id);
@@ -3469,6 +3512,20 @@ function saveProp(){
   closeModal('modal-prop');
   populatePropSelects();
   renderProperties();
+}
+function openContractModal(propId, field){
+  const p = getProp(propId);
+  if(!p) return;
+  const url = p[field] || '';
+  const label = field === 'contract1' ? '簽約合約' : '公證合約';
+  document.getElementById('contract-modal-title').textContent = `${p.name} — ${label}`;
+  document.getElementById('contract-iframe').src = url;
+  document.getElementById('contract-external-link').href = url.replace('/preview','');
+  document.getElementById('modal-contract').classList.add('open');
+}
+function closeContractModal(){
+  document.getElementById('contract-iframe').src = '';
+  closeModal('modal-contract');
 }
 function deleteProp(id){
   if(!confirm('確定刪除此物件？（相關帳目不會刪除）')) return;
