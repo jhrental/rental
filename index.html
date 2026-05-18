@@ -161,7 +161,7 @@ select{cursor:pointer}
 .photo-thumb{width:72px;height:54px;border-radius:var(--radius-sm);object-fit:cover;cursor:pointer;border:0.5px solid var(--border)}
 
 /* Lease alert */
-.alert-banner{background:var(--amber-bg);border:0.5px solid var(--amber-mid);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:12px}
+.alert-banner{background:var(--amber-bg);border:0.5px solid var(--amber-mid);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:12px;overflow:hidden}
 .alert-banner i{color:var(--amber-mid);font-size:20px;flex-shrink:0;margin-top:1px}
 .alert-banner-body{flex:1}
 .alert-banner-title{font-weight:600;font-size:14px;color:var(--amber);margin-bottom:6px}
@@ -322,6 +322,17 @@ select{cursor:pointer}
   .prop-desktop{display:none!important}
   .prop-mobile{display:flex!important}
   .prop-mobile:last-child{flex-shrink:0}
+}
+
+/* Alert 按鈕手機版縮小 */
+@media(max-width:700px){
+  .alert-btn-text{display:none}
+  .alert-btn-icon{display:inline}
+  .alert-banner{padding:0.75rem 0.875rem}
+  .alert-banner-body{overflow:hidden}
+}
+@media(min-width:701px){
+  .alert-btn-icon{display:none}
 }
 
 /* Alert 電腦/手機詳細度 */
@@ -1950,10 +1961,10 @@ function renderProperties(){
         <span style="font-size:14px;font-weight:500;color:var(--text);width:120px;flex-shrink:0;white-space:nowrap">${p.name}</span>
         <span class="alert-tenant" style="font-size:13px;color:var(--text2);width:70px;flex-shrink:0;white-space:nowrap">${p.tenant||''}</span>
         <span class="alert-date" style="font-size:11px;color:var(--text3);flex:1;white-space:nowrap">合約到期 ${p.end}</span>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="btn btn-sm" style="font-size:12px;padding:5px 12px;border-radius:100px;min-height:30px" onclick="openPropModal('${p.id}')">編輯</button>
-          <button class="btn btn-sm" style="font-size:12px;padding:5px 12px;border-radius:100px;min-height:30px" onclick="snooze('lease','${p.id}',30)">暫停</button>
-          <button class="btn btn-sm btn-danger" style="font-size:12px;padding:5px 12px;border-radius:100px;min-height:30px" onclick="snoozeForever('lease','${p.id}')">停止</button>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn btn-sm" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:30px;white-space:nowrap" onclick="openPropModal('${p.id}')">編輯</button>
+          <button class="btn btn-sm" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:30px;white-space:nowrap" onclick="snooze('lease','${p.id}',30)">暫停</button>
+          <button class="btn btn-sm btn-danger" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:30px;white-space:nowrap" onclick="snoozeForever('lease','${p.id}')">停止</button>
         </div>
       </div>`;
     }).join('');
