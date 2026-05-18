@@ -326,7 +326,7 @@ select{cursor:pointer}
   .alert-date{display:none!important}
   .alert-label-full{display:none!important}
   .alert-label-short{display:inline!important}
-  .alert-item-row .btn{font-size:15px!important;padding:8px 16px!important;min-height:42px!important}
+  .alert-item-row .btn{font-size:13px!important;padding:5px 10px!important;min-height:34px!important}
 }
 
 /* FAB 快速記帳 */
@@ -1894,24 +1894,26 @@ function renderProperties(){
       if(snoozed){
         const until = state.notifySnoozed?.[`notify_lease_${p.id}`];
         const untilStr = (until && until!=='permanent') ? new Date(until).toLocaleDateString('zh-TW') : '';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,0.6);border-radius:10px">
-          <span class="alert-label-full" style="font-size:14px;font-weight:700;color:${labelColor};flex-shrink:0">${labelFull}</span>
-          <span class="alert-label-short" style="font-size:15px;font-weight:700;color:${labelColor};flex-shrink:0">${labelShort}</span>
-          <span style="font-size:15px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
-          <span class="alert-tenant" style="font-size:14px;color:var(--text2);flex-shrink:0;white-space:nowrap">${p.tenant||''}</span>
-          <span class="alert-date" style="font-size:13px;color:var(--text3);flex-shrink:0;white-space:nowrap">${p.end}</span>
-          <span style="font-size:13px;color:var(--text3);white-space:nowrap">${until==='permanent'?'已停止':('暫停至'+untilStr)}</span>
+        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.6);border-radius:10px">
+          <span class="alert-label-full" style="font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0;white-space:nowrap">${labelFull}</span>
+          <span class="alert-label-short" style="font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0;white-space:nowrap">${labelShort}</span>
+          <span style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap">${p.name}</span>
+          <span class="alert-tenant" style="font-size:13px;color:var(--text2);white-space:nowrap">${p.tenant||''}</span>
+          <span class="alert-date" style="font-size:12px;color:var(--text3);white-space:nowrap">${p.end}</span>
+          <span style="font-size:12px;color:var(--text3);white-space:nowrap;margin-left:auto">${until==='permanent'?'已停止':('暫停至'+untilStr)}</span>
         </div>`;
       }
-      return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,0.6);border-radius:10px">
-        <span class="alert-label-full" style="font-size:14px;font-weight:700;color:${labelColor};flex-shrink:0">${labelFull}</span>
-        <span class="alert-label-short" style="font-size:15px;font-weight:700;color:${labelColor};flex-shrink:0">${labelShort}</span>
-        <span style="font-size:15px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
-        <span class="alert-tenant" style="font-size:14px;color:var(--text2);flex-shrink:0;white-space:nowrap">${p.tenant||''}</span>
-        <span class="alert-date" style="font-size:13px;color:var(--text3);flex-shrink:0;white-space:nowrap">${p.end}</span>
-        <button class="btn btn-sm" style="font-size:14px;padding:7px 14px;border-radius:100px;min-height:38px;flex-shrink:0" onclick="openPropModal('${p.id}')">編輯</button>
-        <button class="btn btn-sm" style="font-size:14px;padding:7px 14px;border-radius:100px;min-height:38px;flex-shrink:0" onclick="snooze('lease','${p.id}',30)">暫停</button>
-        <button class="btn btn-sm btn-danger" style="font-size:14px;padding:7px 14px;border-radius:100px;min-height:38px;flex-shrink:0" onclick="snoozeForever('lease','${p.id}')">停止</button>
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.6);border-radius:10px">
+        <span class="alert-label-full" style="font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0;white-space:nowrap">${labelFull}</span>
+        <span class="alert-label-short" style="font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0;white-space:nowrap">${labelShort}</span>
+        <span style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap">${p.name}</span>
+        <span class="alert-tenant" style="font-size:13px;color:var(--text2);white-space:nowrap">${p.tenant||''}</span>
+        <span class="alert-date" style="font-size:12px;color:var(--text3);white-space:nowrap">${p.end}</span>
+        <div style="margin-left:auto;display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-sm" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:32px" onclick="openPropModal('${p.id}')">編輯</button>
+          <button class="btn btn-sm" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:32px" onclick="snooze('lease','${p.id}',30)">暫停</button>
+          <button class="btn btn-sm btn-danger" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:32px" onclick="snoozeForever('lease','${p.id}')">停止</button>
+        </div>
       </div>`;
     }).join('');
   } else {
