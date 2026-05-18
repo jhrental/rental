@@ -316,6 +316,16 @@ select{cursor:pointer}
 
 #p-dates-row input[type="date"]{width:100%;box-sizing:border-box;min-width:0}
 
+/* Alert 電腦/手機詳細度 */
+.alert-tenant{display:inline}
+.alert-label-full{display:inline}
+.alert-label-short{display:none}
+@media(max-width:700px){
+  .alert-tenant{display:none!important}
+  .alert-label-full{display:none!important}
+  .alert-label-short{display:inline!important}
+}
+
 /* FAB 快速記帳 */
 .fab{position:fixed;bottom:24px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--blue-mid);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(24,95,165,0.4);z-index:999;transition:transform .15s;font-family:inherit}
 .fab:hover{transform:scale(1.06)}
@@ -1874,24 +1884,29 @@ function renderProperties(){
     alertList.innerHTML = expiring.map(p=>{
       const d=daysUntilExpiry(p.end);
       const isExpired = d < 0;
-      const label = isExpired ? '已逾期' : `剩 ${d}天`;
-      const labelColor = isExpired ? 'var(--red-mid)' : d<=14 ? 'var(--amber-mid)' : 'var(--amber-mid)';
+      const labelShort = isExpired ? '已逾期' : `剩 ${d}天`;
+      const labelFull = isExpired ? `已逾期 ${Math.abs(d)}天` : `剩 ${d}天`;
+      const labelColor = isExpired ? 'var(--red-mid)' : 'var(--amber-mid)';
       const snoozed = isSnoozed('lease', p.id);
       if(snoozed){
         const until = state.notifySnoozed?.[`notify_lease_${p.id}`];
         const untilStr = (until && until!=='permanent') ? new Date(until).toLocaleDateString('zh-TW') : '';
-        return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(255,255,255,0.55);border-radius:8px">
-          <span style="font-size:11px;font-weight:600;color:${labelColor};flex-shrink:0">${label}</span>
-          <span style="font-size:12px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
-          <span style="font-size:10px;color:var(--text3);white-space:nowrap">${until==='permanent'?'已停止':('暫停至'+untilStr)}</span>
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:10px">
+          <span class="alert-label-full" style="font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0">${labelFull}</span>
+          <span class="alert-label-short" style="display:none;font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0">${labelShort}</span>
+          <span style="font-size:15px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
+          <span class="alert-tenant" style="font-size:13px;color:var(--text2);flex-shrink:0;white-space:nowrap">${p.tenant||''}</span>
+          <span style="font-size:12px;color:var(--text3);white-space:nowrap">${until==='permanent'?'已停止':('暫停至'+untilStr)}</span>
         </div>`;
       }
-      return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(255,255,255,0.55);border-radius:8px">
-        <span style="font-size:11px;font-weight:600;color:${labelColor};flex-shrink:0">${label}</span>
-        <span style="font-size:12px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
-        <button class="btn btn-sm" style="font-size:10px;padding:2px 7px;border-radius:100px;flex-shrink:0" onclick="openPropModal('${p.id}')">編輯</button>
-        <button class="btn btn-sm" style="font-size:10px;padding:2px 7px;border-radius:100px;flex-shrink:0" onclick="snooze('lease','${p.id}',30)">暫停</button>
-        <button class="btn btn-sm btn-danger" style="font-size:10px;padding:2px 7px;border-radius:100px;flex-shrink:0" onclick="snoozeForever('lease','${p.id}')">停止</button>
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:10px">
+        <span class="alert-label-full" style="font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0">${labelFull}</span>
+        <span class="alert-label-short" style="display:none;font-size:13px;font-weight:700;color:${labelColor};flex-shrink:0">${labelShort}</span>
+        <span style="font-size:15px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
+        <span class="alert-tenant" style="font-size:13px;color:var(--text2);flex-shrink:0;white-space:nowrap">${p.tenant||''}</span>
+        <button class="btn btn-sm" style="font-size:13px;padding:6px 12px;border-radius:100px;min-height:36px;flex-shrink:0" onclick="openPropModal('${p.id}')">編輯</button>
+        <button class="btn btn-sm" style="font-size:13px;padding:6px 12px;border-radius:100px;min-height:36px;flex-shrink:0" onclick="snooze('lease','${p.id}',30)">暫停</button>
+        <button class="btn btn-sm btn-danger" style="font-size:13px;padding:6px 12px;border-radius:100px;min-height:36px;flex-shrink:0" onclick="snoozeForever('lease','${p.id}')">停止</button>
       </div>`;
     }).join('');
   } else {
@@ -1910,11 +1925,11 @@ function renderProperties(){
       const statusLabel = (p.status==='repair')?'整修中':'閒置中';
       const daysLabel = days!==null&&days>0?` ${days}天`:'';
       const snoozed = isSnoozed('vacant', p.id);
-      return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(255,255,255,0.55);border-radius:8px">
-        <span style="font-size:11px;font-weight:600;color:${p.status==='repair'?'var(--amber-mid)':'var(--red-mid)'};flex-shrink:0">${statusLabel}${daysLabel}</span>
-        <span style="font-size:12px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
-        <button class="btn btn-sm" style="font-size:10px;padding:2px 7px;border-radius:100px;flex-shrink:0" onclick="openPropModal('${p.id}')">編輯</button>
-        ${days!==null&&days>=30&&!snoozed?`<button class="btn btn-sm" style="font-size:10px;padding:2px 7px;border-radius:100px;flex-shrink:0" onclick="snooze('vacant','${p.id}',30)">暫停</button>`:''}
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:10px">
+        <span style="font-size:13px;font-weight:700;color:${p.status==='repair'?'var(--amber-mid)':'var(--red-mid)'};flex-shrink:0;min-width:52px">${statusLabel}${daysLabel}</span>
+        <span style="font-size:15px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
+        <button class="btn btn-sm" style="font-size:13px;padding:6px 12px;border-radius:100px;min-height:36px;flex-shrink:0" onclick="openPropModal('${p.id}')">編輯</button>
+        ${days!==null&&days>=30&&!snoozed?`<button class="btn btn-sm" style="font-size:13px;padding:6px 12px;border-radius:100px;min-height:36px;flex-shrink:0" onclick="snooze('vacant','${p.id}',30)">暫停</button>`:''}
       </div>`;
     }).join('');
   } else {
@@ -2645,10 +2660,10 @@ function renderMaintPending(){
       const d=new Date(m.date); d.setHours(0,0,0,0);
       const days=Math.round((now-d)/86400000);
       const snoozed = isSnoozed('maint', m.id);
-      return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:rgba(255,255,255,0.55);border-radius:8px">
-        <span style="font-size:11px;font-weight:600;color:var(--red-mid);flex-shrink:0">${days}天未處理</span>
-        <span style="font-size:12px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p?p.name:'?'} · ${m.desc}</span>
-        ${!snoozed?`<button class="btn btn-sm" style="font-size:10px;padding:2px 7px;border-radius:100px;flex-shrink:0" onclick="snooze('maint','${m.id}',3)">暫停</button>`:''}
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.6);border-radius:10px">
+        <span style="font-size:13px;font-weight:700;color:var(--red-mid);flex-shrink:0;min-width:60px">${days}天未處理</span>
+        <span style="font-size:15px;font-weight:500;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p?p.name:'?'} · ${m.desc}</span>
+        ${!snoozed?`<button class="btn btn-sm" style="font-size:13px;padding:6px 12px;border-radius:100px;min-height:36px;flex-shrink:0" onclick="snooze('maint','${m.id}',3)">暫停</button>`:''}
       </div>`;
     }).join('');
   } else {
