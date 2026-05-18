@@ -329,14 +329,14 @@ select{cursor:pointer}
 @media(max-width:700px){
   .alert-desktop-btns{display:none!important}
   .alert-mobile-btns{display:flex!important}
-  .alert-banner{padding:0.75rem 0.875rem}
-  .alert-banner-body{overflow:hidden}
+  .alert-banner{padding:12px 12px}
+  .alert-banner-body{overflow:hidden;display:flex;flex-direction:column;gap:6px}
   .alert-name-col{width:auto!important;flex:1!important}
   .alert-tenant{display:none!important}
   .alert-date{display:none!important}
   .alert-label-full{display:none!important}
-  .alert-label-short{display:inline!important;width:auto!important;min-width:64px}
-  .alert-item-wrap{justify-content:center!important;max-width:320px;margin:0 auto}
+  .alert-label-short{display:inline!important;width:36px!important;min-width:36px;text-align:left}
+  .alert-item-wrap{padding:9px 12px!important;gap:10px!important;justify-content:flex-start!important;max-width:100%!important;margin:0!important}
 }
 @media(min-width:701px){
   .alert-btn-icon{display:none}
