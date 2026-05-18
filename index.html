@@ -2563,10 +2563,9 @@ function renderMaintPending(){
   const overdueList=document.getElementById('maint-overdue-list');
   const navBadge=document.getElementById('nav-maint-badge');
   if(overdue.length){
-    banner.style.display='flex';
-    navBadge.style.display='inline-flex';
-    navBadge.textContent=overdue.length;
-    overdueList.innerHTML=overdue.map(m=>{
+    if(banner) banner.style.display='flex';
+    if(navBadge){ navBadge.style.display='inline-flex'; navBadge.textContent=overdue.length; }
+    if(overdueList) overdueList.innerHTML=overdue.map(m=>{
       const p=getProp(m.propId);
       const d=new Date(m.date); d.setHours(0,0,0,0);
       const days=Math.round((now-d)/86400000);
@@ -2578,11 +2577,12 @@ function renderMaintPending(){
       </div>`;
     }).join('');
   } else {
-    banner.style.display='none';
-    navBadge.style.display='none';
+    if(banner) banner.style.display='none';
+    if(navBadge) navBadge.style.display='none';
   }
 
   const list=document.getElementById('maint-pending-list');
+  if(!list) return;
   if(!items.length){ list.innerHTML='<div style="text-align:center;color:var(--text3);padding:2rem;font-size:13px">目前沒有待處理的維修</div>'; return; }
   list.innerHTML=items.map(m=>{
     const p=getProp(m.propId);
