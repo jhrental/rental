@@ -41,7 +41,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans
 a{color:inherit}
 
 /* Layout */
-.app-shell{display:flex;min-height:100vh}
+.app-shell{display:none;min-height:100vh}
+.app-shell.visible{display:flex}
 .sidebar{width:200px;flex-shrink:0;background:var(--surface);border-right:0.5px solid var(--border);padding:1.5rem 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;align-self:flex-start}
 .sidebar-logo{padding:0 1.25rem 1.5rem;font-size:16px;font-weight:600;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px;color:var(--text)}
 .sidebar-logo i{color:var(--blue-mid);font-size:20px}
@@ -202,24 +203,24 @@ select{cursor:pointer}
 .prop-group-summary{font-size:11px;color:var(--text3);margin-left:auto;font-weight:400}
 
 @media(max-width:700px){
-  /* Layout */
-  .app-shell{flex-direction:column;height:100vh}
-  .sidebar{width:100%;height:auto;position:fixed;bottom:0;left:0;right:0;flex-direction:row;padding:0;border-right:none;border-top:0.5px solid var(--border);z-index:100;overflow-x:auto;background:var(--surface);justify-content:space-around}
-  .sidebar-logo{display:none}
-  .sidebar-footer{display:none}
-  .nav-item{flex-direction:column;gap:3px;padding:8px 8px 10px;border-right:none;border-bottom:none;border-top:3px solid transparent;white-space:nowrap;min-width:60px;align-items:center;font-size:11px;position:relative;flex:1;justify-content:center}
-  .nav-item span{font-size:11px;font-weight:500}
-  .nav-item.active{border-right:none;border-bottom:none;border-top-color:var(--blue-mid);color:var(--blue-mid);background:transparent}
-  .nav-item svg{width:24px;height:24px}
+  /* Layout - sidebar 固定在底部 */
+  .app-shell{flex-direction:column!important}
+  .sidebar{width:100%!important;height:auto!important;position:fixed!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;flex-direction:row!important;padding:0!important;border-right:none!important;border-top:0.5px solid var(--border)!important;z-index:100;overflow-x:auto;background:var(--surface);justify-content:space-around!important;flex-shrink:0!important}
+  .sidebar-logo{display:none!important}
+  .sidebar-footer{display:none!important}
+  .nav-item{flex-direction:column!important;gap:3px!important;padding:8px 4px 10px!important;border-right:none!important;border-bottom:none!important;border-top:3px solid transparent!important;white-space:nowrap;min-width:60px;align-items:center!important;font-size:11px!important;position:relative;flex:1;justify-content:center!important}
+  .nav-item span{font-size:11px!important;font-weight:500}
+  .nav-item.active{border-right:none!important;border-bottom:none!important;border-top-color:var(--blue-mid)!important;color:var(--blue-mid)!important;background:transparent!important}
+  .nav-item svg{width:24px!important;height:24px!important}
   .nav-badge{position:absolute;top:4px;right:6px;font-size:9px;min-width:16px;height:16px}
-  .main{padding:1rem;max-width:100%;padding-bottom:80px;flex:1;overflow-y:auto}
+  .main{padding:1rem!important;max-width:100%!important;padding-bottom:80px!important;flex:1;overflow-y:auto}
 
   /* 月季年那排置中 */
   .page-title{flex-direction:column;align-items:flex-start;gap:10px}
   .page-title>div{width:100%;justify-content:center}
 
   /* FAB 在導覽列上方 */
-  .fab{bottom:70px}
+  .fab{bottom:70px!important}
 
   /* Page title */
   .page-title{font-size:20px;font-weight:600;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px}
@@ -370,7 +371,7 @@ select{cursor:pointer}
   </div>
 </div>
 
-<div class="app-shell" id="app-shell" style="display:none">
+<div class="app-shell" id="app-shell">
 <!-- Sidebar -->
 <nav class="sidebar">
   <div class="sidebar-logo"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4l7 4v14M9 21v-4a2 2 0 0 1 4 0v4"/></svg><span>租屋記帳</span></div>
@@ -3700,7 +3701,8 @@ function doLogin() {
     currentUser = account;
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ username: account.username, ts: Date.now() }));
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-shell').style.display = 'flex';
+    document.getElementById('app-shell').style.display = '';
+    document.getElementById('app-shell').classList.add('visible');
     document.getElementById('login-username').value = '';
     document.getElementById('login-password').value = '';
     document.getElementById('login-error').textContent = '';
@@ -3778,7 +3780,8 @@ function checkSession() {
         currentUser = account;
         sessionStorage.setItem(SESSION_KEY, JSON.stringify({ username: account.username, ts: Date.now() }));
         document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-shell').style.display = 'flex';
+        document.getElementById('app-shell').style.display = '';
+        document.getElementById('app-shell').classList.add('visible');
         applyPermissions();
       }
     }
@@ -3790,6 +3793,7 @@ function lockApp() {
   sessionStorage.removeItem(SESSION_KEY);
   currentUser = null;
   document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('app-shell').classList.remove('visible');
   document.getElementById('login-screen').style.display = 'flex';
   setTimeout(() => document.getElementById('login-username').focus(), 100);
 }
