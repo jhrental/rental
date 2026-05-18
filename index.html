@@ -106,7 +106,10 @@ tbody tr:hover td{background:var(--surface2)}
 .toolbar-end{margin-left:auto}
 
 /* Form elements */
-input,select,textarea{padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;width:100%}
+input,select,textarea{padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;width:100%;box-sizing:border-box}
+#p-dates-row{overflow:hidden}
+#p-dates-row>div{min-width:0;overflow:hidden}
+#p-dates-row input[type="date"]{width:100%;min-width:0;box-sizing:border-box}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue-mid);box-shadow:0 0 0 3px rgba(55,138,221,.15)}
 select{cursor:pointer}
 .form-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
@@ -368,10 +371,7 @@ select{cursor:pointer}
   <div class="nav-item" onclick="showPage('records')"><svg class="ico" viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-3-2l-2 2l-2-2l-2 2l-2-2l-3 2M9 7h6M9 11h6M9 15h4"/></svg><span>帳目記錄</span></div>
   <div class="nav-item" onclick="showPage('properties')"><svg class="ico" viewBox="0 0 24 24"><path d="M3 21h18M9 21V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14M9 11h6M5 21V11l2-2M19 21V11l-2-2"/></svg><span>物件管理</span><span id="nav-lease-badge" style="display:none" class="nav-badge"></span></div>
   <div class="nav-item" onclick="showPage('maintenance')"><svg class="ico" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>維修管理</span><span id="nav-maint-badge" style="display:none" class="nav-badge" style="background:var(--amber-mid)"></span></div>
-  <div class="nav-item" id="nav-accounts" onclick="showPage('accounts')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>帳號管理</span></div>
-  <div class="nav-item" onclick="showPage('export')"><svg class="ico" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM12 11v6M9 15l3 3l3-3"/></svg><span>匯出報表</span></div>
-  <div class="nav-item" id="nav-settings" onclick="showPage('settings')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>通知設定</span></div>
-  <div class="nav-item" id="nav-audit" onclick="showPage('audit')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>操作記錄</span></div>
+  <div class="nav-item" id="nav-settings" onclick="showPage('settings')" style="display:none"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span></div>
   <div class="sidebar-footer">
     <div class="save-indicator" id="save-indicator"><svg class="ico" viewBox="0 0 24 24"><path d="M7 18a4.6 4.4 0 0 1 0-9 5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7H7"/><path d="M9 15l2 2l4-4"/></svg><span id="save-text">✓ 已儲存</span></div>
     <div style="margin-top:6px;color:var(--text3);font-size:12px">登入：<span id="current-user-label" style="color:var(--text2)"></span></div>
@@ -481,332 +481,227 @@ select{cursor:pointer}
 </div>
 
 <!-- 匯出 -->
-<div class="page" id="page-export" style="display:none">
-  <div class="page-title">匯出報表</div>
-  <div class="card">
-    <div class="card-title">匯出設定</div>
-    <div class="form-grid">
-      <div class="form-row"><label>起始月份</label><select id="exp-from"></select></div>
-      <div class="form-row"><label>結束月份</label><select id="exp-to"></select></div>
-      <div class="form-row"><label>物件篩選</label><select id="exp-prop"><option value="">全部物件</option></select></div>
-      <div class="form-row"><label>匯出格式</label>
-        <select id="exp-fmt">
-          <option value="csv">CSV（Excel 可直接開啟）</option>
-          <option value="text">純文字報表</option>
-        </select>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn btn-success" onclick="doExport()"><svg class="ico" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/></svg> 下載匯出</button>
-      <button class="btn" onclick="previewExport()"><svg class="ico" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 預覽</button>
-    </div>
-  </div>
-  <div class="card" id="export-preview" style="display:none">
-    <div class="card-title">預覽內容</div>
-    <div id="export-preview-content"></div>
-  </div>
-</div>
-
-<!-- 操作記錄 -->
-<div class="page" id="page-audit" style="display:none">
-  <div class="page-title">操作記錄</div>
-  <div class="card">
-    <!-- 篩選列 -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
-      <select id="audit-filter-user" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);flex:1;min-width:120px">
-        <option value="">所有人員</option>
-      </select>
-      <select id="audit-filter-action" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);flex:1;min-width:120px">
-        <option value="">所有動作</option>
-        <option value="login">登入</option>
-        <option value="logout">登出</option>
-        <option value="pwd_change">修改密碼</option>
-        <option value="prop_add">新增物件</option>
-        <option value="prop_edit">編輯物件</option>
-        <option value="prop_delete">刪除物件</option>
-        <option value="record_add">新增帳目</option>
-        <option value="record_edit">編輯帳目</option>
-        <option value="record_delete">刪除帳目</option>
-        <option value="maint_add">新增維修</option>
-        <option value="maint_edit">編輯維修</option>
-        <option value="maint_done">完成維修</option>
-        <option value="routine_add">新增保養</option>
-        <option value="routine_done">完成保養</option>
-        <option value="notify_settings">通知設定</option>
-      </select>
-      <input type="date" id="audit-filter-date" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text)">
-      <button class="btn btn-sm" onclick="document.getElementById('audit-filter-user').value='';document.getElementById('audit-filter-action').value='';document.getElementById('audit-filter-date').value='';renderAuditLog()">清除篩選</button>
-    </div>
-    <div id="audit-log-list"></div>
-  </div>
-</div>
-
-<!-- 通知設定 -->
 <div class="page" id="page-settings" style="display:none">
-  <div class="page-title">通知設定</div>
-
-  <!-- 租約到期 -->
-  <div class="card" id="settings-card-lease">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:10px;height:10px;border-radius:50%;background:var(--amber-mid);flex-shrink:0"></div>
-        <div class="card-title" style="margin:0">租約到期提醒</div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <span style="font-size:12px;color:var(--text2)" id="settings-lease-label">開啟</span>
-        <div id="settings-lease-toggle" onclick="settingsToggle('lease')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
-          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-        </div>
-      </label>
-    </div>
-    <div id="settings-lease-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="form-row">
-        <label>首次提醒（剩幾天開始）</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="7" max="90" step="1" id="cfg-lease-start" style="flex:1" oninput="document.getElementById('cfg-lease-start-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-lease-start-val">30</span>
-          <span style="font-size:12px;color:var(--text3)">天前</span>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>通知間隔</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="1" max="14" step="1" id="cfg-lease-interval" style="flex:1" oninput="document.getElementById('cfg-lease-interval-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-lease-interval-val">7</span>
-          <span style="font-size:12px;color:var(--text3)">天/次</span>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>「知道了」暫停天數</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="3" max="60" step="1" id="cfg-lease-snooze" style="flex:1" oninput="document.getElementById('cfg-lease-snooze-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-lease-snooze-val">30</span>
-          <span style="font-size:12px;color:var(--text3)">天</span>
-        </div>
-      </div>
-    </div>
+  <div class="page-title">設定</div>
+  <div style="display:flex;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem;flex-wrap:wrap">
+    <div class="maint-tab active" id="stab-accounts" onclick="showSettingsTab('accounts')">帳號</div>
+    <div class="maint-tab" id="stab-roles" onclick="showSettingsTab('roles')">角色</div>
+    <div class="maint-tab" id="stab-export" onclick="showSettingsTab('export')">匯出</div>
+    <div class="maint-tab" id="stab-notify" onclick="showSettingsTab('notify')">通知</div>
+    <div class="maint-tab" id="stab-audit" onclick="showSettingsTab('audit')">紀錄</div>
   </div>
 
-  <!-- 維修未跟進 -->
-  <div class="card" id="settings-card-maint">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:10px;height:10px;border-radius:50%;background:var(--red-mid);flex-shrink:0"></div>
-        <div class="card-title" style="margin:0">維修未跟進</div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <span style="font-size:12px;color:var(--text2)" id="settings-maint-label">開啟</span>
-        <div id="settings-maint-toggle" onclick="settingsToggle('maint')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
-          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-        </div>
-      </label>
-    </div>
-    <div id="settings-maint-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="form-row">
-        <label>超過幾天算逾期</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="1" max="14" step="1" id="cfg-maint-trigger" style="flex:1" oninput="document.getElementById('cfg-maint-trigger-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-maint-trigger-val">3</span>
-          <span style="font-size:12px;color:var(--text3)">天</span>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>通知間隔</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="1" max="14" step="1" id="cfg-maint-interval" style="flex:1" oninput="document.getElementById('cfg-maint-interval-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-maint-interval-val">3</span>
-          <span style="font-size:12px;color:var(--text3)">天/次</span>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>「知道了」暫停天數</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="1" max="14" step="1" id="cfg-maint-snooze" style="flex:1" oninput="document.getElementById('cfg-maint-snooze-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-maint-snooze-val">3</span>
-          <span style="font-size:12px;color:var(--text3)">天</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 定期保養 -->
-  <div class="card" id="settings-card-routine">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:10px;height:10px;border-radius:50%;background:var(--blue-mid);flex-shrink:0"></div>
-        <div class="card-title" style="margin:0">定期保養提醒</div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <span style="font-size:12px;color:var(--text2)" id="settings-routine-label">開啟</span>
-        <div id="settings-routine-toggle" onclick="settingsToggle('routine')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
-          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-        </div>
-      </label>
-    </div>
-    <div id="settings-routine-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="form-row">
-        <label>提前幾天提醒</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="3" max="30" step="1" id="cfg-routine-start" style="flex:1" oninput="document.getElementById('cfg-routine-start-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-routine-start-val">14</span>
-          <span style="font-size:12px;color:var(--text3)">天前</span>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>「知道了」暫停天數</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="3" max="30" step="1" id="cfg-routine-snooze" style="flex:1" oninput="document.getElementById('cfg-routine-snooze-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-routine-snooze-val">14</span>
-          <span style="font-size:12px;color:var(--text3)">天</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 物件閒置 -->
-  <div class="card" id="settings-card-vacant">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:10px;height:10px;border-radius:50%;background:var(--text3);flex-shrink:0"></div>
-        <div class="card-title" style="margin:0">物件閒置提醒</div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <span style="font-size:12px;color:var(--text2)" id="settings-vacant-label">開啟</span>
-        <div id="settings-vacant-toggle" onclick="settingsToggle('vacant')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
-          <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-        </div>
-      </label>
-    </div>
-    <div id="settings-vacant-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="form-row">
-        <label>閒置幾天後提醒</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="7" max="90" step="1" id="cfg-vacant-trigger" style="flex:1" oninput="document.getElementById('cfg-vacant-trigger-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-vacant-trigger-val">30</span>
-          <span style="font-size:12px;color:var(--text3)">天後</span>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>「知道了」暫停天數</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-          <input type="range" min="7" max="60" step="1" id="cfg-vacant-snooze" style="flex:1" oninput="document.getElementById('cfg-vacant-snooze-val').textContent=this.value">
-          <span style="font-size:14px;font-weight:600;min-width:32px;color:var(--blue-mid)" id="cfg-vacant-snooze-val">30</span>
-          <span style="font-size:12px;color:var(--text3)">天</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 儲存按鈕 -->
-  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:0.5rem">
-    <button class="btn" onclick="resetNotifySettings()">恢復預設值</button>
-    <button class="btn btn-primary" onclick="saveNotifySettings()">儲存設定</button>
-  </div>
-</div>
-
-<!-- 維修管理 -->
-<div class="page" id="page-maintenance" style="display:none">
-  <div class="page-title">維修管理</div>
-
-  <!-- 三個子頁籤 -->
-  <div style="display:flex;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem">
-    <div class="maint-tab active" id="mtab-pending" onclick="showMaintTab('pending')">維修</div>
-    <div class="maint-tab" id="mtab-history" onclick="showMaintTab('history')">紀錄</div>
-    <div class="maint-tab" id="mtab-routine" onclick="showMaintTab('routine')">保養</div>
-  </div>
-
-  <!-- 維修安排 -->
-  <div id="mpanel-pending">
-    <div class="section-head" style="margin-bottom:1rem">
-      <div id="maint-overdue-banner" style="display:none" class="alert-banner">
-        <span style="font-size:18px">⚠️</span>
-        <div class="alert-banner-body">
-          <div class="alert-banner-title">未跟進提醒</div>
-          <div id="maint-overdue-list"></div>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
-      <select id="maint-filter-prop" onchange="renderMaintPending()" style="width:auto">
-        <option value="">全部物件</option>
-      </select>
-      <select id="maint-filter-status" onchange="renderMaintPending()" style="width:auto">
-        <option value="">全部狀態</option>
-        <option value="pending">待處理</option>
-        <option value="scheduled">已安排</option>
-      </select>
-      <div style="margin-left:auto">
-        <button class="btn btn-primary" onclick="openMaintModal()">
-          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
-        </button>
-      </div>
-    </div>
-    <div id="maint-pending-list"></div>
-  </div>
-
-  <!-- 維修紀錄 -->
-  <div id="mpanel-history" style="display:none">
-    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
-      <select id="hist-filter-prop" onchange="renderMaintHistory()" style="width:auto">
-        <option value="">全部物件</option>
-      </select>
-      <select id="hist-filter-kind" onchange="renderMaintHistory()" style="width:auto">
-        <option value="">全部類型</option>
-        <option value="repair">維修</option>
-        <option value="routine">保養</option>
-      </select>
-      <div style="margin-left:auto">
-        <button class="btn btn-primary" onclick="openHistModal()">
-          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
-        </button>
-      </div>
-    </div>
-    <div id="maint-history-list"></div>
-  </div>
-
-  <!-- 定期保養 -->
-  <div id="mpanel-routine" style="display:none">
-    <div id="routine-alert-banner" style="display:none" class="alert-banner">
-      <span style="font-size:18px">🛠</span>
-      <div class="alert-banner-body">
-        <div class="alert-banner-title">保養即將到期提醒</div>
-        <div id="routine-alert-list"></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center">
-      <div style="margin-left:auto">
-        <button class="btn btn-primary" onclick="openRoutineModal()">
-          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
-        </button>
-      </div>
-    </div>
-    <div id="routine-list"></div>
-  </div>
-</div>
-
-<!-- 帳號管理 -->
-<div class="page" id="page-accounts" style="display:none">
-  <div class="page-title">帳號管理</div>
-  <!-- 子頁籤 -->
-  <div style="display:flex;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem">
-    <div class="maint-tab active" id="atab-accounts" onclick="showAccountTab('accounts')">帳號</div>
-    <div class="maint-tab" id="atab-roles" onclick="showAccountTab('roles')">角色設定</div>
-  </div>
-  <!-- 帳號列表 -->
-  <div id="apanel-accounts">
+  <!-- 帳號 -->
+  <div id="spanel-accounts">
     <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
-      <button class="btn btn-primary" onclick="openAccountModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增帳號</button>
+      <button class="btn btn-primary" onclick="openAccountModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
     </div>
     <div id="accounts-list"></div>
   </div>
-  <!-- 角色設定 -->
-  <div id="apanel-roles" style="display:none">
+
+  <!-- 角色 -->
+  <div id="spanel-roles" style="display:none">
     <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
       <button class="btn btn-primary" onclick="openRoleModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增角色</button>
     </div>
     <div id="roles-list"></div>
   </div>
+
+  <!-- 匯出 -->
+  <div id="spanel-export" style="display:none">
+    <div class="card">
+      <div class="card-title">匯出設定</div>
+      <div class="form-grid">
+        <div class="form-row"><label>起始月份</label><select id="exp-from"></select></div>
+        <div class="form-row"><label>結束月份</label><select id="exp-to"></select></div>
+        <div class="form-row"><label>物件篩選</label><select id="exp-prop"><option value="">全部物件</option></select></div>
+        <div class="form-row"><label>匯出格式</label>
+          <select id="exp-fmt">
+            <option value="csv">CSV（Excel 可直接開啟）</option>
+            <option value="text">純文字報表</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-success" onclick="doExport()"><svg class="ico" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/></svg> 下載匯出</button>
+        <button class="btn" onclick="previewExport()"><svg class="ico" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 預覽</button>
+      </div>
+    </div>
+    <div class="card" id="export-preview" style="display:none">
+      <div class="card-title">預覽內容</div>
+      <div id="export-preview-content"></div>
+    </div>
+  </div>
+
+  <!-- 通知 -->
+  <div id="spanel-notify" style="display:none">
+    <div class="card" style="padding:0;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:0.5px solid var(--border)">
+            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 14px;text-align:left;width:32%">通知類型</th>
+            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center;width:10%">開關</th>
+            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center">首次提醒</th>
+            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center">間隔</th>
+            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center">暫停</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 租約到期 -->
+          <tr style="border-bottom:0.5px solid var(--border)">
+            <td style="padding:12px 14px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--amber-mid);flex-shrink:0"></div>租約到期
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div id="settings-lease-toggle" onclick="settingsToggle('lease')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-lease-start" value="30" min="7" max="90" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天前</span>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-lease-interval" value="7" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3)">天</span>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-lease-snooze" value="30" min="3" max="60" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3)">天</span>
+              </div>
+            </td>
+          </tr>
+          <!-- 維修未跟進 -->
+          <tr style="border-bottom:0.5px solid var(--border)">
+            <td style="padding:12px 14px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--red-mid);flex-shrink:0"></div>維修未跟進
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div id="settings-maint-toggle" onclick="settingsToggle('maint')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-maint-trigger" value="3" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天後</span>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-maint-interval" value="3" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3)">天</span>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-maint-snooze" value="3" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3)">天</span>
+              </div>
+            </td>
+          </tr>
+          <!-- 定期保養 -->
+          <tr style="border-bottom:0.5px solid var(--border)">
+            <td style="padding:12px 14px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--blue-mid);flex-shrink:0"></div>定期保養
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div id="settings-routine-toggle" onclick="settingsToggle('routine')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-routine-start" value="14" min="3" max="30" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天前</span>
+              </div>
+            </td>
+            <td style="text-align:center;color:var(--text3);font-size:14px;padding:12px 8px">—</td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-routine-snooze" value="14" min="3" max="30" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3)">天</span>
+              </div>
+            </td>
+          </tr>
+          <!-- 物件閒置 -->
+          <tr>
+            <td style="padding:12px 14px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0"></div>物件閒置
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div id="settings-vacant-toggle" onclick="settingsToggle('vacant')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+              </div>
+            </td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-vacant-trigger" value="30" min="7" max="90" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天後</span>
+              </div>
+            </td>
+            <td style="text-align:center;color:var(--text3);font-size:14px;padding:12px 8px">—</td>
+            <td style="text-align:center;padding:12px 8px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+                <input type="number" id="cfg-vacant-snooze" value="30" min="7" max="60" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
+                <span style="font-size:11px;color:var(--text3)">天</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" onclick="resetNotifySettings()">恢復預設值</button>
+      <button class="btn btn-primary" onclick="saveNotifySettings()">儲存設定</button>
+    </div>
+  </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--amber-mid);flex-shrink:0"></div>
+          <div class="card-title" style="margin:0">租約到期提醒</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <span style="font-size:12px;color:var(--text2)" id="settings-lease-label">開啟</span>
+          <div id="settings-lease-toggle" onclick="settingsToggle('lease')" style="width:38px;height:22px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0"><div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div></div>
+        </label>
+      </div>
+      <div id="settings-lease-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+  <!-- 操作記錄 -->
+  <div id="spanel-audit" style="display:none">
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+        <select id="audit-filter-user" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);flex:1;min-width:120px"><option value="">所有人員</option></select>
+        <select id="audit-filter-action" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);flex:1;min-width:120px">
+          <option value="">所有動作</option>
+          <option value="login">登入</option><option value="logout">登出</option><option value="pwd_change">修改密碼</option>
+          <option value="prop_add">新增物件</option><option value="prop_edit">編輯物件</option><option value="prop_delete">刪除物件</option>
+          <option value="record_add">新增帳目</option><option value="record_edit">編輯帳目</option><option value="record_delete">刪除帳目</option>
+          <option value="maint_add">新增維修</option><option value="maint_edit">編輯維修</option><option value="maint_done">完成維修</option>
+          <option value="routine_add">新增保養</option><option value="routine_done">完成保養</option><option value="notify_settings">通知設定</option>
+        </select>
+        <input type="date" id="audit-filter-date" onchange="renderAuditLog()" style="font-size:13px;padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text)">
+        <button class="btn btn-sm" onclick="document.getElementById('audit-filter-user').value='';document.getElementById('audit-filter-action').value='';document.getElementById('audit-filter-date').value='';renderAuditLog()">清除篩選</button>
+      </div>
+      <div id="audit-log-list"></div>
+    </div>
+  </div>
 </div>
+
 
 </main>
 </div>
@@ -1031,16 +926,22 @@ select{cursor:pointer}
       <!-- 閒置起始日（閒置/整修時才顯示）-->
       <input type="date" id="p-vacant-since" style="display:none">
 
-      <!-- 租約起始 + 到期 並排 -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="p-dates-row">
-        <div style="position:relative">
-          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none;z-index:1">起始</span>
-          <input type="date" id="p-start" style="width:100% !important;padding-left:36px;box-sizing:border-box;font-size:12px;min-width:0">
+      <!-- 租約起始 + 到期（進度條樣式）-->
+      <div id="p-dates-row" style="background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:3px">合約起始</div>
+            <input type="date" id="p-start" style="border:none;background:transparent;font-size:13px;color:var(--text);padding:0;width:auto;box-shadow:none" onchange="updateLeaseProgress()">
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:3px">合約到期</div>
+            <input type="date" id="p-end" style="border:none;background:transparent;font-size:13px;color:var(--text);padding:0;width:auto;text-align:right;box-shadow:none" onchange="updateLeaseProgress()">
+          </div>
         </div>
-        <div style="position:relative">
-          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none;z-index:1">到期</span>
-          <input type="date" id="p-end" style="width:100% !important;padding-left:36px;box-sizing:border-box;font-size:12px;min-width:0">
+        <div style="height:6px;background:var(--surface2);border-radius:100px;overflow:hidden">
+          <div id="p-lease-bar" style="height:100%;background:var(--blue-mid);border-radius:100px;width:0%;transition:width .3s"></div>
         </div>
+        <div id="p-lease-remain" style="font-size:11px;color:var(--blue-mid);margin-top:5px;text-align:right"></div>
       </div>
 
       <!-- 出租類型 + 公證合約 -->
@@ -1403,6 +1304,9 @@ const NOTIFY_DEFAULTS = {
   vacant:  { on: true, trigger: 30,             snooze: 30 },
 };
 
+function $id(id){ return document.getElementById(id); }
+function $set(id, prop, val){ const el=$id(id); if(el) el[prop]=val; }
+function $style(id, prop, val){ const el=$id(id); if(el) el.style[prop]=val; }
 let state = {
   properties: [],
   records: [],
@@ -1441,6 +1345,7 @@ async function loadData() {
   if (!state.notifySnoozed) state.notifySnoozed = {};
   if (!state.notifyConfig) state.notifyConfig = JSON.parse(JSON.stringify(NOTIFY_DEFAULTS));
   if (!state.auditLog) state.auditLog = [];
+  if (!state.notifyLog) state.notifyLog = {};
   if (state.properties.length === 0) seedDemo();
   setSaveIndicator('saved');
   runDailyNotifyCheck();
@@ -1541,24 +1446,22 @@ function initials(name){ return name ? name.slice(0,1) : '?' }
 function showPage(name) {
   currentPage = name;
   document.querySelectorAll('.page').forEach(el => el.style.display='none');
-  document.getElementById('page-'+name).style.display='block';
-  document.querySelectorAll('.nav-item').forEach((el,i) => {
-    el.classList.toggle('active', ['overview','records','properties','maintenance','accounts','export','settings'][i]===name);
+  const pageEl = document.getElementById('page-'+name);
+  if(pageEl) pageEl.style.display='block';
+  document.querySelectorAll('.nav-item').forEach(el => {
+    const onclick = el.getAttribute('onclick')||'';
+    el.classList.toggle('active', onclick.includes("'"+name+"'"));
   });
   if(name==='overview') renderOverview();
   if(name==='records') renderRecords();
   if(name==='properties') renderProperties();
   if(name==='maintenance'){ populateMaintPropSelects(); showMaintTab('pending'); }
-  if(name==='accounts'){ getRoles(); showAccountTab('accounts'); }
-  if(name==='export') renderExportPage();
-  if(name==='settings') renderSettingsPage();
-  if(name==='audit') renderAuditLog();
+  if(name==='settings'){ getRoles(); showSettingsTab('accounts'); }
 }
 let viewMode = 'month'; // 'month' | 'quarter' | 'year'
 
 function setViewMode(mode){
   viewMode = mode;
-  // update button styles
   ['month','quarter','year'].forEach(m=>{
     const btn=document.getElementById('vmode-'+m);
     if(btn){
@@ -1566,9 +1469,9 @@ function setViewMode(mode){
       btn.style.color = m===mode ? '#fff' : 'var(--text2)';
     }
   });
-  document.getElementById('ov-month-nav').style.display = mode==='month'?'flex':'none';
-  document.getElementById('ov-quarter-nav').style.display = mode==='quarter'?'block':'none';
-  document.getElementById('ov-year-nav').style.display = mode==='year'?'block':'none';
+  $style('ov-month-nav','display',mode==='month'?'flex':'none');
+  $style('ov-quarter-nav','display',mode==='quarter'?'block':'none');
+  $style('ov-year-nav','display',mode==='year'?'block':'none');
   populatePeriodSelects();
   renderOverview();
 }
@@ -1672,21 +1575,19 @@ function renderOverview(){
   populatePeriodSelects();
   const {recs, label, period} = getViewRecs();
 
-  // Update title and labels
   const titles={'month':'每月總覽','quarter':'季度總覽','year':'年度總覽'};
-  document.getElementById('ov-title').textContent=titles[viewMode]||'總覽';
-  document.getElementById('ov-income-label').textContent=label+'收入';
-  document.getElementById('ov-expense-label').textContent=label+'支出';
+  $set('ov-title','textContent',titles[viewMode]||'總覽');
+  $set('ov-income-label','textContent',label+'收入');
+  $set('ov-expense-label','textContent',label+'支出');
 
   const inc=recs.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
   const exp=recs.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
-  document.getElementById('ov-income').textContent=fmtMoney(inc);
-  document.getElementById('ov-expense').textContent=fmtMoney(exp);
+  $set('ov-income','textContent',fmtMoney(inc));
+  $set('ov-expense','textContent',fmtMoney(exp));
   const net=inc-exp;
   const nel=document.getElementById('ov-net');
-  nel.textContent=fmtMoney(net);
-  nel.className='stat-val '+(net>=0?'green':'red');
-  document.getElementById('ov-propcount').textContent=state.properties.length;
+  if(nel){ nel.textContent=fmtMoney(net); nel.className='stat-val '+(net>=0?'green':'red'); }
+  $set('ov-propcount','textContent',state.properties.length);
   const rented=state.properties.filter(p=>(p.status||'rented')==='rented').length;
   const vacant=state.properties.filter(p=>p.status==='vacant').length;
   const repair=state.properties.filter(p=>p.status==='repair').length;
@@ -2315,24 +2216,18 @@ function renderSettingsPage() {
   const cfg = getNotifyConfig();
   ['lease','maint','routine','vacant'].forEach(key => {
     const c = cfg[key];
-    // 開關
     const tog = document.getElementById('settings-'+key+'-toggle');
-    const lbl = document.getElementById('settings-'+key+'-label');
-    const body = document.getElementById('settings-'+key+'-body');
-    if (tog) {
+    if(tog){
       tog.style.background = c.on ? 'var(--blue-mid)' : 'var(--text3)';
-      tog.querySelector('div').style.left = c.on ? '20px' : '4px';
+      const knob = tog.querySelector('div');
+      if(knob) knob.style.left = c.on ? '17px' : '3px';
     }
-    if (lbl) { lbl.textContent = c.on ? '開啟' : '關閉'; lbl.style.color = c.on ? 'var(--text2)' : 'var(--red-mid)'; }
-    if (body) { body.style.opacity = c.on ? '1' : '0.35'; body.style.pointerEvents = c.on ? '' : 'none'; }
-    // 滑桿值
     const fields = key==='lease' ? ['start','interval','snooze'] :
                    key==='maint' ? ['trigger','interval','snooze'] :
                    key==='routine' ? ['start','snooze'] : ['trigger','snooze'];
     fields.forEach(f => {
       const el = document.getElementById('cfg-'+key+'-'+f);
-      const vl = document.getElementById('cfg-'+key+'-'+f+'-val');
-      if (el && c[f] !== undefined) { el.value = c[f]; if (vl) vl.textContent = c[f]; }
+      if(el && c[f] !== undefined) el.value = c[f];
     });
   });
 }
@@ -2340,7 +2235,12 @@ function renderSettingsPage() {
 function settingsToggle(key) {
   const cfg = getNotifyConfig();
   cfg[key].on = !cfg[key].on;
-  renderSettingsPage();
+  const tog = document.getElementById('settings-'+key+'-toggle');
+  if(tog){
+    tog.style.background = cfg[key].on ? 'var(--blue-mid)' : 'var(--text3)';
+    const knob = tog.querySelector('div');
+    if(knob) knob.style.left = cfg[key].on ? '17px' : '3px';
+  }
 }
 
 function saveNotifySettings() {
@@ -2508,10 +2408,13 @@ function buildFlexMsg(title, lines, type, id, snoozeDays, intervalDays){
 }
 
 function getLastNotified(type, id){
-  return parseInt(localStorage.getItem(`lastNotify_${type}_${id}`) || '0');
+  if(!state.notifyLog) state.notifyLog = {};
+  return state.notifyLog[`${type}_${id}`] || 0;
 }
 function setLastNotified(type, id){
-  localStorage.setItem(`lastNotify_${type}_${id}`, Date.now().toString());
+  if(!state.notifyLog) state.notifyLog = {};
+  state.notifyLog[`${type}_${id}`] = Date.now();
+  saveData();
 }
 
 async function runDailyNotifyCheck(){
@@ -2531,6 +2434,7 @@ async function runDailyNotifyCheck(){
       if((p.status||'rented')!=='rented') return;
       const d = daysUntilExpiry(p.end);
       if(d===null || d > cfg.lease.start) return;
+      if(d < -90) return; // 到期超過 90 天停止通知
       if(isSnoozed('lease', p.id)) return;
       const last = getLastNotified('lease', p.id);
       if(now - last < cfg.lease.interval * 86400000) return;
@@ -2628,8 +2532,10 @@ function showToast(msg){
 /* ── Maintenance ── */
 function showMaintTab(tab){
   ['pending','history','routine'].forEach(t=>{
-    document.getElementById('mtab-'+t).className='maint-tab'+(t===tab?' active':'');
-    document.getElementById('mpanel-'+t).style.display=t===tab?'block':'none';
+    const mtab = document.getElementById('mtab-'+t);
+    const mpanel = document.getElementById('mpanel-'+t);
+    if(mtab) mtab.className='maint-tab'+(t===tab?' active':'');
+    if(mpanel) mpanel.style.display=t===tab?'block':'none';
   });
   if(tab==='pending') renderMaintPending();
   if(tab==='history') renderMaintHistory();
@@ -3388,6 +3294,28 @@ function deleteRecord(id){
   saveData();
   renderRecords();
 }
+function updateLeaseProgress(){
+  const start = document.getElementById('p-start')?.value;
+  const end = document.getElementById('p-end')?.value;
+  const bar = document.getElementById('p-lease-bar');
+  const remain = document.getElementById('p-lease-remain');
+  if(!bar || !remain) return;
+  if(!start || !end){ bar.style.width='0%'; remain.textContent=''; return; }
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  const now = Date.now();
+  const total = e - s;
+  if(total <= 0){ bar.style.width='0%'; remain.textContent=''; return; }
+  const elapsed = Math.min(Math.max(now - s, 0), total);
+  const pct = Math.round((elapsed / total) * 100);
+  const remainPct = 100 - pct;
+  const daysLeft = Math.round((e - now) / 86400000);
+  bar.style.width = pct + '%';
+  bar.style.background = daysLeft < 0 ? 'var(--red-mid)' : daysLeft <= 14 ? 'var(--amber-mid)' : 'var(--blue-mid)';
+  if(daysLeft < 0) remain.style.color = 'var(--red-mid)', remain.textContent = `已到期 ${Math.abs(daysLeft)} 天`;
+  else if(daysLeft <= 14) remain.style.color = 'var(--amber-mid)', remain.textContent = `剩餘 ${daysLeft} 天 ⚠`;
+  else remain.style.color = 'var(--blue-mid)', remain.textContent = `剩餘 ${remainPct}%（${daysLeft} 天）`;
+}
 function toggleVacantFields(){
   const status = document.getElementById('p-status').value;
   const isVacant = status !== 'rented';
@@ -3458,6 +3386,7 @@ function openPropModal(id){
   document.getElementById('p-tenant').value=p?p.tenant:'';
   document.getElementById('p-start').value=p?p.start:'';
   document.getElementById('p-end').value=p?p.end:'';
+  updateLeaseProgress();
   document.getElementById('p-note').value=p?p.note:'';
   document.getElementById('p-status').value=p?(p.status||'rented'):'rented';
   document.getElementById('p-vacant-since').value=p?(p.vacantSince||''):'';
@@ -3744,14 +3673,9 @@ function applyPermissions() {
   const label = document.getElementById('current-user-label');
   if (label) label.textContent = currentUser.displayName || currentUser.username;
 
-  // 帳號管理只有管理員看得到
-  const navAcc = document.getElementById('nav-accounts');
-  if (navAcc) navAcc.style.display = isAdmin ? 'flex' : 'none';
-  // 通知設定只有管理員看得到
+  // 設定只有管理員看得到
   const navSet = document.getElementById('nav-settings');
   if (navSet) navSet.style.display = isAdmin ? 'flex' : 'none';
-  const navAudit = document.getElementById('nav-audit');
-  if (navAudit) navAudit.style.display = isAdmin ? 'flex' : 'none';
   // FAB 快速記帳 - 登入後顯示
   const fab = document.getElementById('fab-quick');
   if (fab) fab.style.display = 'flex';
@@ -3833,10 +3757,25 @@ function getRoles() {
   return state.roles;
 }
 
+function showSettingsTab(tab){
+  ['accounts','roles','export','notify','audit'].forEach(t=>{
+    const stab = document.getElementById('stab-'+t);
+    const spanel = document.getElementById('spanel-'+t);
+    if(stab) stab.classList.toggle('active', t===tab);
+    if(spanel) spanel.style.display = t===tab ? '' : 'none';
+  });
+  if(tab==='export') renderExportPage();
+  if(tab==='notify') renderSettingsPage();
+  if(tab==='audit') renderAuditLog();
+  if(tab==='accounts') { renderAccounts(); }
+  if(tab==='roles') { getRoles(); renderRoles(); }
+}
 function showAccountTab(tab) {
   ['accounts', 'roles'].forEach(t => {
-    document.getElementById('atab-' + t).className = 'maint-tab' + (t === tab ? ' active' : '');
-    document.getElementById('apanel-' + t).style.display = t === tab ? 'block' : 'none';
+    const stab = document.getElementById('stab-' + t);
+    const spanel = document.getElementById('spanel-' + t);
+    if(stab) stab.className = 'maint-tab' + (t === tab ? ' active' : '');
+    if(spanel) spanel.style.display = t === tab ? 'block' : 'none';
   });
   if (tab === 'accounts') renderAccounts();
   if (tab === 'roles') renderRoles();
