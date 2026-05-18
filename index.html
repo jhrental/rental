@@ -1030,14 +1030,14 @@ select{cursor:pointer}
       <input type="date" id="p-vacant-since" style="display:none">
 
       <!-- 租約起始 + 到期 並排 -->
-      <div style="display:flex;gap:8px" id="p-dates-row">
-        <div style="position:relative;flex:1">
-          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none;z-index:1">合約起始</span>
-          <input type="date" id="p-start" style="width:100%;padding-left:68px;text-align:center;box-sizing:border-box">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0" id="p-dates-row">
+        <div style="position:relative;min-width:0">
+          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none;z-index:1;white-space:nowrap">起始</span>
+          <input type="date" id="p-start" style="width:100%;padding-left:40px;box-sizing:border-box;font-size:13px">
         </div>
-        <div style="position:relative;flex:1">
-          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text3);pointer-events:none;z-index:1">合約到期</span>
-          <input type="date" id="p-end" style="width:100%;padding-left:68px;text-align:center;box-sizing:border-box">
+        <div style="position:relative;min-width:0">
+          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none;z-index:1;white-space:nowrap">到期</span>
+          <input type="date" id="p-end" style="width:100%;padding-left:40px;box-sizing:border-box;font-size:13px">
         </div>
       </div>
 
