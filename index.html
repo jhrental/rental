@@ -1300,8 +1300,22 @@ select{cursor:pointer}
       <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">租客</span><span style="font-size:14px;color:var(--text)" id="view-tenant"></span></div>
       <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">月租金</span><span style="font-size:14px;font-weight:500;color:var(--blue-mid)" id="view-rent"></span></div>
       <div style="border-top:0.5px solid var(--border);margin:4px 0"></div>
-      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">合約起始</span><span style="font-size:14px;color:var(--text)" id="view-start"></span></div>
-      <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">合約到期</span><span style="font-size:14px;color:var(--text)" id="view-end"></span></div>
+      <div style="background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:3px">合約起始</div>
+            <div style="font-size:13px;color:var(--text)" id="view-start"></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:3px">合約到期</div>
+            <div style="font-size:13px;color:var(--text)" id="view-end"></div>
+          </div>
+        </div>
+        <div style="height:6px;background:var(--surface2);border-radius:100px;overflow:hidden">
+          <div id="view-lease-bar" style="height:100%;border-radius:100px;width:0%;transition:width .3s"></div>
+        </div>
+        <div id="view-lease-remain" style="font-size:11px;margin-top:5px;text-align:right"></div>
+      </div>
       <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">出租類型</span><span style="font-size:14px;color:var(--text)" id="view-type"></span></div>
       <div style="display:flex;gap:8px"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">公證合約</span><span style="font-size:14px;color:var(--text)" id="view-notary"></span></div>
       <div style="display:flex;gap:8px" id="view-note-row"><span style="font-size:12px;color:var(--text3);width:68px;flex-shrink:0;padding-top:2px">備註</span><span style="font-size:14px;color:var(--text2)" id="view-note"></span></div>
@@ -3651,6 +3665,23 @@ function openPropView(id){
   const endEl = document.getElementById('view-end');
   endEl.textContent = p.end||'—';
   endEl.style.color = isExpired?'var(--red-mid)':isWarn?'var(--amber-mid)':'var(--text)';
+  // 進度條
+  if(p.start && p.end){
+    const s=new Date(p.start).getTime(), e=new Date(p.end).getTime(), now=Date.now();
+    const total=e-s, elapsed=Math.min(Math.max(now-s,0),total);
+    const pct=Math.round((elapsed/total)*100);
+    const daysLeft=Math.round((e-now)/86400000);
+    const bar=document.getElementById('view-lease-bar');
+    const rem=document.getElementById('view-lease-remain');
+    bar.style.width=pct+'%';
+    bar.style.background=daysLeft<0?'var(--red-mid)':daysLeft<=14?'var(--amber-mid)':'var(--blue-mid)';
+    if(daysLeft<0){ rem.style.color='var(--red-mid)'; rem.textContent=`已到期 ${Math.abs(daysLeft)} 天`; }
+    else if(daysLeft<=14){ rem.style.color='var(--amber-mid)'; rem.textContent=`剩餘 ${daysLeft} 天 ⚠`; }
+    else { rem.style.color='var(--blue-mid)'; rem.textContent=`剩餘 ${100-pct}%（${daysLeft} 天）`; }
+  } else {
+    document.getElementById('view-lease-bar').style.width='0%';
+    document.getElementById('view-lease-remain').textContent='';
+  }
   document.getElementById('view-type').textContent = typeMap[p.rentalType]||'一般出租';
   document.getElementById('view-notary').textContent = p.notarized?'是':'否';
   document.getElementById('view-note').textContent = p.note||'—';
