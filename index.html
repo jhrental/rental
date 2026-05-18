@@ -478,18 +478,19 @@ select{cursor:pointer}
 
 <!-- 帳目 -->
 <div class="page" id="page-records" style="display:none">
-  <div class="page-title">帳目記錄</div>
-  <div class="toolbar">
-    <select id="rec-month" onchange="renderRecords()" style="width:auto"></select>
-    <select id="rec-prop" onchange="renderRecords()" style="width:auto"><option value="">全部物件</option></select>
-    <select id="rec-type" onchange="renderRecords()" style="width:auto">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
+    <span style="font-size:24px;font-weight:600;color:var(--text)">帳目記錄</span>
+    <button class="btn btn-primary btn-sm" onclick="openRecordModal()" style="font-size:13px;padding:6px 14px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem">
+    <select id="rec-month" onchange="renderRecords()"></select>
+    <select id="rec-prop" onchange="renderRecords()"><option value="">全部物件</option></select>
+    <select id="rec-type" onchange="renderRecords()">
       <option value="">全部類型</option>
       <option value="in">收入</option>
       <option value="out">支出</option>
     </select>
-    <div class="toolbar-end">
-      <button class="btn btn-primary" onclick="openRecordModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
-    </div>
+  </div>
   </div>
   <div class="card">
     <div class="table-wrap"><table id="rec-table"><thead><tr><th>日期</th><th>類型</th><th>項目</th><th>金額</th><th>備註</th><th></th></tr></thead><tbody></tbody></table></div>
@@ -1863,7 +1864,7 @@ function renderRecords(){
     const accent = isShared ? '#888' : accentColors[gi % accentColors.length];
 
     const rows=gr.map(r=>`<tr class="rec-detail-row">
-      <td style="padding-left:20px;color:var(--text2);font-size:13px;border-left:3px solid ${accent}20">${r.date}</td>
+      <td style="padding-left:20px;color:var(--text2);font-size:13px;border-left:3px solid ${accent}20">${r.date ? r.date.slice(5) : ''}</td>
       <td><span class="badge ${r.type==='in'?'badge-in':'badge-out'}" style="font-size:11px">${r.type==='in'?'收入':'支出'}</span></td>
       <td style="font-size:13px">${r.cat}</td>
       <td style="font-size:13px" class="${r.type==='in'?'amt-in':'amt-out'};font-weight:600">${r.type==='in'?'+':'-'}${fmtMoney(r.amount)}</td>
@@ -2074,13 +2075,9 @@ function renderProperties(){
 
       <!-- 手機版：緊湊一行 -->
       <div class="prop-mobile" style="flex:1;display:none;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:16px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
-          ${statusBadge}
-        </div>
-        <div style="font-size:13px;color:var(--text2);margin-top:2px">${!isVacant&&p.tenant?p.tenant+' · ':''} ${isVacant?'':fmtMoney(p.rent)+'/月'}</div>
+        <span style="font-size:16px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
       </div>
-      <div class="prop-mobile" style="display:none;flex-shrink:0;display:none">
+      <div class="prop-mobile" style="display:none;flex-shrink:0">
         <div style="display:flex;gap:6px">${lineBtn}${viewBtn}</div>
       </div>
     </div>`;
