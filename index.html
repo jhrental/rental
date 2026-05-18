@@ -1956,7 +1956,7 @@ function renderProperties(){
       const d=daysUntilExpiry(p.end);
       const isExpired = d!==null && d<0;
       const labelFull = isExpired ? `已逾期 ${Math.abs(d)}天` : `剩 ${d}天`;
-      const labelShort = isExpired ? `逾${Math.abs(d)}天` : `剩${d}天`;
+      const labelShort = isExpired ? `逾期` : `${d}天`;
       const labelColor = isExpired ? 'var(--red-mid)' : 'var(--amber-mid)';
       const snoozed = isSnoozed('lease', p.id);
       if(snoozed){
@@ -1982,9 +1982,9 @@ function renderProperties(){
           <button class="btn btn-sm" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:30px" onclick="snooze('lease','${p.id}',30)">暫停</button>
           <button class="btn btn-sm btn-danger" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:30px" onclick="snoozeForever('lease','${p.id}')">停止</button>
         </div>
-        <div class="alert-mobile-btns" style="display:flex;gap:5px;flex-shrink:0">
-          <button class="btn btn-sm" style="font-size:13px;padding:6px 14px;border-radius:100px;min-height:34px" onclick="snooze('lease','${p.id}',30)">暫停</button>
-          <button class="btn btn-sm btn-danger" style="font-size:13px;padding:6px 14px;border-radius:100px;min-height:34px" onclick="snoozeForever('lease','${p.id}')">停止</button>
+        <div class="alert-mobile-btns" style="display:flex;gap:4px;flex-shrink:0">
+          <button class="btn btn-sm" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:32px;white-space:nowrap" onclick="snooze('lease','${p.id}',30)">暫停</button>
+          <button class="btn btn-sm btn-danger" style="font-size:12px;padding:5px 10px;border-radius:100px;min-height:32px;white-space:nowrap" onclick="snoozeForever('lease','${p.id}')">停止</button>
         </div>
       </div>`;
 
