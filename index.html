@@ -482,7 +482,7 @@ select{cursor:pointer}
     <span style="font-size:24px;font-weight:600;color:var(--text)">帳目記錄</span>
     <button class="btn btn-primary btn-sm" onclick="openRecordModal()" style="font-size:13px;padding:6px 14px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem;align-items:center">
     <select id="rec-month" onchange="renderRecords()"></select>
     <select id="rec-prop" onchange="renderRecords()"><option value="">全部物件</option></select>
     <select id="rec-type" onchange="renderRecords()">
@@ -493,7 +493,7 @@ select{cursor:pointer}
   </div>
   </div>
   <div class="card">
-    <div class="table-wrap"><table id="rec-table"><thead><tr><th>日期</th><th>類型</th><th>項目</th><th>金額</th><th>備註</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div class="table-wrap"><table id="rec-table"><thead><tr><th>日期</th><th>類型</th><th>項目</th><th>金額</th><th></th><th></th></tr></thead><tbody></tbody></table></div>
   </div>
 </div>
 
@@ -1827,6 +1827,27 @@ function renderCharts(inc, exp, recs){
 }
 
 /* ── Records ── */
+let currentRecType = '';
+function setRecType(type){
+  currentRecType = type;
+  const configs = {
+    '': {id:'rec-type-all', bg:'var(--surface2)', color:'var(--text)', border:'var(--border2)'},
+    'in': {id:'rec-type-in', bg:'#E1F5EE', color:'#0F6E56', border:'#0F6E56'},
+    'out': {id:'rec-type-out', bg:'#FCEBEB', color:'#A32D2D', border:'#A32D2D'},
+  };
+  ['','in','out'].forEach(t=>{
+    const btn = document.getElementById('rec-type-'+(t||'all'));
+    if(!btn) return;
+    const isActive = t===type;
+    const cfg = isActive ? configs[t] : {bg:'transparent', color:'var(--text2)', border:'var(--border2)'};
+    if(t==='') cfg.bg = isActive?'var(--surface2)':'transparent';
+    btn.style.background = cfg.bg;
+    btn.style.color = cfg.color;
+    btn.style.borderColor = cfg.border;
+    btn.style.fontWeight = isActive?'500':'400';
+  });
+  renderRecords();
+}
 function renderRecords(){
   populateMonthSelects();
   populatePropSelects();
@@ -1863,17 +1884,40 @@ function renderRecords(){
     const accentColors=['#185fa5','#1d9e75','#ba7517','#533ab7','#993556','#3b6d11','#d85a30','#0f6e56','#854f0b'];
     const accent = isShared ? '#888' : accentColors[gi % accentColors.length];
 
-    const rows=gr.map(r=>`<tr class="rec-detail-row">
-      <td style="padding-left:20px;color:var(--text2);font-size:13px;border-left:3px solid ${accent}20">${r.date ? r.date.slice(5) : ''}</td>
-      <td><span class="badge ${r.type==='in'?'badge-in':'badge-out'}" style="font-size:11px">${r.type==='in'?'收入':'支出'}</span></td>
-      <td style="font-size:13px">${r.cat}</td>
-      <td style="font-size:13px" class="${r.type==='in'?'amt-in':'amt-out'};font-weight:600">${r.type==='in'?'+':'-'}${fmtMoney(r.amount)}</td>
-      <td style="color:var(--text3);font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.note||''}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-icon btn-sm" onclick="openRecordModal('${r.id}')" title="編輯"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
-        <button class="btn btn-icon btn-sm btn-danger" onclick="deleteRecord('${r.id}')" title="刪除"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
-      </td>
-    </tr>`).join('');
+    const isMobile = window.innerWidth <= 900;
+    const rows=gr.map(r=>{
+      const isIn = r.type==='in';
+      const badgeBg = isIn ? '#E1F5EE' : '#FCEBEB';
+      const badgeColor = isIn ? '#0F6E56' : '#A32D2D';
+      const amtColor = isIn ? '#1D9E75' : '#E24B4A';
+      const amtSign = isIn ? '+' : '-';
+      if(isMobile){
+        return `<tr class="rec-detail-row">
+          <td style="padding-left:12px;color:var(--text2);font-size:13px;border-left:3px solid ${accent}20;white-space:nowrap">${r.date ? r.date.slice(5) : ''}</td>
+          <td colspan="2">
+            <span style="font-size:12px;font-weight:500;padding:3px 10px;border-radius:100px;background:${badgeBg};color:${badgeColor};white-space:nowrap">${r.cat}</span>
+            ${r.note?`<span style="font-size:11px;color:var(--text3);margin-left:6px">${r.note}</span>`:''}
+          </td>
+          <td style="font-size:13px;font-weight:600;color:${amtColor};white-space:nowrap">${amtSign}${fmtMoney(r.amount)}</td>
+          <td style="display:none"></td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-icon btn-sm" onclick="openRecordModal('${r.id}')" title="編輯"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
+            <button class="btn btn-icon btn-sm btn-danger" onclick="deleteRecord('${r.id}')" title="刪除"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+          </td>
+        </tr>`;
+      }
+      return `<tr class="rec-detail-row">
+        <td style="padding-left:20px;color:var(--text2);font-size:13px;border-left:3px solid ${accent}20">${r.date ? r.date.slice(5) : ''}</td>
+        <td><span class="badge ${isIn?'badge-in':'badge-out'}" style="font-size:11px">${isIn?'收入':'支出'}</span></td>
+        <td style="font-size:13px">${r.cat}</td>
+        <td style="font-size:13px;color:${amtColor};font-weight:600">${amtSign}${fmtMoney(r.amount)}</td>
+        <td style="color:var(--text3);font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.note||''}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-icon btn-sm" onclick="openRecordModal('${r.id}')" title="編輯"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>
+          <button class="btn btn-icon btn-sm btn-danger" onclick="deleteRecord('${r.id}')" title="刪除"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+        </td>
+      </tr>`;
+    }).join('');
 
     return `<tr class="rec-group-header">
       <td colspan="6" style="padding:0;border-bottom:none">
