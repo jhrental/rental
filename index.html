@@ -1334,7 +1334,18 @@ select{cursor:pointer}
 <!-- Modal：新增/編輯帳號 -->
 <div class="modal-backdrop" id="modal-account">
   <div class="modal" style="width:460px">
-    <div class="modal-title" id="modal-account-title">新增帳號</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div class="modal-title" id="modal-account-title" style="margin:0">新增帳號</div>
+      <div id="acc-danger-btns" style="display:none;align-items:center;gap:8px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span id="acc-active-label" style="font-size:11px;color:var(--text3)">啟用</span>
+          <button id="acc-toggle-btn" onclick="toggleAccountInModal()" style="width:38px;height:22px;border-radius:100px;border:none;background:#185FA5;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s">
+            <div style="position:absolute;top:4px;left:20px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+          </button>
+        </div>
+        <button onclick="deleteAccountFromModal()" style="width:30px;height:30px;border-radius:8px;border:0.5px solid #F0997B;background:transparent;color:#D85A30;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px">🗑</button>
+      </div>
+    </div>
     <div class="form-grid">
       <div class="form-row"><label>帳號名稱</label><input type="text" id="acc-username" placeholder="英文+數字，3-20字元" maxlength="20"></div>
       <div class="form-row"><label>顯示名稱</label><input type="text" id="acc-displayname" placeholder="例：王師傅、社宅業者-大安"></div>
@@ -1349,6 +1360,7 @@ select{cursor:pointer}
       </div>
     </div>
     <input type="hidden" id="acc-edit-username">
+    <input type="hidden" id="acc-active-state" value="true">
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('modal-account')">取消</button>
       <button class="btn btn-primary" onclick="saveAccount()">儲存</button>
@@ -4235,30 +4247,56 @@ function renderAccounts() {
   list.innerHTML = accounts.map(a => {
     const isAdmin = a.role === 'admin';
     const isSelf = currentUser && a.username === currentUser.username;
-    const propNames = (a.props || []).map(pid => {
-      const p = getProp(pid); return p ? p.name : pid;
-    }).join('、') || '全部物件';
-    return `<div class="maint-card" style="opacity:${a.active===false?0.5:1}">
-      <div class="maint-card-head">
-        <div style="flex:1">
-          <div class="maint-card-title" style="display:flex;align-items:center;gap:8px">
-            ${a.displayName || a.username}
-            <span style="font-size:12px;color:var(--text3);font-weight:400">@${a.username}</span>
+    const props = (a.props || []).map(pid => {
+      const p = getProp(pid); return p ? `<span style="font-size:11px;padding:2px 8px;border-radius:100px;background:var(--surface);border:0.5px solid var(--border);color:var(--text)">${p.name}</span>` : '';
+    }).join('');
+    const uid = 'acc-expand-' + a.username;
+    return `<div class="maint-card" style="opacity:${a.active===false?0.5:1};padding:0;overflow:hidden">
+      <!-- 卡片頭部 -->
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 14px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:15px;font-weight:500;color:var(--text)">${a.displayName||a.username}</span>
+            <span style="font-size:11px;color:var(--text3)">@${a.username}</span>
             <span class="badge ${isAdmin?'badge-in':'badge-warn'}" style="${isAdmin?'':'background:var(--amber-bg);color:var(--amber)'}">${isAdmin?'管理員':(getRoles().find(r=>r.id===a.role)?.name||a.role)}</span>
             ${a.active===false?'<span class="badge badge-out">停用</span>':''}
           </div>
-          <div class="maint-card-sub">${isAdmin?'全部功能':'負責物件：'+propNames}</div>
         </div>
-        <div class="maint-card-actions">
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${!isAdmin||isSelf?`<button class="btn btn-sm" onclick="openResetPwModal('${a.username}')">重設密碼</button>`:''}
-          ${!isAdmin?`<button class="btn btn-sm" onclick="openAccountModal('${a.username}')"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1l1-4l9.5-9.5z"/></svg></button>`:''}
-          ${!isAdmin&&!isSelf?`<button class="btn btn-sm ${a.active===false?'btn-primary':'btn-danger'}" onclick="toggleAccount('${a.username}')">${a.active===false?'啟用':'停用'}</button>`:''}
-          ${!isAdmin&&!isSelf&&getLockout(a.username)?.until>Date.now()?`<button class="btn btn-sm btn-primary" onclick="adminUnlock('${a.username}')">解鎖</button>`:''}
-          ${!isAdmin&&!isSelf?`<button class="btn btn-icon btn-sm btn-danger" onclick="deleteAccount('${a.username}')"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>`:''}
+          ${!isAdmin?`<button class="btn btn-sm" onclick="openAccountModal('${a.username}')">編輯</button>`:''}
+          ${!isAdmin?`<button class="btn btn-sm" style="font-size:16px;padding:4px 8px;color:var(--text3);border-color:var(--border)" onclick="const p=document.getElementById('${uid}');const arrow=this;if(p.style.display==='none'||!p.style.display){p.style.display='block';arrow.textContent='▲'}else{p.style.display='none';arrow.textContent='▼'}">▼</button>`:''}
         </div>
       </div>
+      <!-- 展開內容 -->
+      ${!isAdmin?`<div id="${uid}" style="display:none;border-top:0.5px solid var(--border);padding:10px 14px;background:var(--surface2)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">負責物件</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">${props||'<span style="font-size:12px;color:var(--text3)">全部物件</span>'}</div>
+      </div>`:''}
     </div>`;
   }).join('');
+}
+
+function toggleAccountInModal(){
+  const btn = document.getElementById('acc-toggle-btn');
+  const label = document.getElementById('acc-active-label');
+  const state = document.getElementById('acc-active-state');
+  const isActive = state.value === 'true';
+  state.value = isActive ? 'false' : 'true';
+  btn.style.background = isActive ? '#B4B2A9' : '#185FA5';
+  btn.querySelector('div').style.left = isActive ? '4px' : '20px';
+  label.textContent = isActive ? '停用' : '啟用';
+  label.style.color = isActive ? '#D85A30' : 'var(--text3)';
+}
+
+function deleteAccountFromModal(){
+  const username = document.getElementById('acc-edit-username').value;
+  if(!username) return;
+  const a = getAccounts().find(x=>x.username===username);
+  const name = a?.displayName || username;
+  if(!confirm(`確定刪除「${name}」？\n此操作無法復原，帳號將永久刪除。`)) return;
+  deleteAccount(username);
+  closeModal('modal-account');
 }
 
 function openAccountModal(username) {
@@ -4280,6 +4318,22 @@ function openAccountModal(username) {
       ${p.name}
     </label>`).join('');
   togglePropSelect();
+  // 顯示/隱藏停用開關和刪除按鈕
+  const dangerBtns = document.getElementById('acc-danger-btns');
+  const toggleBtn = document.getElementById('acc-toggle-btn');
+  const activeLabel = document.getElementById('acc-active-label');
+  const activeState = document.getElementById('acc-active-state');
+  if(a && a.role !== 'admin'){
+    dangerBtns.style.display = 'flex';
+    const isActive = a.active !== false;
+    activeState.value = isActive ? 'true' : 'false';
+    toggleBtn.style.background = isActive ? '#185FA5' : '#B4B2A9';
+    toggleBtn.querySelector('div').style.left = isActive ? '20px' : '4px';
+    activeLabel.textContent = isActive ? '啟用' : '停用';
+    activeLabel.style.color = isActive ? 'var(--text3)' : '#D85A30';
+  } else {
+    dangerBtns.style.display = 'none';
+  }
   document.getElementById('modal-account').classList.add('open');
 }
 
@@ -4310,6 +4364,7 @@ function saveAccount() {
       state.accounts[idx].role = role;
       state.accounts[idx].props = props;
       if (password) state.accounts[idx].password = hashPassword(password);
+      state.accounts[idx].active = document.getElementById('acc-active-state').value !== 'false';
     }
   } else {
     if (state.accounts.find(a => a.username === username)) { alert('帳號名稱已存在'); return; }
