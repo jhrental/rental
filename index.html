@@ -236,8 +236,7 @@ select{cursor:pointer}
   .card-title{font-size:16px}
 
   /* Tables - hide less important columns on mobile */
-  #ov-prop-table th:nth-child(2),
-  #ov-prop-table td:nth-child(2){display:none}
+  #ov-prop-table th, #ov-prop-table td{font-size:12px}
   #rec-table th:last-child,
   #rec-table td:last-child{display:none}
   table{font-size:14px}
@@ -472,7 +471,7 @@ select{cursor:pointer}
   </div>
   <div class="card">
     <div class="card-title">各物件收支概況</div>
-    <div class="table-wrap"><table id="ov-prop-table"><thead><tr><th>物件</th><th>租金</th><th>收入</th><th>支出</th><th>合計</th><th>租金狀態</th></tr></thead><tbody></tbody></table></div>
+    <div class="table-wrap"><table id="ov-prop-table"><thead><tr><th>物件</th><th>收入</th><th>支出</th><th>合計</th></tr></thead><tbody></tbody></table></div>
   </div>
 </div>
 
@@ -1748,24 +1747,20 @@ function renderOverview(){
   const isMonthMode = viewMode==='month';
   // Update table header
   const pthead = document.querySelector('#ov-prop-table thead tr');
-  if(pthead) pthead.innerHTML = `<th>物件</th><th>租金</th><th>收入</th><th>支出</th><th>合計</th>${isMonthMode?'<th>租金狀態</th>':''}`;
+  if(pthead) pthead.innerHTML = `<th>物件</th><th>收入</th><th>支出</th><th>合計</th>`;
   const propRows = state.properties.map(p=>{
     const pr = recs.filter(r=>r.propId===p.id);
     const pi = pr.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
     const pe = pr.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
     const hasRent = pr.some(r=>r.cat==='租金'&&r.type==='in');
     const status = p.status||'rented';
-    let statusCell;
-    if(status==='vacant') statusCell = '<span class="badge badge-vacant"> 閒置中</span>';
-    else if(status==='repair') statusCell = '<span class="badge badge-repair">🔧 整修中</span>';
-    else statusCell = `<span class="badge ${hasRent?'badge-in':'badge-out'}">${hasRent?'✓ 已收租':'✕ 未收租'}</span>`;
+    const rentBadge = (isMonthMode&&status==='rented'&&hasRent) ? `<div style="margin-top:3px"><span style="font-size:10px;padding:2px 7px;border-radius:100px;background:#E1F5EE;color:#0F6E56;font-weight:500">租金已收</span></div>` : '';
     return `<tr${status!=='rented'?' style="opacity:0.65"':''}>
-      <td><strong>${p.name}</strong></td>
+      <td><strong>${p.name}</strong>${rentBadge}</td>
       <td style="color:var(--text2)">${status==='rented'?fmtMoney(p.rent):'—'}</td>
       <td class="amt-in">${pi?fmtMoney(pi):'—'}</td>
       <td class="amt-out">${pe?fmtMoney(pe):'—'}</td>
       <td class="${(pi-pe)>=0?'amt-in':'amt-out'}">${fmtMoney(pi-pe)}</td>
-      ${isMonthMode?`<td>${statusCell}</td>`:''}
     </tr>`;
   });
   if(sharedRecs.length){
@@ -1775,10 +1770,9 @@ function renderOverview(){
       <td>—</td><td>—</td>
       <td class="amt-out">${fmtMoney(se)}</td>
       <td class="amt-out">${fmtMoney(-se)}</td>
-      ${isMonthMode?'<td><span class="badge" style="background:var(--surface2);color:var(--text2)">整體</span></td>':''}
     </tr>`);
   }
-  ptbody.innerHTML = propRows.join('') || `<tr class="empty-row"><td colspan="${isMonthMode?6:5}">尚無物件</td></tr>`;
+  ptbody.innerHTML = propRows.join('') || `<tr class="empty-row"><td colspan="5">尚無物件</td></tr>`;
 
   renderCharts(inc, exp, recs);
 }
