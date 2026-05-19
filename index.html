@@ -477,7 +477,7 @@ select{cursor:pointer}
 
 <!-- 帳目 -->
 <div class="page" id="page-records" style="display:none">
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px">
     <span style="font-size:24px;font-weight:600;color:var(--text)">帳目記錄</span>
     <button class="btn btn-primary btn-sm" onclick="openRecordModal()" style="font-size:13px;padding:6px 14px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
   </div>
@@ -497,7 +497,7 @@ select{cursor:pointer}
 
 <!-- 物件 -->
 <div class="page" id="page-properties" style="display:none">
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1rem">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px">
     <span style="font-size:24px;font-weight:600;color:var(--text)">物件管理 <span id="prop-count" style="font-size:13px;font-weight:400;color:var(--text3)"></span></span>
     <button class="btn btn-primary btn-sm" onclick="openPropModal()" style="font-size:13px;padding:6px 14px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
   </div>
@@ -520,7 +520,7 @@ select{cursor:pointer}
 
 <!-- 維修管理 -->
 <div class="page" id="page-maintenance" style="display:none">
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:0">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px">
     <span style="font-size:24px;font-weight:600;color:var(--text)">維修管理</span>
   </div>
   <div style="display:flex;align-items:center;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem">
@@ -581,28 +581,27 @@ select{cursor:pointer}
 
 <!-- 設定 -->
 <div class="page" id="page-settings" style="display:none">
-  <div class="page-title">設定</div>
-  <div style="display:flex;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem;flex-wrap:wrap">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px">
+    <span style="font-size:24px;font-weight:600;color:var(--text)">設定</span>
+    <div id="settings-add-btn-wrap">
+      <button class="btn btn-primary btn-sm" id="settings-add-btn" onclick="openAccountModal()" style="font-size:13px;padding:6px 14px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem;flex-wrap:wrap">
     <div class="maint-tab active" id="stab-accounts" onclick="showSettingsTab('accounts')">帳號</div>
     <div class="maint-tab" id="stab-roles" onclick="showSettingsTab('roles')">角色</div>
-    <div class="maint-tab" id="stab-export" onclick="showSettingsTab('export')">匯出</div>
     <div class="maint-tab" id="stab-notify" onclick="showSettingsTab('notify')">通知</div>
     <div class="maint-tab" id="stab-audit" onclick="showSettingsTab('audit')">紀錄</div>
+    <div class="maint-tab" id="stab-export" onclick="showSettingsTab('export')">匯出</div>
   </div>
 
   <!-- 帳號 -->
   <div id="spanel-accounts">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
-      <button class="btn btn-primary" onclick="openAccountModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
-    </div>
     <div id="accounts-list"></div>
   </div>
 
   <!-- 角色 -->
   <div id="spanel-roles" style="display:none">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
-      <button class="btn btn-primary" onclick="openRoleModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增角色</button>
-    </div>
     <div id="roles-list"></div>
   </div>
 
@@ -4056,6 +4055,13 @@ function showSettingsTab(tab){
     if(stab) stab.classList.toggle('active', t===tab);
     if(spanel) spanel.style.display = t===tab ? '' : 'none';
   });
+  const addBtn = document.getElementById('settings-add-btn');
+  const addWrap = document.getElementById('settings-add-btn-wrap');
+  if(addBtn && addWrap){
+    if(tab==='accounts'){ addWrap.style.display=''; addBtn.textContent=''; addBtn.innerHTML='<svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增'; addBtn.onclick=()=>openAccountModal(); }
+    else if(tab==='roles'){ addWrap.style.display=''; addBtn.innerHTML='<svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增'; addBtn.onclick=()=>openRoleModal(); }
+    else { addWrap.style.display='none'; }
+  }
   if(tab==='export') renderExportPage();
   if(tab==='notify') renderSettingsPage();
   if(tab==='audit') renderAuditLog();
