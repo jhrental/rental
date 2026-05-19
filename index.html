@@ -1483,6 +1483,45 @@ async function loadData() {
   runDailyNotifyCheck();
 }
 
+let deviceCheckInterval = null;
+const DEVICE_TOKEN_KEY = 'rental_device_token';
+
+function generateDeviceToken() {
+  return 'dt_' + Date.now() + '_' + Math.random().toString(36).slice(2,10);
+}
+
+function startDeviceCheck() {
+  if(deviceCheckInterval) clearInterval(deviceCheckInterval);
+  deviceCheckInterval = setInterval(async ()=>{
+    if(!currentUser || currentUser.role==='admin') return;
+    try {
+      const res = await fetch(GAS_URL + '?action=load&key=' + GAS_KEY);
+      const json = await res.json();
+      if(json.success && json.data){
+        const myToken = sessionStorage.getItem(DEVICE_TOKEN_KEY);
+        const cloudAccounts = json.data.accounts || [];
+        const cloudAcc = cloudAccounts.find(a=>a.username===currentUser.username);
+        if(cloudAcc && cloudAcc.deviceToken && cloudAcc.deviceToken !== myToken){
+          clearInterval(deviceCheckInterval);
+          forceLogout('此帳號已在其他裝置登入，您已被登出');
+        }
+      }
+    } catch(e){}
+  }, 30000);
+}
+
+function forceLogout(msg){
+  currentUser = null;
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(DEVICE_TOKEN_KEY);
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('app-shell').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  // 顯示提示
+  const errEl = document.getElementById('login-error');
+  if(errEl){ errEl.textContent=msg; errEl.style.display='block'; }
+  else { alert(msg); }
+}
 function saveDataNow() {
   setSaveIndicator('saving');
   clearTimeout(saveTimer);
@@ -3931,10 +3970,17 @@ function doLogin() {
   const account = accounts.find(a => a.username === username && a.active !== false);
 
   if (account && account.password === hashPassword(password)) {
-    // 登入成功，清除錯誤記錄
     clearLockout(username);
     currentUser = account;
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ username: account.username, ts: Date.now() }));
+    // 單裝置登入：非管理員產生 deviceToken 存雲端
+    if(account.role !== 'admin'){
+      const token = generateDeviceToken();
+      sessionStorage.setItem(DEVICE_TOKEN_KEY, token);
+      account.deviceToken = token;
+      saveDataNow();
+      startDeviceCheck();
+    }
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-shell').style.display = '';
     document.getElementById('app-shell').classList.add('visible');
@@ -4017,6 +4063,7 @@ function checkSession() {
         document.getElementById('app-shell').style.display = '';
         document.getElementById('app-shell').classList.add('visible');
         applyPermissions();
+        if(account.role !== 'admin') startDeviceCheck();
       }
     }
   } catch(e) {}
@@ -4025,6 +4072,8 @@ function checkSession() {
 function lockApp() {
   addAuditLog('logout', '登出／鎖定系統');
   sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(DEVICE_TOKEN_KEY);
+  if(deviceCheckInterval) clearInterval(deviceCheckInterval);
   currentUser = null;
   document.getElementById('app-shell').style.display = 'none';
   document.getElementById('app-shell').classList.remove('visible');
