@@ -1476,6 +1476,8 @@ async function loadData() {
   if (!state.notifyConfig) state.notifyConfig = JSON.parse(JSON.stringify(NOTIFY_DEFAULTS));
   if (!state.auditLog) state.auditLog = [];
   if (!state.notifyLog) state.notifyLog = {};
+  if (!state.roles) state.roles = [];
+  if (!state.accounts || state.accounts.length === 0) state.accounts = getDefaultAccounts();
   if (state.properties.length === 0) seedDemo();
   setSaveIndicator('saved');
   runDailyNotifyCheck();
@@ -4042,8 +4044,13 @@ function getDefaultRoles() {
 }
 
 function getRoles() {
-  if (!state.roles || state.roles.length === 0) {
-    state.roles = getDefaultRoles();
+  if (!state.roles || !state.roles.some(r=>r.id==='admin')) {
+    const defaults = getDefaultRoles();
+    if(!state.roles) state.roles = defaults;
+    else {
+      // merge defaults that don't exist yet
+      defaults.forEach(d=>{ if(!state.roles.find(r=>r.id===d.id)) state.roles.push(d); });
+    }
   }
   return state.roles;
 }
