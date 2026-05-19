@@ -1483,6 +1483,19 @@ async function loadData() {
   runDailyNotifyCheck();
 }
 
+function saveDataNow() {
+  setSaveIndicator('saving');
+  clearTimeout(saveTimer);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'save', data: state, key: GAS_KEY }),
+  }).then(r=>r.json()).then(json=>{
+    if(json.success) setSaveIndicator('saved');
+    else setSaveIndicator('error');
+  }).catch(()=>setSaveIndicator('error'));
+}
 function saveData() {
   setSaveIndicator('saving');
   clearTimeout(saveTimer);
@@ -3974,12 +3987,11 @@ function applyPermissions() {
   // 根據權限顯示/隱藏導覽項目
   document.querySelectorAll('.nav-item').forEach(el => {
     const onclick = el.getAttribute('onclick') || '';
-    if (onclick.includes('accounts')) { el.style.display = isAdmin ? 'flex' : 'none'; return; }
+    if (onclick.includes('settings')) { el.style.display = isAdmin ? 'flex' : 'none'; return; }
     if (onclick.includes('overview')) { el.style.display = (isAdmin || perms.overview) ? 'flex' : 'none'; return; }
     if (onclick.includes('records')) { el.style.display = (isAdmin || perms.records) ? 'flex' : 'none'; return; }
     if (onclick.includes('properties')) { el.style.display = (isAdmin || perms.props) ? 'flex' : 'none'; return; }
     if (onclick.includes('maintenance')) { el.style.display = (isAdmin || perms.maint) ? 'flex' : 'none'; return; }
-    if (onclick.includes('export')) { el.style.display = isAdmin ? 'flex' : 'none'; return; }
     el.style.display = 'flex';
   });
 
@@ -4143,7 +4155,7 @@ function saveRole() {
   } else {
     state.roles.push({ id: uid(), name, isSystem: false, perms });
   }
-  saveData();
+  saveDataNow();
   closeModal('modal-role');
   renderRoles();
 }
@@ -4253,7 +4265,7 @@ function saveAccount() {
       displayName, role, props, active: true,
     });
   }
-  saveData();
+  saveDataNow();
   closeModal('modal-account');
   renderAccounts();
 }
