@@ -1494,20 +1494,21 @@ function startDeviceCheck() {
   if(deviceCheckInterval) clearInterval(deviceCheckInterval);
   deviceCheckInterval = setInterval(async ()=>{
     if(!currentUser || currentUser.role==='admin') return;
+    const myToken = sessionStorage.getItem(DEVICE_TOKEN_KEY);
+    if(!myToken) return;
     try {
-      const res = await fetch(GAS_URL + '?action=load&key=' + GAS_KEY);
+      const res = await fetch(GAS_URL + '?action=load&key=' + GAS_KEY + '&t=' + Date.now());
       const json = await res.json();
-      if(json.success && json.data){
-        const myToken = sessionStorage.getItem(DEVICE_TOKEN_KEY);
-        const cloudAccounts = json.data.accounts || [];
-        const cloudAcc = cloudAccounts.find(a=>a.username===currentUser.username);
+      if(json.success && json.data && json.data.accounts){
+        const cloudAcc = json.data.accounts.find(a=>a.username===currentUser.username);
         if(cloudAcc && cloudAcc.deviceToken && cloudAcc.deviceToken !== myToken){
           clearInterval(deviceCheckInterval);
+          deviceCheckInterval = null;
           forceLogout('此帳號已在其他裝置登入，您已被登出');
         }
       }
-    } catch(e){}
-  }, 30000);
+    } catch(e){ console.log('device check error:', e); }
+  }, 10000);
 }
 
 function forceLogout(msg){
@@ -3977,7 +3978,10 @@ function doLogin() {
     if(account.role !== 'admin'){
       const token = generateDeviceToken();
       sessionStorage.setItem(DEVICE_TOKEN_KEY, token);
-      account.deviceToken = token;
+      // 更新 state.accounts 裡的 deviceToken
+      const accIdx = state.accounts.findIndex(a=>a.username===account.username);
+      if(accIdx>=0) state.accounts[accIdx].deviceToken = token;
+      currentUser = state.accounts[accIdx] || account;
       saveDataNow();
       startDeviceCheck();
     }
