@@ -2302,7 +2302,7 @@ function addAuditLog(action, detail, propName) {
   };
   state.auditLog.unshift(entry); // 最新的放最前面
   if (state.auditLog.length > 500) state.auditLog = state.auditLog.slice(0, 500); // 最多保留500筆
-  saveData();
+  saveDataNow();
 }
 
 function renderAuditLog() {
