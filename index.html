@@ -497,9 +497,9 @@ select{cursor:pointer}
 
 <!-- 物件 -->
 <div class="page" id="page-properties" style="display:none">
-  <div class="page-title">
-    <span>物件管理 <span id="prop-count" style="font-size:13px;font-weight:400;color:var(--text3)"></span></span>
-    <button class="btn btn-primary" onclick="openPropModal()"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1rem">
+    <span style="font-size:24px;font-weight:600;color:var(--text)">物件管理 <span id="prop-count" style="font-size:13px;font-weight:400;color:var(--text3)"></span></span>
+    <button class="btn btn-primary btn-sm" onclick="openPropModal()" style="font-size:13px;padding:6px 14px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
   </div>
   <div id="lease-alert-banner" style="display:none" class="alert-banner">
     <svg class="ico" viewBox="0 0 24 24"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3V11a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
@@ -520,11 +520,16 @@ select{cursor:pointer}
 
 <!-- 維修管理 -->
 <div class="page" id="page-maintenance" style="display:none">
-  <div class="page-title">維修管理</div>
-  <div style="display:flex;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:0">
+    <span style="font-size:24px;font-weight:600;color:var(--text)">維修管理</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px;border-bottom:0.5px solid var(--border);margin-bottom:1.25rem">
     <div class="maint-tab active" id="mtab-pending" onclick="showMaintTab('pending')">維修</div>
     <div class="maint-tab" id="mtab-history" onclick="showMaintTab('history')">紀錄</div>
     <div class="maint-tab" id="mtab-routine" onclick="showMaintTab('routine')">保養</div>
+    <div style="margin-left:auto" id="maint-add-btn-wrap">
+      <button class="btn btn-primary btn-sm" id="maint-add-btn" onclick="openMaintModal()" style="font-size:13px;padding:6px 14px"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增</button>
+    </div>
   </div>
   <!-- 維修安排 -->
   <div id="mpanel-pending">
@@ -544,11 +549,6 @@ select{cursor:pointer}
         <option value="pending">待處理</option>
         <option value="scheduled">已安排</option>
       </select>
-      <div style="margin-left:auto">
-        <button class="btn btn-primary" onclick="openMaintModal()">
-          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
-        </button>
-      </div>
     </div>
     <div id="maint-pending-list"></div>
   </div>
@@ -561,11 +561,6 @@ select{cursor:pointer}
         <option value="repair">維修</option>
         <option value="routine">保養</option>
       </select>
-      <div style="margin-left:auto">
-        <button class="btn btn-primary" onclick="openHistModal()">
-          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
-        </button>
-      </div>
     </div>
     <div id="maint-history-list"></div>
   </div>
@@ -579,11 +574,6 @@ select{cursor:pointer}
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center">
-      <div style="margin-left:auto">
-        <button class="btn btn-primary" onclick="openRoutineModal()">
-          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增
-        </button>
-      </div>
     </div>
     <div id="routine-list"></div>
   </div>
@@ -1696,7 +1686,7 @@ function populateMonthSelects(){
 }
 function populatePropSelects(){
   const allOpt = '<option value="">全部物件</option>'
-    + `<option value="${SHARED_PROP_ID}">── 整體支出</option>`
+    + `<option value="${SHARED_PROP_ID}">整體支出</option>`
     + state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   const onlyProp = state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   // income: only real properties
@@ -1705,7 +1695,14 @@ function populatePropSelects(){
   const expensePropOpt = `<option value="${SHARED_PROP_ID}">整體支出（不分物件）</option>`
     + '<option disabled>──────────────</option>'
     + onlyProp;
-  ['rec-prop','exp-prop'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=allOpt; });
+  ['rec-prop','exp-prop'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      const prev=el.value;
+      el.innerHTML=allOpt;
+      if(prev) el.value=prev;
+    }
+  });
   // r-prop will be set dynamically by pickType
   const rp=document.getElementById('r-prop'); if(rp) rp.innerHTML=onlyProp;
 }
@@ -1801,15 +1798,15 @@ function renderCharts(inc, exp, recs){
     return;
   }
   const maxAmt = cats[0][1];
-  const barColors = ['#185fa5','#1d9e75','#d85a30','#ba7517','#533ab7','#993556','#3b6d11','#0f6e56'];
+  const barColors = ['#E24B4A','#D85A30','#BA7517','#185FA5','#533AB7','#993556','#0F6E56','#3B6D11'];
   barsEl.innerHTML = cats.map(([cat,amt],i)=>{
     const pct = Math.round(amt/exp*100);
     const barW = Math.round(amt/maxAmt*100);
     const color = barColors[i%barColors.length];
-    return `<div style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-        <span style="color:var(--text2);font-weight:500">${cat} <span style="color:var(--text3);font-weight:400">${fmtMoney(amt)}</span></span>
-        <span style="color:var(--text3)">${pct}%</span>
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+        <span style="color:var(--text);font-weight:500">${cat} <span style="color:var(--text2);font-weight:400;font-size:12px">${fmtMoney(amt)}</span></span>
+        <span style="color:var(--text2);font-size:12px">${pct}%</span>
       </div>
       <div style="height:6px;background:var(--surface2);border-radius:100px;overflow:hidden">
         <div style="height:100%;width:${barW}%;background:${color};border-radius:100px;transition:width .4s"></div>
@@ -2777,6 +2774,12 @@ function showMaintTab(tab){
     if(mtab) mtab.className='maint-tab'+(t===tab?' active':'');
     if(mpanel) mpanel.style.display=t===tab?'block':'none';
   });
+  const addBtn = document.getElementById('maint-add-btn');
+  if(addBtn){
+    if(tab==='pending') addBtn.onclick=()=>openMaintModal();
+    else if(tab==='history') addBtn.onclick=()=>openHistModal();
+    else if(tab==='routine') addBtn.onclick=()=>openRoutineModal();
+  }
   if(tab==='pending') renderMaintPending();
   if(tab==='history') renderMaintHistory();
   if(tab==='routine') renderRoutine();
