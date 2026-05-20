@@ -633,134 +633,162 @@ select{cursor:pointer}
 
   <!-- 通知 -->
   <div id="spanel-notify" style="display:none">
-    <div class="card" style="padding:0;overflow:hidden">
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr style="border-bottom:0.5px solid var(--border)">
-            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 14px;text-align:left;width:32%">通知類型</th>
-            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center;width:10%">開關</th>
-            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center">首次提醒</th>
-            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center">間隔</th>
-            <th style="font-size:11px;color:var(--text2);font-weight:500;padding:10px 8px;text-align:center">暫停</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 租約到期 -->
-          <tr style="border-bottom:0.5px solid var(--border)">
-            <td style="padding:12px 14px">
-              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
-                <div style="width:8px;height:8px;border-radius:50%;background:var(--amber-mid);flex-shrink:0"></div>租約到期
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div id="settings-lease-toggle" onclick="settingsToggle('lease')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
-                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-lease-start" value="30" min="7" max="90" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天前</span>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-lease-interval" value="7" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3)">天</span>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-lease-snooze" value="30" min="3" max="60" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3)">天</span>
-              </div>
-            </td>
-          </tr>
-          <!-- 維修未跟進 -->
-          <tr style="border-bottom:0.5px solid var(--border)">
-            <td style="padding:12px 14px">
-              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
-                <div style="width:8px;height:8px;border-radius:50%;background:var(--red-mid);flex-shrink:0"></div>維修未跟進
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div id="settings-maint-toggle" onclick="settingsToggle('maint')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
-                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-maint-trigger" value="3" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天後</span>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-maint-interval" value="3" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3)">天</span>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-maint-snooze" value="3" min="1" max="14" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3)">天</span>
-              </div>
-            </td>
-          </tr>
-          <!-- 定期保養 -->
-          <tr style="border-bottom:0.5px solid var(--border)">
-            <td style="padding:12px 14px">
-              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
-                <div style="width:8px;height:8px;border-radius:50%;background:var(--blue-mid);flex-shrink:0"></div>定期保養
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div id="settings-routine-toggle" onclick="settingsToggle('routine')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
-                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-routine-start" value="14" min="3" max="30" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天前</span>
-              </div>
-            </td>
-            <td style="text-align:center;color:var(--text3);font-size:14px;padding:12px 8px">—</td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-routine-snooze" value="14" min="3" max="30" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3)">天</span>
-              </div>
-            </td>
-          </tr>
-          <!-- 物件閒置 -->
-          <tr>
-            <td style="padding:12px 14px">
-              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)">
-                <div style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0"></div>物件閒置
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div id="settings-vacant-toggle" onclick="settingsToggle('vacant')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
-                <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
-              </div>
-            </td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-vacant-trigger" value="30" min="7" max="90" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3);white-space:nowrap">天後</span>
-              </div>
-            </td>
-            <td style="text-align:center;color:var(--text3);font-size:14px;padding:12px 8px">—</td>
-            <td style="text-align:center;padding:12px 8px">
-              <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-                <input type="number" id="cfg-vacant-snooze" value="30" min="7" max="60" style="width:44px;padding:5px 6px;font-size:13px;text-align:center">
-                <span style="font-size:11px;color:var(--text3)">天</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <!-- 租約到期 -->
+      <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--amber-mid);flex-shrink:0"></div>
+          <span style="font-size:14px;font-weight:500;color:var(--text)">租約到期</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+            <span id="settings-lease-label" style="font-size:12px;color:var(--text2)">開啟</span>
+            <div id="settings-lease-toggle" onclick="settingsToggle('lease')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+              <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:0.5px solid var(--border);margin:0 -16px"></div>
+        <div style="display:flex;align-items:flex-start;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:40px">首次提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-lease-start" value="30" min="7" max="90" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3);white-space:nowrap">天前</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:32px">間隔再提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-lease-interval" value="7" min="1" max="14" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3)">天</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:32px">暫停</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-lease-snooze" value="30" min="3" max="60" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3)">天</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 維修跟進 -->
+      <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--red-mid);flex-shrink:0"></div>
+          <span style="font-size:14px;font-weight:500;color:var(--text)">維修跟進</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+            <span id="settings-maint-label" style="font-size:12px;color:var(--text2)">開啟</span>
+            <div id="settings-maint-toggle" onclick="settingsToggle('maint')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+              <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:0.5px solid var(--border);margin:0 -16px"></div>
+        <div style="display:flex;align-items:flex-start;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:40px">首次提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-maint-trigger" value="3" min="1" max="14" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3);white-space:nowrap">天後</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:32px">間隔再提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-maint-interval" value="3" min="1" max="14" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3)">天</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:32px">暫停</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-maint-snooze" value="3" min="1" max="14" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3)">天</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 定期保養 -->
+      <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--blue-mid);flex-shrink:0"></div>
+          <span style="font-size:14px;font-weight:500;color:var(--text)">定期保養</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+            <span id="settings-routine-label" style="font-size:12px;color:var(--text2)">開啟</span>
+            <div id="settings-routine-toggle" onclick="settingsToggle('routine')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+              <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:0.5px solid var(--border);margin:0 -16px"></div>
+        <div style="display:flex;align-items:flex-start;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:40px">首次提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-routine-start" value="14" min="3" max="30" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3);white-space:nowrap">天前</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text3);white-space:nowrap;margin-right:32px">間隔再提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-routine-interval" placeholder="—" min="1" max="30" style="width:46px;padding:5px 4px;font-size:13px;text-align:center;opacity:0.45">
+              <span style="font-size:11px;color:var(--text3);opacity:0.45">天</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:32px">暫停</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-routine-snooze" value="14" min="3" max="30" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3)">天</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:-4px">間隔再提醒填入天數即開啟，留空則不重複提醒</div>
+      </div>
+
+      <!-- 物件閒置 -->
+      <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0"></div>
+          <span style="font-size:14px;font-weight:500;color:var(--text)">物件閒置</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+            <span id="settings-vacant-label" style="font-size:12px;color:var(--text2)">開啟</span>
+            <div id="settings-vacant-toggle" onclick="settingsToggle('vacant')" style="width:34px;height:20px;border-radius:100px;background:var(--blue-mid);cursor:pointer;position:relative;display:inline-block">
+              <div style="position:absolute;top:3px;left:17px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:0.5px solid var(--border);margin:0 -16px"></div>
+        <div style="display:flex;align-items:flex-start;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:40px">首次提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-vacant-trigger" value="30" min="7" max="90" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3);white-space:nowrap">天後</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text3);white-space:nowrap;margin-right:32px">間隔再提醒</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-vacant-interval" placeholder="—" min="1" max="90" style="width:46px;padding:5px 4px;font-size:13px;text-align:center;opacity:0.45">
+              <span style="font-size:11px;color:var(--text3);opacity:0.45">天</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;margin-right:32px">暫停</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-vacant-snooze" value="30" min="7" max="60" style="width:46px;padding:5px 4px;font-size:13px;text-align:center">
+              <span style="font-size:11px;color:var(--text3)">天</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:-4px">間隔再提醒填入天數即開啟，留空則不重複提醒</div>
+      </div>
+
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
       <button class="btn" onclick="resetNotifySettings()">恢復預設值</button>
@@ -1442,8 +1470,8 @@ const CAT_OUT = ['修繕費','水費','電費','天然氣','洗樓梯','自訂..
 const NOTIFY_DEFAULTS = {
   lease:   { on: true, start: 30, interval: 7,  snooze: 30 },
   maint:   { on: true, trigger: 3, interval: 3, snooze: 3  },
-  routine: { on: true, start: 14,               snooze: 14 },
-  vacant:  { on: true, trigger: 30,             snooze: 30 },
+  routine: { on: true, start: 14, interval: null, snooze: 14 },
+  vacant:  { on: true, trigger: 30, interval: null, snooze: 30 },
 };
 
 function $id(id){ return document.getElementById(id); }
@@ -2525,12 +2553,20 @@ function renderSettingsPage() {
       const knob = tog.querySelector('div');
       if(knob) knob.style.left = c.on ? '17px' : '3px';
     }
+    const lbl = document.getElementById('settings-'+key+'-label');
+    if(lbl) lbl.textContent = c.on ? '開啟' : '關閉';
     const fields = key==='lease' ? ['start','interval','snooze'] :
                    key==='maint' ? ['trigger','interval','snooze'] :
-                   key==='routine' ? ['start','snooze'] : ['trigger','snooze'];
+                   key==='routine' ? ['start','interval','snooze'] : ['trigger','interval','snooze'];
     fields.forEach(f => {
       const el = document.getElementById('cfg-'+key+'-'+f);
-      if(el && c[f] !== undefined) el.value = c[f];
+      if(!el) return;
+      if(f==='interval' && ['routine','vacant'].includes(key)){
+        el.value = c[f] ? c[f] : '';
+        el.style.opacity = c[f] ? '1' : '0.45';
+      } else if(c[f] !== undefined) {
+        el.value = c[f];
+      }
     });
   });
 }
@@ -2544,6 +2580,8 @@ function settingsToggle(key) {
     const knob = tog.querySelector('div');
     if(knob) knob.style.left = cfg[key].on ? '17px' : '3px';
   }
+  const lbl = document.getElementById('settings-'+key+'-label');
+  if(lbl) lbl.textContent = cfg[key].on ? '開啟' : '關閉';
 }
 
 function saveNotifySettings() {
@@ -2551,10 +2589,17 @@ function saveNotifySettings() {
   ['lease','maint','routine','vacant'].forEach(key => {
     const fields = key==='lease' ? ['start','interval','snooze'] :
                    key==='maint' ? ['trigger','interval','snooze'] :
-                   key==='routine' ? ['start','snooze'] : ['trigger','snooze'];
+                   key==='routine' ? ['start','interval','snooze'] : ['trigger','interval','snooze'];
     fields.forEach(f => {
       const el = document.getElementById('cfg-'+key+'-'+f);
-      if (el) cfg[key][f] = parseInt(el.value);
+      if(!el) return;
+      if(f==='interval' && ['routine','vacant'].includes(key)){
+        const v = parseInt(el.value);
+        cfg[key][f] = isNaN(v) ? null : v;
+      } else {
+        const v = parseInt(el.value);
+        if(!isNaN(v)) cfg[key][f] = v;
+      }
     });
   });
   state.notifyConfig = cfg;
