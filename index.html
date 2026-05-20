@@ -1789,8 +1789,8 @@ function renderOverview(){
 
   const titles={'month':'每月總覽','quarter':'季度總覽','year':'年度總覽'};
   $set('ov-title','textContent',titles[viewMode]||'總覽');
-  $set('ov-income-label','textContent',label+'收入');
-  $set('ov-expense-label','textContent',label+'支出');
+  $set('ov-income-label','textContent','收入');
+  $set('ov-expense-label','textContent','支出');
 
   const inc=recs.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0);
   const exp=recs.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
@@ -1885,41 +1885,30 @@ function renderCmpLabel(elId, curr, prev){
   el.style.color = diff>0?'var(--green-mid)':'var(--red-mid)';
 }
 
-function renderNetCmp(el, net, prevRecs){
+function renderNetCmp(el, net, prevRecs, periodLabel){
   if(!el) return;
-  if(!prevRecs || prevRecs.length===0){ el.textContent='無上月資料'; el.style.color='var(--text3)'; return; }
+  if(!prevRecs || prevRecs.length===0){ el.textContent='無資料'; el.style.color='var(--text3)'; return; }
   const prevNet = prevRecs.filter(r=>r.type==='in').reduce((a,r)=>a+r.amount,0)
                 - prevRecs.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
   const diff = net - prevNet;
-  if(diff===0){ el.textContent='與上期持平'; el.style.color='var(--text3)'; return; }
+  if(diff===0){ el.textContent='與'+periodLabel+'持平'; el.style.color='var(--text3)'; return; }
   const arrow = diff>0?'▲':'▼';
-  el.textContent=`${arrow} 較上期 ${fmtMoney(Math.abs(diff))}`;
+  el.textContent=`${arrow} ${periodLabel} ${fmtMoney(Math.abs(diff))}`;
   el.style.color = diff>0?'var(--green-mid)':'var(--red-mid)';
 }
 
 function renderCharts(inc, exp, recs){
   const prevRecs = getPrevPeriodRecs();
 
-  // 收入比較
-  renderCmpLabel('ov-income-cmp', inc, prevRecs);
-  // 支出比較 (用支出金額比較)
+  // 收入/支出小字拿掉
+  const incCmpEl = document.getElementById('ov-income-cmp');
+  if(incCmpEl){ incCmpEl.textContent=''; }
   const expCmpEl = document.getElementById('ov-expense-cmp');
-  if(expCmpEl){
-    if(!prevRecs||prevRecs.length===0){ expCmpEl.textContent='無上月資料'; expCmpEl.style.color='var(--text3)'; }
-    else {
-      const prevExp=prevRecs.filter(r=>r.type==='out').reduce((a,r)=>a+r.amount,0);
-      const diff=exp-prevExp;
-      if(diff===0){ expCmpEl.textContent='與上期持平'; expCmpEl.style.color='var(--text3)'; }
-      else {
-        // 支出增加是負面的，所以顏色反轉
-        expCmpEl.textContent=`${diff>0?'▲':'▼'} 較上期 ${fmtMoney(Math.abs(diff))}`;
-        expCmpEl.style.color=diff>0?'var(--red-mid)':'var(--green-mid)';
-      }
-    }
-  }
-  // 收支比較
+  if(expCmpEl){ expCmpEl.textContent=''; }
+  // 收支比較，依模式顯示不同文字
+  const periodLabel = viewMode==='month'?'前一月':viewMode==='quarter'?'前一季':'前一年';
   const net=inc-exp;
-  renderNetCmp(document.getElementById('ov-net-cmp'), net, prevRecs);
+  renderNetCmp(document.getElementById('ov-net-cmp'), net, prevRecs, periodLabel);
 
   // ── Expense breakdown bars ──
   const barsEl = document.getElementById('ov-expense-bars');
